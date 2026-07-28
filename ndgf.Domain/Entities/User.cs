@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using ndgf.Domain.Entities.Common;
+using ndgf.Domain.Common;
 using ndgf.Domain.Exceptions;
 
 namespace ndgf.Domain.Entities;

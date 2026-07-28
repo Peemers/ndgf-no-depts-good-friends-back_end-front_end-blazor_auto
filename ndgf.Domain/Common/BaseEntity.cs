@@ -1,4 +1,4 @@
-﻿namespace ndgf.Domain.Entities.Common;
+﻿namespace ndgf.Domain.Common;
 
 public abstract class BaseEntity
 {
