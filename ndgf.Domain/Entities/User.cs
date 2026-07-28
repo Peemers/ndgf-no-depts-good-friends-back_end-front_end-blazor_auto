@@ -1,18 +1,18 @@
 ﻿using System.Text.RegularExpressions;
+using ndgf.Domain.Entities.Common;
 using ndgf.Domain.Exceptions;
 
 namespace ndgf.Domain.Entities;
 
 //Partial pour autoriser le GenerateRegex (source generator) d'écrire du code optimisé pour moi dans les fichiers de build et non exécuté au runtime (gain de performance)
 
-public sealed partial class User
+public sealed partial class User : BaseEntity
 {
   private const int PseudoMaxLength = 30;
   private const int FirstNameLastNameMaxLength = 30;
   private const int PseudoMinLength = 3;
   private const int FirstNameLastNameMinLength = 2;
 
-  public Guid Id { get; private set; }
   public string Email { get; private set; } = null!;
   public string PasswordHash { get; private set; } = null!;
   public string Pseudo { get; private set; } = null!;
@@ -23,9 +23,8 @@ public sealed partial class User
   {
   }
 
-  private User(Guid id, string email, string passwordHash, string pseudo, string lastName, string firstName)
+  private User(Guid id, DateTime createdAt, string email, string passwordHash, string pseudo, string lastName, string firstName)  : base(id, createdAt)
   {
-    Id = id;
     Email = email;
     PasswordHash = passwordHash;
     Pseudo = pseudo;
@@ -95,7 +94,7 @@ public sealed partial class User
       throw new DomainException($"Le prénom ne peut pas comporter moins de {FirstNameLastNameMinLength} caractères");
     }
 
-    return new User(Guid.NewGuid(), email, passwordHash, pseudo, lastName, firstName);
+    return new User(Guid.NewGuid(), DateTime.UtcNow, email, passwordHash, pseudo, lastName, firstName);
   }
   [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
   private static partial Regex EmailRegex();

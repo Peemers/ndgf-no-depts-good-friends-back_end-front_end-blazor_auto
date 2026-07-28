@@ -27,6 +27,7 @@ public class UserTests
     Assert.Equal(firstName, user.FirstName);
     Assert.Equal(lastName, user.LastName);
     Assert.NotEqual(Guid.Empty, user.Id);
+    Assert.True(user.CreatedAt <= DateTime.UtcNow);
   }
 
   [Theory]
