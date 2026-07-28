@@ -1,0 +1,7 @@
+﻿services:
+  ndgf:
+    image: ndgf
+    build:
+      context: .
+      dockerfile: ndgf/Dockerfile
+
