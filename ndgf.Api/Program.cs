@@ -1,5 +1,7 @@
+using ndgf.Api.Endpoints.User;
 using ndgf.Application.Extensions;
 using ndgf.Infrastructure.Extensions;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +16,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
   app.MapOpenApi();
+  app.MapScalarApiReference(option =>
+  {
+    option.Title = "NDGF API";
+    option.Theme = ScalarTheme.Moon;
+  });
 }
 
+app.MapUserEndpoints();
 app.UseHttpsRedirection();
 
 app.Run();
