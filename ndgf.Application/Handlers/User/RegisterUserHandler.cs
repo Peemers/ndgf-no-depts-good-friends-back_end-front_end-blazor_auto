@@ -12,10 +12,10 @@ public class RegisterUserHandler(IUserRepository userRepository, IPasswordHasher
     var emailAlreadyExists = await userRepository.EmailAlreadyExistsAsync(command.Email);
     if (emailAlreadyExists)
     {
-      return Result<Domain.Entities.User>.Failure("Cet emil est déja utilisé.");
+      return Result<Domain.Entities.User>.Failure("Cet email est déja utilisé.");
     }
 
-    var passwordHash = passwordHasher.HashPassword(command.Password);
+    string passwordHash = passwordHasher.HashPassword(command.Password);
 
     var user = Domain.Entities.User.Create(command.Email, passwordHash, command.Pseudo, command.LastName, command.FirstName);
     

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ndgf.Api", "ndgf.Api\ndgf.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ndgf.Domain.Tests", "ndgf.Domain.Tests\ndgf.Domain.Tests.csproj", "{B889A044-897B-4052-B59A-6944746E5675}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ndgf.Application.Tests", "ndgf.Application.Tests\ndgf.Application.Tests.csproj", "{18EDF429-A6BA-497F-81A9-3DE2417B8EA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,5 +43,9 @@ Global
 		{B889A044-897B-4052-B59A-6944746E5675}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B889A044-897B-4052-B59A-6944746E5675}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B889A044-897B-4052-B59A-6944746E5675}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18EDF429-A6BA-497F-81A9-3DE2417B8EA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18EDF429-A6BA-497F-81A9-3DE2417B8EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18EDF429-A6BA-497F-81A9-3DE2417B8EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18EDF429-A6BA-497F-81A9-3DE2417B8EA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
