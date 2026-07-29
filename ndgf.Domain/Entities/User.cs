@@ -19,6 +19,8 @@ public sealed partial class User : BaseEntity
   public string FirstName { get; private set; } = null!;
   public string LastName { get; private set; } = null!;
 
+  //Constructeur vide pour la réflexion EfCore
+  //EfCore peut contourner les champs privés car il remonte un objet deja validé.
   private User()
   {
   }
