@@ -20,6 +20,8 @@ public static class ServiceCollectionExtensions
 
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IPasswordHasher, PasswordHasher>();
+    services.AddTransient<IJwtService, JwtService>();
+    services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     
     return services;
   }
