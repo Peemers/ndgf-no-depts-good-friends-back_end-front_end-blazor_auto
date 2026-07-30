@@ -1,0 +1,102 @@
+﻿@page "/register"
+@using ndgf.Web.Models.User
+@using ndgf.Web.Services.User
+@rendermode InteractiveServer
+@inject UserApiClient UserApiClient
+
+<div class="min-h-screen flex bg-linear-to-bl from-gray-100 to-gray-400 p-6 items-center justify-center border-2">
+  <div class="border rounded-2xl p-8 w-2xl bg-linear-to-br from-white to-violet-200 ">
+    <h1 class="text-3xl font-bold mb-6 flex underline">Formulaire d'inscription</h1>
+    @if (_message is not null)
+    {
+      <p class="mb-4">@_message</p>
+    }
+
+    <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-4">
+      <DataAnnotationsValidator/>
+      <ValidationSummary/>
+
+      <div>
+        <label class="text-xl">Email</label>
+        <InputText @bind-Value="_model.Email" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.Email"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Mot de passe</label>
+        <InputText type="password" @bind-Value="_model.Password" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.Password"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Confirmation</label>
+        <InputText type="password" @bind-Value="_model.ConfirmPassword" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.ConfirmPassword"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Pseudo</label>
+        <InputText @bind-Value="_model.Pseudo" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.Pseudo"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Prénom</label>
+        <InputText @bind-Value="_model.FirstName" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.FirstName"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Nom</label>
+        <InputText @bind-Value="_model.LastName" class="border p-3 w-full text-xl mt-2"/>
+        <ValidationMessage For="() => _model.LastName"/>
+      </div>
+
+      <button type="submit" disabled="@_isSubmiting"
+              class="bg-linear-to-l from-blue-300 to-blue-600 text-white hover:bg-linear-to-r hover:from-green-300 hover:to-green-600 px-4 py-2 text-xl mt-4">
+        @if (_isSubmiting)
+        {
+          <span>Inscription en cours ...</span>
+        }
+        else
+        {
+          <span>S'inscrire</span>
+        }
+      </button>
+    </EditForm>
+  </div>
+</div>
+
+@code {
+
+  private string? _message;
+  private bool _isSubmiting;
+
+  private RegisterUserModel _model = new()
+  {
+    Email = "",
+    Password = "",
+    ConfirmPassword = "",
+    Pseudo = "",
+    FirstName = "",
+    LastName = ""
+  };
+
+  private async Task HandleValidSubmit()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await UserApiClient.RegisterAsync(_model);
+      _message = response.IsSuccessStatusCode
+        ? "Inscription réussie !"
+        : "Erreur lors de l'inscription";
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+
+}
