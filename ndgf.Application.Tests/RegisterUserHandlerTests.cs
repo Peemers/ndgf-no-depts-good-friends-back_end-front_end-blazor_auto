@@ -52,6 +52,6 @@ public class RegisterUserHandlerTests
     //Assert
     Assert.False(result.IsSuccess);
     Assert.NotNull(result.ErrorMessage);
-    userRepository.DidNotReceive().AddAsync(Arg.Any<Domain.Entities.User>());
+    await userRepository.DidNotReceive().AddAsync(Arg.Any<Domain.Entities.User>());
   }
 }

@@ -17,4 +17,9 @@ public class UserRepository(NdgfDbContext context) : IUserRepository
     await context.SaveChangesAsync();
     return user;
   }
+
+  public async Task<User?> GetUserByEmailAsync(string email)
+  {
+    return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+  }
 }

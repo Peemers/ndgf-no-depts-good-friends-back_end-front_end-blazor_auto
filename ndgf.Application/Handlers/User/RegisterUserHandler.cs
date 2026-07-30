@@ -9,7 +9,7 @@ public class RegisterUserHandler(IUserRepository userRepository, IPasswordHasher
 {
   public async Task<Result<Domain.Entities.User>> HandleAsync(RegisterUserCommand command)
   {
-    var emailAlreadyExists = await userRepository.EmailAlreadyExistsAsync(command.Email);
+    bool emailAlreadyExists = await userRepository.EmailAlreadyExistsAsync(command.Email);
     if (emailAlreadyExists)
     {
       return Result<Domain.Entities.User>.Failure("Cet email est déja utilisé.");
@@ -17,10 +17,11 @@ public class RegisterUserHandler(IUserRepository userRepository, IPasswordHasher
 
     string passwordHash = passwordHasher.HashPassword(command.Password);
 
-    var user = Domain.Entities.User.Create(command.Email, passwordHash, command.Pseudo, command.LastName, command.FirstName);
+    Domain.Entities.User user = Domain.Entities.User.Create(command.Email, passwordHash, command.Pseudo, command.LastName, command.FirstName);
     
-    var savedUser = await userRepository.AddAsync(user);
+    Domain.Entities.User savedUser = await userRepository.AddAsync(user);
     
     return Result<Domain.Entities.User>.Success(savedUser);
+    
   }
 }
