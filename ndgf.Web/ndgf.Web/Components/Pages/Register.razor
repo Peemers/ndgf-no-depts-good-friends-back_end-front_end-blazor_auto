@@ -5,7 +5,7 @@
 @inject UserApiClient UserApiClient
 
 <div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
-  <div class="border rounded-2xl flex-row flex p-5 w-10xl bg-linear-to-br from-white to-violet-200">
+  <div class="border rounded-2xl flex-row flex p-5 w-10xl bg-linear-to-br from-white to-[#FDFBF5]">
     <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl mr-10 hidden md:block">
 
@@ -28,7 +28,7 @@
         <label class="text-xl">Mot de passe</label>
         <InputText type="password" @bind-Value="_model.Password"
                    class="border border-gray-400 rounded-xl  p-3 w-full text-xl mt-1"/>
-        <ValidationMessage For="() => _model.Password" class=""/>
+        <ValidationMessage For="() => _model.Password"/>
       </div>
 
       <div>
