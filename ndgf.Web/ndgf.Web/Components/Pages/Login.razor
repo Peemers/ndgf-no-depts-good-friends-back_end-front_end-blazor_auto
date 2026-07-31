@@ -5,9 +5,9 @@
 @inject UserApiClient UserApiCLient
 
 <div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
-  <div class="border rounded-2xl flex-row flex p-6 w-l bg-linear-to-br from-white to-violet-200">
+  <div class="border rounded-2xl flex-row flex p-6 w-l bg-linear-to-br from-white to-violet-200 shadow-2xl">
     <img src="images/ngdf3.jpg" alt="image de personne en train de faire leurs comptes"
-         class="border rounded-2xl hidden md:block">
+         class="border rounded-2xl hidden md:block shadow-xl">
 
     @if (_message is not null)
     {
@@ -31,7 +31,7 @@
       </div>
 
       <button type="submit" disabled="@_isSubmiting"
-              class="bg-linear-to-l rounded-2xl border-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-400 hover:to-green-600 active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-6 w-full">
+              class="bg-linear-to-l rounded-2xl border-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-5 w-full">
         @if (_isSubmiting)
         {
           <span>Connexion en cours ...</span>
@@ -42,12 +42,12 @@
         }
       </button>
 
-      <div class="flex p-6 text-2xl">
+      <div class="flex p-6 text-2xl -mt-3">
         Pas encore inscrit ?
-        <NavLink href="/register" class="text-orange-600 hover:text-blue-600 ml-5">Créer un compte</NavLink>
+        <NavLink href="/register" class="text-orange-600 hover:text-[#7B9668] ml-5">Créer un compte</NavLink>
       </div>
 
-      <div class="p-2 border-gray-300">
+      <div class="p-2 border-gray-300 -mt-4">
         <p class="text-xl text-gray-600 font-semibold mb-3">Avec No Debts, Good Friends, vous pouvez :</p>
         <ul class="space-y-2 text-xl text-gray-700">
           <li class="flex items-center gap-2">💰 Suivre vos dépenses partagées facilement</li>

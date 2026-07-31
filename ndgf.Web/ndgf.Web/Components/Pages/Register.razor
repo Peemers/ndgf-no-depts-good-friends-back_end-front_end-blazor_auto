@@ -5,7 +5,7 @@
 @inject UserApiClient UserApiClient
 
 <div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
-  <div class="border rounded-2xl flex-row flex p-5 w-10xl bg-linear-to-br from-white to-[#FDFBF5]">
+  <div class="border rounded-2xl flex-row flex p-5 w-10xl bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
     <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl mr-10 hidden md:block">
 
@@ -51,13 +51,13 @@
       </div>
 
       <div>
-        <label class="text-xl">Nom</label>
+        <label class="text-xl">Nom de famille</label>
         <InputText @bind-Value="_model.LastName" class="border p-3 border-gray-400 rounded-xl  w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.LastName"/>
       </div>
 
       <button type="submit" disabled="@_isSubmiting"
-              class="bg-linear-to-l from-amber-700 to-orange-800 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-400 hover:to-green-600 active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-6 w-full">
+              class=" bg-linear-to-l from-amber-700 to-orange-800 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-4 w-full">
         @if (_isSubmiting)
         {
           <span>Inscription en cours ...</span>
@@ -67,17 +67,17 @@
           <span>S'inscrire</span>
         }
       </button>
-      <div class="flex justify-around p-6 text-2xl ">
+      <div class="flex justify-around p-6 text-2xl -mt-4 ">
         Deja inscrit ?
-        <NavLink href="/login" class="text-orange-600 hover:text-blue-600">Connectez-vous</NavLink>
+        <NavLink href="/login" class="text-orange-600 hover:text-[#7B9668]">Connectez-vous</NavLink>
       </div>
 
-      <div class="pt-1">
-        <p class="text-xl text-gray-600 font-semibold mb-3">Avec No Debts, Good Friends, vous pouvez :</p>
+      <div class="pt-1 -mt-4">
+        <p class="text-xl text-gray-600 font-semibold mb-3 justify-center items-center flex">Avec No Debts, Good Friends, vous pouvez :</p>
         <ul class="space-y-2 text-xl text-gray-700">
-          <li class="flex items-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
-          <li class="flex items-center gap-2">💰 Savoir qui doit combien, en un coup d'œil</li>
-          <li class="flex items-center gap-2">💰 Gérer votre budget en toute simplicité</li>
+          <li class="flex items-center justify-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
+          <li class="flex items-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>
+          <li class="flex items-center gap-2 justify-center">💰 Gérer votre budget en toute simplicité</li>
         </ul>
       </div>
     </EditForm>
