@@ -20,7 +20,7 @@ public class GroupTests
     Assert.Equal(name, group.Name);
     Assert.Equal(description, group.Description);
     Assert.NotEqual(Guid.Empty, group.Id);
-    Assert.True(group.CreatedAt <= DateTime.Now);
+    Assert.True(group.CreatedAt <= DateTime.UtcNow);
   }
   
   [Fact]
@@ -33,7 +33,7 @@ public class GroupTests
     
     Assert.Equal(name, group.Name);
     Assert.NotEqual(Guid.Empty, group.Id);
-    Assert.True(group.CreatedAt <= DateTime.Now);
+    Assert.True(group.CreatedAt <= DateTime.UtcNow);
     Assert.Null(group.Description);
   }
 
