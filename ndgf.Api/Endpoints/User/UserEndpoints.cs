@@ -30,6 +30,28 @@ public static class UserEndpoints
       .Produces<RegisterUserResponseDto>(StatusCodes.Status201Created)
       .Produces(StatusCodes.Status400BadRequest);
 
+    app.MapPost("/api/users/login", async (LoginUserRequestDto dto, LoginUserHandler handler) =>
+      {
+        var command = dto.ToCommand();
+
+        var result = await handler.HandleAsync(command);
+
+        if (!result.IsSuccess)
+        {
+          return Results.BadRequest(result.ErrorMessage);
+        }
+
+        var response = result.Value!.ToResponseDto();
+
+        return Results.Ok(response);
+      })
+      .WithName("LoginUser")
+      .WithSummary("Connexion utilisateur")
+      .WithDescription("Connexion de l'utilisateur avec email et mot de passe et protection jwt")
+      .Produces<LoginUserResponseDto>(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status400BadRequest);
+
+
     return app;
   }
 }

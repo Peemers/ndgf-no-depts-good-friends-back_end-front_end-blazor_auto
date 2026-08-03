@@ -8,4 +8,9 @@ public class UserApiClient(HttpClient httpClient)
   {
     return await httpClient.PostAsJsonAsync("/api/users/register", model);
   }
+
+  public async Task<HttpResponseMessage> LoginAsync(LoginUserModel model)
+  {
+    return await httpClient.PostAsJsonAsync("/api/users/login", model);
+  }
 }
