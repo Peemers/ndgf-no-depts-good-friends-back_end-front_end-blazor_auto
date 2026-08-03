@@ -1,17 +1,16 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using ndgf.Web.Components;
+using ndgf.Web.Extensions;
+using ndgf.Web.Services.Auth;
 using ndgf.Web.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container via Extensions
 builder.Services.AddRazorComponents()
   .AddInteractiveServerComponents()
   .AddInteractiveWebAssemblyComponents();
-
-builder.Services.AddHttpClient<UserApiClient>(client =>
-{
-  client.BaseAddress = new Uri("http://localhost:5217");
-});
+builder.Services.AddWebService(builder.Configuration);
 
 var app = builder.Build();
 

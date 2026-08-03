@@ -1,6 +1,10 @@
 ﻿@page "/login"
 @using ndgf.Web.Models.User
+@using ndgf.Web.Services.Auth
 @using ndgf.Web.Services.User
+@inject IJSRuntime JSRuntime
+@inject CustomAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 @inject UserApiClient UserApiCLient
 
@@ -77,7 +81,27 @@
     try
     {
       var response = await UserApiCLient.LoginAsync(_model);
-      _message = response.IsSuccessStatusCode ? "Connexion réussie !" : "Erreur lors de connexion";
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de la connexion";
+        return;
+      }
+
+      var loginResponse = await response.Content.ReadFromJsonAsync<LoginUserResponseModel>();
+
+      if (loginResponse is null)
+      {
+        _message = "Erreur lors de la connexion";
+        return;
+      }
+
+      await JSRuntime.InvokeVoidAsync("ndgfAuth.setCookie", "accessToken", loginResponse.AccessToken, 1);
+      await JSRuntime.InvokeVoidAsync("ndgfAuth.setCookie", "refreshToken", loginResponse.RefreshToken, 7);
+      
+      AuthStateProvider.NotifyUserAuthentication();
+      
+      NavigationManager.NavigateTo("/", forceLoad: true);
     }
     finally
     {
