@@ -10,11 +10,18 @@ public class AuthTokenHandler(IJSRuntime jsRuntime) : DelegatingHandler
     HttpRequestMessage request,
     CancellationToken cancellationToken)
   {
-    var token = await jsRuntime.InvokeAsync<string?>("ndgfAuth.getCookie", "accessToken");
-
-    if (!string.IsNullOrWhiteSpace(token))
+    try
     {
-      request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+      var token = await jsRuntime.InvokeAsync<string?>("ndgfAuth.getCookie", "accessToken");
+
+      if (!string.IsNullOrWhiteSpace(token))
+      {
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+      }
+    }
+    catch (InvalidOperationException)
+    {
+      // JS interop pas encore disponible (prerendering) : on continue sans token
     }
 
     return await base.SendAsync(request, cancellationToken);

@@ -5,22 +5,21 @@
 @inject IJSRuntime JSRuntime
 @inject CustomAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
 @inject UserApiClient UserApiCLient
+@layout AuthLayout
 
 <div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
   <div class="border rounded-2xl flex-row flex p-6 bg-linear-to-br from-white to-violet-200 shadow-2xl">
     <img src="images/ngdf3.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl hidden md:block shadow-xl w-4xl">
 
-    @if (_message is not null)
-    {
-      <p class="mb-4">@_message</p>
-    }
-
     <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-4 ml-5">
       <DataAnnotationsValidator/>
       <h1 class="text-3xl font-bold mb-6 flex underline">Formulaire de connexion</h1>
+      @if (_message is not null)
+      {
+        <p class="mb-4 text-lg text-red-600">@_message</p>
+      }
 
       <div>
         <label class="text-xl">Email</label>
@@ -84,7 +83,7 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Erreur lors de la connexion";
+        _message = "Erreur lors de la connexion, email ou password incorrecte.";
         return;
       }
 
@@ -92,7 +91,7 @@
 
       if (loginResponse is null)
       {
-        _message = "Erreur lors de la connexion";
+        _message = "Erreur lors de la connexion, email ou password incorrecte.";
         return;
       }
 
