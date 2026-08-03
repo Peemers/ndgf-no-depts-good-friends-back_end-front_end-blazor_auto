@@ -64,7 +64,7 @@ public class RefreshTokenTests
   }
 
   [Fact]
-  public void RevokeRefreshToken_OnUnrevokedToken_ShouldThrowDomainException()
+  public void RevokeRefreshToken_OnRevokedToken_ShouldThrowDomainException()
   {
     //Arrange
     var token = "some-refresh-token";
@@ -80,7 +80,7 @@ public class RefreshTokenTests
   }
 
   [Fact]
-  public void RevokeRefreshToken_OnRevokedToken_ShouldSetRevokedAt()
+  public void RevokeRefreshToken_OnUnrevokedToken_ShouldSetRevokedAt()
   {
     //Arrange
     var token = "some-refresh-token";
