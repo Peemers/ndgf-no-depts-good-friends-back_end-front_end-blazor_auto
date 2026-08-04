@@ -11,6 +11,7 @@ public static class GroupEndpoints
 {
   public static IEndpointRouteBuilder MapGroupEndpoints(this IEndpointRouteBuilder app)
   {
+    //ClaimsPrincipal user = pour l'id du token.
     app.MapPost("/api/groups", async (CreateGroupRequestDto dto, CreateGroupeHandler handler, ClaimsPrincipal user) =>
       {
         var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
