@@ -1,6 +1,7 @@
 ﻿using ndgf.Api.Dtos.User.Request;
 using ndgf.Api.Dtos.User.Response;
 using ndgf.Api.Mappers;
+using ndgf.Api.Mappers.User;
 using ndgf.Application.Handlers.User;
 
 namespace ndgf.Api.Endpoints.User;

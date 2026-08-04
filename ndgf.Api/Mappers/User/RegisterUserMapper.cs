@@ -1,9 +1,8 @@
 ﻿using ndgf.Api.Dtos.User.Request;
 using ndgf.Api.Dtos.User.Response;
 using ndgf.Application.Commands.User;
-using ndgf.Domain.Entities;
 
-namespace ndgf.Api.Mappers;
+namespace ndgf.Api.Mappers.User;
 
 public static class RegisterUserMapper
 {
@@ -12,7 +11,7 @@ public static class RegisterUserMapper
     return new RegisterUserCommand(dto.Email, dto.Password, dto.Pseudo, dto.FirstName, dto.LastName);
   }
 
-  public static RegisterUserResponseDto ToResponseDto(this User user)
+  public static RegisterUserResponseDto ToResponseDto(this Domain.Entities.User user)
   {
     return new RegisterUserResponseDto
     {
