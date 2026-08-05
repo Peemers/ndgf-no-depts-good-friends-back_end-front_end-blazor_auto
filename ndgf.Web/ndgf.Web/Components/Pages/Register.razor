@@ -1,0 +1,120 @@
+﻿@page "/register"
+@layout AuthLayout
+@using ndgf.Web.Models.User
+@using ndgf.Web.Services.User
+@inject UserApiClient UserApiClient
+
+<div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]  items-center justify-center p-4 border-2">
+  <div class="border rounded-2xl flex-row flex p-3 bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
+    <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
+         class="border rounded-2xl mr-10 hidden md:block">
+
+    @if (_message is not null)
+    {
+      <p class="mb-4">@_message</p>
+    }
+
+    <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-1">
+      <DataAnnotationsValidator/>
+      <h1 class="text-2xl font-bold mb-6 flex underline">Formulaire d'inscription</h1>
+
+      <div>
+        <label class="text-xl">Email</label>
+        <InputText @bind-Value="_model.Email" class="border border-gray-400 rounded-xl p-2 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Email"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Mot de passe</label>
+        <InputText type="password" @bind-Value="_model.Password"
+                   class="border border-gray-400 rounded-xl  p-2 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Password"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Confirmation mot de passe</label>
+        <InputText type="password" @bind-Value="_model.ConfirmPassword"
+                   class="border border-gray-400 rounded-xl  p-2 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.ConfirmPassword"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Pseudo</label>
+        <InputText @bind-Value="_model.Pseudo" class="border p-2 w-full border-gray-400 rounded-xl  text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Pseudo"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Prénom</label>
+        <InputText @bind-Value="_model.FirstName" class="border p-2 border-gray-400 rounded-xl  w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.FirstName"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Nom de famille</label>
+        <InputText @bind-Value="_model.LastName" class="border p-2 border-gray-400 rounded-xl  w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.LastName"/>
+      </div>
+
+      <button type="submit" disabled="@_isSubmiting"
+              class=" bg-linear-to-l from-amber-700 to-orange-800 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-10 w-full">
+        @if (_isSubmiting)
+        {
+          <span>Inscription en cours ...</span>
+        }
+        else
+        {
+          <span>S'inscrire</span>
+        }
+      </button>
+      <div class="flex justify-around p-6 text-2xl">
+        Deja inscrit ?
+        <NavLink href="/login" class="text-orange-600 hover:text-[#7B9668]">Connectez-vous</NavLink>
+      </div>
+
+      <div class="pt-1 -mt-4">
+        <p class="text-xl text-gray-600 font-semibold mb-3 justify-center items-center flex">Avec No Debts, Good Friends, vous pouvez :</p>
+        <ul class="space-y-2 text-xl text-gray-700">
+          <li class="flex items-center justify-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
+          <li class="flex items-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>
+          <li class="flex items-center gap-2 justify-center">💰 Gérer votre budget en toute simplicité</li>
+        </ul>
+      </div>
+    </EditForm>
+  </div>
+</div>
+
+
+@code {
+
+  private string? _message;
+  private bool _isSubmiting;
+
+  private RegisterUserModel _model = new()
+  {
+    Email = "",
+    Password = "",
+    ConfirmPassword = "",
+    Pseudo = "",
+    FirstName = "",
+    LastName = ""
+  };
+
+  private async Task HandleValidSubmit()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await UserApiClient.RegisterAsync(_model);
+      _message = response.IsSuccessStatusCode
+        ? "Inscription réussie !"
+        : "Erreur lors de l'inscription";
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+
+}

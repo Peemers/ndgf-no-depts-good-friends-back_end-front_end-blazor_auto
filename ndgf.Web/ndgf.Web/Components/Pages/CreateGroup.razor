@@ -1,0 +1,89 @@
+﻿@page "/groups/create"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using ndgf.Web.Models.Group
+@using ndgf.Web.Services.Group
+@inject GroupApiClient GroupApiClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthProvider
+@attribute [Authorize]
+
+<div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
+  <div class="border rounded-2xl flex-row flex p-6 bg-linear-to-br from-white to-violet-200 shadow-2xl">
+    
+    
+    <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-4">
+      <DataAnnotationsValidator/>
+      <h1 class="text-3xl font-bold mb-6 flex underline">Création d'un nouveau groupe : </h1>
+      @if (_message is not null)
+      {
+        <p class="mb-4 text-lg text-red-600">@_message</p>
+      }
+      
+      <div>
+        <label class="text-xl">Nom du groupe</label>
+        <InputText @bind-Value="_model.Name" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Name"/>
+      </div>
+      
+      <div>
+        <label class="text-xl">Déscription</label>
+        <InputText @bind-Value="_model.Description" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Description"/>
+      </div>
+      
+      <button type="submit" disabled="@_isSubmiting"
+              class="bg-linear-to-l rounded-2xl border-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-5 w-full">
+        @if (_isSubmiting)
+        {
+          <span>Création en cours ...</span>
+        }
+        else
+        {
+          <span>Créer le groupe</span>
+        }
+      </button>
+    </EditForm>
+  </div>
+</div>
+
+@code {
+  private string? _message;
+  private bool _isSubmiting;
+
+  private CreateGroupeModel _model = new()
+  {
+    Name = "",
+    Description = ""
+  };
+
+  private async Task HandleValidSubmit()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await GroupApiClient.CreateGroupAsync(_model);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Une erreur s'est produite durant la création";
+        return;
+      }
+
+      var createGroupResponse = await response.Content.ReadFromJsonAsync<CreateGroupResponseModel>();
+
+      if (createGroupResponse is null)
+      {
+        _message = "Une erreur s'est produite durant la création";
+        return;
+      }
+
+      NavigationManager.NavigateTo("/");
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+}

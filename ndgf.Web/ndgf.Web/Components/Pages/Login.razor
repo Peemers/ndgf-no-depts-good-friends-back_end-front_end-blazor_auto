@@ -1,0 +1,125 @@
+﻿@page "/login"
+@layout AuthLayout
+@using ndgf.Web.Models.User
+@using ndgf.Web.Services.User
+@inject NavigationManager NavigationManager
+@inject UserApiClient UserApiCLient
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
+
+<div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
+  <div class="border rounded-2xl flex-row flex p-6 bg-linear-to-br from-white to-violet-200 shadow-2xl">
+    <img src="images/ngdf3.jpg" alt="image de personne en train de faire leurs comptes"
+         class="border rounded-2xl hidden md:block shadow-xl w-4xl">
+
+    <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-4 ml-5">
+      <DataAnnotationsValidator/>
+      <h1 class="text-3xl font-bold mb-6 flex underline">Formulaire de connexion</h1>
+      @if (_message is not null)
+      {
+        <p class="mb-4 text-lg text-red-600">@_message</p>
+      }
+
+      <div>
+        <label class="text-xl">Email</label>
+        <InputText @bind-Value="_model.Email" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Email"/>
+      </div>
+
+      <div>
+        <label class="text-xl">Mot de passe</label>
+        <InputText type="password" @bind-Value="_model.Password" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
+        <ValidationMessage For="() => _model.Password"/>
+      </div>
+
+      <button type="submit" disabled="@_isSubmiting"
+              class="bg-linear-to-l rounded-2xl border-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-5 w-full">
+        @if (_isSubmiting)
+        {
+          <span>Connexion en cours ...</span>
+        }
+        else
+        {
+          <span>Connexion</span>
+        }
+      </button>
+
+      <div class="flex p-6 text-2xl -mt-3">
+        Pas encore inscrit ?
+        <NavLink href="/register" class="text-orange-600 hover:text-[#7B9668] ml-5">Créer un compte</NavLink>
+      </div>
+
+      <div class="p-2 border-gray-300 -mt-4">
+        <p class="text-xl text-gray-600 font-semibold mb-3">Avec No Debts, Good Friends, vous pouvez :</p>
+        <ul class="space-y-2 text-xl text-gray-700">
+          <li class="flex items-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
+          <li class="flex items-center gap-2">💰 Savoir qui doit combien, en un coup d'œil</li>
+          <li class="flex items-center gap-2">💰 Gérer votre budget en toute simplicité</li>
+        </ul>
+      </div>
+    </EditForm>
+  </div>
+  @if (_loginResponse is not null)
+  {
+    <form action="/auth/signin" method="post" id="signin-form">
+      <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken" />
+      <input type="hidden" name="userId" value="@_loginResponse.Id" />
+      <input type="hidden" name="email" value="@_loginResponse.Email" />
+      <input type="hidden" name="accessToken" value="@_loginResponse.AccessToken" />
+      <input type="hidden" name="refreshToken" value="@_loginResponse.RefreshToken" />
+    </form>
+
+    <script>
+        document.getElementById('signin-form').submit();
+    </script>
+  }
+</div>
+
+@code {
+  private string? _message;
+  private bool _isSubmiting;
+  
+  private string? _antiforgeryToken;
+
+  protected override void OnInitialized()
+  {
+    var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext!);
+    _antiforgeryToken = tokens.RequestToken;
+  }
+
+  private LoginUserModel _model = new()
+  {
+    Email = "",
+    Password = ""
+  };
+
+  private LoginUserResponseModel? _loginResponse;
+
+  private async Task HandleValidSubmit()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await UserApiCLient.LoginAsync(_model);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de la connexion";
+        return;
+      }
+
+      _loginResponse = await response.Content.ReadFromJsonAsync<LoginUserResponseModel>();
+
+      if (_loginResponse is null)
+      {
+        _message = "Erreur lors de la connexion";
+        return;
+      }
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+}

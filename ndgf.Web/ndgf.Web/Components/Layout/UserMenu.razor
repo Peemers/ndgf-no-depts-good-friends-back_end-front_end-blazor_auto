@@ -1,0 +1,26 @@
+﻿@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+  <Authorized>
+    <div class="flex items-center gap-4">
+      <span>Bonjour, @context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</span>
+      <button @onclick="HandleLogout" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
+        Déconnexion
+      </button>
+    </div>
+  </Authorized>
+  <NotAuthorized>
+    <div class="flex gap-4">
+      <NavLink href="/login" class="hover:underline">Se connecter</NavLink>
+      <NavLink href="/register" class="hover:underline">S'inscrire</NavLink>
+    </div>
+  </NotAuthorized>
+</AuthorizeView>
+
+@code {
+  private void HandleLogout()
+  {
+    NavigationManager.NavigateTo("/auth/signout", forceLoad: true);
+  }
+}
