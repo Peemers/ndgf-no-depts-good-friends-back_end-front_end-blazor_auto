@@ -11,6 +11,8 @@ public class NdgfDbContext : DbContext
   
   public DbSet<User> Users => Set<User>();
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+  public DbSet<Group> Groups => Set<Group>();
+  public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

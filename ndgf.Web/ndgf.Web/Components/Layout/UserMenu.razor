@@ -1,13 +1,10 @@
 ﻿@inject NavigationManager NavigationManager
-@inject CustomAuthenticationStateProvider AuthStateProvider
-@inject IJSRuntime JsRuntime
-@using ndgf.Web.Services.Auth
 @using Microsoft.AspNetCore.Components.Authorization
 
 <AuthorizeView>
   <Authorized>
     <div class="flex items-center gap-4">
-      <span>Bonjour, @context.User.FindFirst("email")?.Value</span>
+      <span>Bonjour, @context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</span>
       <button @onclick="HandleLogout" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
         Déconnexion
       </button>
@@ -22,13 +19,8 @@
 </AuthorizeView>
 
 @code {
-  private async Task HandleLogout()
+  private void HandleLogout()
   {
-    await JsRuntime.InvokeVoidAsync("ndgfAuth.removeCookie", "accessToken");
-    await JsRuntime.InvokeVoidAsync("ndgfAuth.removeCookie", "refreshToken");
-
-    AuthStateProvider.NotifyUserLogout();
-
-    NavigationManager.NavigateTo("/login", forceLoad: true);
+    NavigationManager.NavigateTo("/auth/signout", forceLoad: true);
   }
 }

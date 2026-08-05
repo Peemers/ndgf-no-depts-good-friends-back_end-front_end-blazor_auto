@@ -22,6 +22,8 @@ public static class ServiceCollectionExtensions
     services.AddScoped<IPasswordHasher, PasswordHasher>();
     services.AddTransient<IJwtService, JwtService>();
     services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+    services.AddScoped<IGroupRepository, GroupRepository>();
+    services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
     
     return services;
   }

@@ -4,7 +4,7 @@ using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Security;
 using NSubstitute;
 
-namespace ndgf.Application.Tests;
+namespace ndgf.Application.Tests.User;
 
 public class RegisterUserHandlerTests
 {

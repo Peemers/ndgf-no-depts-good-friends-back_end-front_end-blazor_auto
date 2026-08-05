@@ -3,7 +3,7 @@ using ndgf.Api.Dtos.User.Response;
 using ndgf.Application.Commands.User;
 using ndgf.Application.Models.User;
 
-namespace ndgf.Api.Mappers;
+namespace ndgf.Api.Mappers.User;
 
 public static class LoginUserMapper
 {
