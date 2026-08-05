@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using ndgf.Web.Components;
+using ndgf.Web.Endpoints;
 using ndgf.Web.Extensions;
 using ndgf.Web.Services.Auth;
 using ndgf.Web.Services.User;
@@ -26,12 +27,16 @@ else
   app.UseHsts();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapAuthEndpoints();
 app.MapRazorComponents<App>()
   .AddInteractiveServerRenderMode()
   .AddInteractiveWebAssemblyRenderMode()

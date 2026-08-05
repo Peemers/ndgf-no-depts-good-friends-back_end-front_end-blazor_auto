@@ -1,12 +1,11 @@
 ﻿@page "/login"
+@layout AuthLayout
 @using ndgf.Web.Models.User
-@using ndgf.Web.Services.Auth
 @using ndgf.Web.Services.User
-@inject IJSRuntime JSRuntime
-@inject CustomAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject UserApiClient UserApiCLient
-@layout AuthLayout
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
 
 <div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
   <div class="border rounded-2xl flex-row flex p-6 bg-linear-to-br from-white to-violet-200 shadow-2xl">
@@ -60,18 +59,41 @@
       </div>
     </EditForm>
   </div>
+  @if (_loginResponse is not null)
+  {
+    <form action="/auth/signin" method="post" id="signin-form">
+      <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken" />
+      <input type="hidden" name="userId" value="@_loginResponse.Id" />
+      <input type="hidden" name="email" value="@_loginResponse.Email" />
+      <input type="hidden" name="accessToken" value="@_loginResponse.AccessToken" />
+      <input type="hidden" name="refreshToken" value="@_loginResponse.RefreshToken" />
+    </form>
+
+    <script>
+        document.getElementById('signin-form').submit();
+    </script>
+  }
 </div>
 
 @code {
-
   private string? _message;
   private bool _isSubmiting;
+  
+  private string? _antiforgeryToken;
+
+  protected override void OnInitialized()
+  {
+    var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext!);
+    _antiforgeryToken = tokens.RequestToken;
+  }
 
   private LoginUserModel _model = new()
   {
     Email = "",
     Password = ""
   };
+
+  private LoginUserResponseModel? _loginResponse;
 
   private async Task HandleValidSubmit()
   {
@@ -83,29 +105,21 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Erreur lors de la connexion, email ou password incorrecte.";
+        _message = "Erreur lors de la connexion";
         return;
       }
 
-      var loginResponse = await response.Content.ReadFromJsonAsync<LoginUserResponseModel>();
+      _loginResponse = await response.Content.ReadFromJsonAsync<LoginUserResponseModel>();
 
-      if (loginResponse is null)
+      if (_loginResponse is null)
       {
-        _message = "Erreur lors de la connexion, email ou password incorrecte.";
+        _message = "Erreur lors de la connexion";
         return;
       }
-
-      await JSRuntime.InvokeVoidAsync("ndgfAuth.setCookie", "accessToken", loginResponse.AccessToken, 1);
-      await JSRuntime.InvokeVoidAsync("ndgfAuth.setCookie", "refreshToken", loginResponse.RefreshToken, 7);
-      
-      AuthStateProvider.NotifyUserAuthentication();
-      
-      NavigationManager.NavigateTo("/", forceLoad: true);
     }
     finally
     {
       _isSubmiting = false;
     }
   }
-
 }

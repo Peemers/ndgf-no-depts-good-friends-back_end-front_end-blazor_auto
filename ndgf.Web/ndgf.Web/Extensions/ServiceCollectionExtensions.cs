@@ -11,9 +11,10 @@ public static class ServiceCollectionExtensions
   public static IServiceCollection AddWebService(this IServiceCollection services, IConfiguration configuration)
   {
     const string apiUri = "http://localhost:5217";
-    
+
     services.AddScoped<CustomAuthenticationStateProvider>();
     services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
+
     services.AddAuthentication(options =>
       {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -22,17 +23,17 @@ public static class ServiceCollectionExtensions
       {
         options.LoginPath = "/login";
       });
+
     services.AddAuthorizationCore();
     services.AddHttpContextAccessor();
     services.AddScoped<AuthTokenHandler>();
-    
-    
+
     services.AddHttpClient<UserApiClient>(client =>
-    {
-      client.BaseAddress = new Uri(apiUri);
-    })
-    .AddHttpMessageHandler<AuthTokenHandler>();
-    
+      {
+        client.BaseAddress = new Uri(apiUri);
+      })
+      .AddHttpMessageHandler<AuthTokenHandler>();
+
     services.AddHttpClient<GroupApiClient>(client =>
       {
         client.BaseAddress = new Uri(apiUri);
