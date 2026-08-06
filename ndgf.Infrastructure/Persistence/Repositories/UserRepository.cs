@@ -27,4 +27,9 @@ public class UserRepository(NdgfDbContext context) : IUserRepository
   {
     return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
   }
+
+  public async Task<User?> GetUserByPseudoAsync(string pseudo)
+  {
+    return await context.Users.FirstOrDefaultAsync(u => u.Pseudo == pseudo);
+  }
 }

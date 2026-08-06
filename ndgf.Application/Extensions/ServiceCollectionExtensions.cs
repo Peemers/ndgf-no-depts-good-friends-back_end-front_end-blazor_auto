@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<RegisterUserHandler>();
     services.AddScoped<LoginUserHandler>();
     services.AddScoped<CreateGroupeHandler>();
-    
+    services.AddScoped<AddGroupMemberHandler>();
     return services;
   }
 }

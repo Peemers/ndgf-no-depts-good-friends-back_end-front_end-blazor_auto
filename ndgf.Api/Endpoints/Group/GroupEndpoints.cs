@@ -3,6 +3,7 @@ using System.Security.Claims;
 using ndgf.Api.Dtos.Group.Request;
 using ndgf.Api.Dtos.Group.Response;
 using ndgf.Api.Mappers.Group;
+using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
 
 namespace ndgf.Api.Endpoints.Group;
@@ -35,6 +36,34 @@ public static class GroupEndpoints
       .WithSummary("Crée un nouveau groupe")
       .WithDescription("Crée un groupe et ajoute automatiquement le créateur comme membre. Nécessite d'être authentifié.")
       .Produces<CreateGroupResponseDto>(StatusCodes.Status201Created)
+      .Produces(StatusCodes.Status400BadRequest)
+      .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapPost("/api/groups/{groupId}/members", async (
+        Guid groupId,
+        AddGroupMemberRequestDto dto,
+        AddGroupMemberHandler handler,
+        ClaimsPrincipal user) =>
+      {
+        var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = Guid.Parse(userIdClaim!);
+        
+        var command = new AddGroupMemberCommand(userId, groupId, dto.SearchValue);
+        
+        var result = await handler.HandleAsync(command);
+
+        if (!result.IsSuccess)
+        {
+          return Results.BadRequest(result.ErrorMessage);
+        }
+
+        return Results.Ok();
+      })
+      .RequireAuthorization()
+      .WithName("AddGroupMember")
+      .WithSummary("Ajoute un membre à un groupe")
+      .WithDescription("Ajoute un utilisateur existant (identifié par email ou pseudo) à un groupe. L'appelant doit être membre du groupe.")
+      .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status400BadRequest)
       .Produces(StatusCodes.Status401Unauthorized);
 
