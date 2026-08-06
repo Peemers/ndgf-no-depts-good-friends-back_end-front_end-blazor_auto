@@ -11,6 +11,11 @@ public class UserRepository(NdgfDbContext context) : IUserRepository
     return await context.Users.AnyAsync(u => u.Email == email);
   }
 
+  public async Task<bool> PseudoAlreadyExistsAsync(string pseudo)
+  {
+    return await context.Users.AnyAsync(u => u.Pseudo == pseudo);
+  }
+
   public async Task<User> AddAsync(User user)
   {
     await context.Users.AddAsync(user);

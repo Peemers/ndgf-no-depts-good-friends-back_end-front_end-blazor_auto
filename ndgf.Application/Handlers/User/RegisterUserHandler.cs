@@ -14,6 +14,12 @@ public class RegisterUserHandler(IUserRepository userRepository, IPasswordHasher
     {
       return Result<Domain.Entities.User>.Failure("Cet email est déja utilisé.");
     }
+    
+    bool pseudoAlreadyExists = await userRepository.PseudoAlreadyExistsAsync(command.Pseudo);
+    if (pseudoAlreadyExists)
+    {
+      return Result<Domain.Entities.User>.Failure("Pseudo déjà utilisé");
+    }
 
     string passwordHash = passwordHasher.HashPassword(command.Password);
 
