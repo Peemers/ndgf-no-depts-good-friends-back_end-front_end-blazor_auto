@@ -8,4 +8,9 @@ public class GroupApiClient(HttpClient httpClient)
   {
     return await httpClient.PostAsJsonAsync("/api/groups", model);
   }
+
+  public async Task<HttpResponseMessage> AddGroupMember(AddGroupMemberModel model)
+  {
+    return await httpClient.PostAsJsonAsync("/api/groups/members", model);
+  }
 }

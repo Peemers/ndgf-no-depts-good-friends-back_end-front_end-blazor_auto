@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<LoginUserHandler>();
     services.AddScoped<CreateGroupeHandler>();
     services.AddScoped<AddGroupMemberHandler>();
+    services.AddScoped<GetGroupDetailsHandler>();
     return services;
   }
 }

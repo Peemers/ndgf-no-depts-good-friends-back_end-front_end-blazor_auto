@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ndgf.Application.Interfaces.Repositories;
+using ndgf.Domain.Entities;
 
 namespace ndgf.Infrastructure.Persistence.Repositories;
 
@@ -16,5 +17,11 @@ public class GroupMemberRepository(NdgfDbContext context) : IGroupMemberReposito
   {
     return await context.GroupMembers
       .AnyAsync(gm => gm.UserId == userId && gm.GroupId == groupId);
+  }
+
+  public async Task<IEnumerable<GroupMember>> GetMemberByGroupIdAsync(Guid groupId)
+  {
+    return await context.GroupMembers
+      .Where(gm => gm.GroupId == groupId).ToListAsync();
   }
 }

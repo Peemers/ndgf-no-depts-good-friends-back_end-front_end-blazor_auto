@@ -5,6 +5,7 @@ using ndgf.Api.Dtos.Group.Response;
 using ndgf.Api.Mappers.Group;
 using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
+using ndgf.Application.Queries;
 
 namespace ndgf.Api.Endpoints.Group;
 
@@ -47,9 +48,9 @@ public static class GroupEndpoints
       {
         var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         var userId = Guid.Parse(userIdClaim!);
-        
+
         var command = new AddGroupMemberCommand(userId, groupId, dto.SearchValue);
-        
+
         var result = await handler.HandleAsync(command);
 
         if (!result.IsSuccess)
@@ -66,6 +67,33 @@ public static class GroupEndpoints
       .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status400BadRequest)
       .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapGet("/api/groups/{groupId}", async (
+      Guid groupId,
+      GetGroupDetailsHandler handler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+
+      var query = new GetGroupDetailQuery(groupId, userId);
+      var result = await handler.HandleAsync(query);
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+      
+      var response = result.Value!.ToResponseDto();
+      
+      return Results.Ok(response);
+    })
+    .RequireAuthorization()
+    .WithName("GetGroupDetails")
+    .WithSummary("Consulte les détails d'un groupe")
+    .WithDescription("Retourne les informations d'un groupe et la liste de ses membres.")
+    .Produces<GetGroupDetailsResponseDto>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized);
 
     return app;
   }

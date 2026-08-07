@@ -32,4 +32,9 @@ public class UserRepository(NdgfDbContext context) : IUserRepository
   {
     return await context.Users.FirstOrDefaultAsync(u => u.Pseudo == pseudo);
   }
+
+  public async Task<User?> GetUserByIdAsync(Guid userId)
+  {
+    return await context.Users.FindAsync(userId);
+  }
 }
