@@ -7,8 +7,7 @@ namespace ndgf.Application.Handlers.Group;
 
 public class GetUserGroupsHandler(
   IGroupMemberRepository groupMemberRepository,
-  IGroupRepository groupRepository,
-  IUserRepository userRepository)
+  IGroupRepository groupRepository)
 {
   public async Task<Result<GetUserGroupsResult>> HandleAsync(GetUserGroupsQuery query)
   {
