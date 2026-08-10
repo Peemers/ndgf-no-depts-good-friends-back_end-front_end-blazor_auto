@@ -1,8 +1,37 @@
 ﻿@page "/"
 @layout MainLayout
 
-<PageTitle>Home</PageTitle>
 
-<h1 class="text-red-500 text-4xl font-bold">Hello, world!</h1>
+<div class="min-h-screen w-screen bg-[#F5F3EE] flex items-center justify-center p-6">
 
-Welcome to your new app.
+  <div
+    class="w-full max-w-6xl bg-white rounded-3xl ring-1 ring-black/5 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25)] overflow-hidden grid md:grid-cols-2">
+
+
+    <div class="p-10 md:p-14 flex flex-col justify-center border-t-4 md:border-t-0 md:border-l-4 border-amber-600">
+
+      <h1 class="text-5xl md:text-6xl font-black tracking-tight text-neutral-900 leading-[1.05] mb-6">
+        Bienvenue sur :
+      </h1>
+
+      <p class="text-neutral-500 text-lg max-w-sm mb-10">
+        Suivez, partagez et équilibrez vos dépenses de groupe en un coup d'œil.
+      </p>
+
+      <button
+        class="bg-amber-600 hover:bg-amber-700 active:scale-[0.95] transition-all text-white font-semibold rounded-lg h-14 px-8 text-base w-fit shadow-lg shadow-amber-600/20">
+        Consultez vos groupes de dépense
+      </button>
+    </div>
+
+    <div class="relative h-72 md:h-auto bg-neutral-100 flex items-center justify-center">
+      <img src="images/ngdf4-crop.jpg" alt=""
+           class="w-full h-full object-contain">
+    </div>
+
+  </div>
+</div>
+
+
+
+
