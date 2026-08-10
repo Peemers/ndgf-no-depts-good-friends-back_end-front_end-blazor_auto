@@ -1,8 +1,8 @@
 ﻿namespace ndgf.Web.Models.Group;
 
-public class CreateGroupResponseModel
+public record CreateGroupResponseModel
 {
-  public Guid Id { get; set; }
-  public required string Name { get; set; }
-  public string? Description { get; set; }
+  public Guid Id { get; init; }
+  public required string Name { get; init; }
+  public string? Description { get; init; }
 }

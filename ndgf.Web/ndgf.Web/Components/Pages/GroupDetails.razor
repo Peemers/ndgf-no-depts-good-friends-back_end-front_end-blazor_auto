@@ -1,0 +1,156 @@
+﻿@page "/groups/{groupId:guid}"
+@using Microsoft.AspNetCore.Authorization
+@using ndgf.Web.Models.Group
+@using ndgf.Web.Services.Group
+@inject GroupApiClient GroupApiClient
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
+
+  @if (_errorMessage is not null)
+  {
+    <p class="text-center text-2xl text-red-600 p-6">@_errorMessage</p>
+  }
+  else if (_groupDetails is null)
+  {
+    <p class="text-center text-2xl p-6">Chargement en cours</p>
+  }
+  else
+  {
+    <!-- SIDEBAR à gauche -->
+    <div class="w-full bg-white/70 p-6 shadow-lg md:w-80">
+      <div class="flex flex-col justify-between items-center">
+        <h2 class="text-xl mb-4 font-semibold">Membres dans le groupe : </h2>
+        <button @onclick="ToggleAddMemberForm"
+                class="bg-linear-to-l rounded-xl shadow-black shadow-lg border-black from-amber-700 to-orange-800 text-white px-4 py-2 hover:from-green-600 hover:to-[#7B9668]">
+          + Ajouter
+        </button>
+      </div>
+
+      @if (_showAddMemberForm)
+      {
+        <EditForm Model="_model" OnValidSubmit="HandleAddGroupMember" class="p-2 flex flex-col items-center">
+          <DataAnnotationsValidator/>
+          <h3 class="mb-2 font-bold">Rechercher un membre à ajouter</h3>
+          
+          <div>
+            <InputText @bind-Value="_model.SearchValue" class="border  border-gray-400 rounded-xl p-3 mb-2"/>
+            <ValidationMessage For="() => _model.SearchValue" class="text-s mb-2 text-red-800"/>
+          </div>
+          
+          <button type="submit" disabled="@_isSubmiting"
+                  class="bg-linear-to-l rounded-2xl border-b-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 w-50 p-2 shadow-black shadow-lg">
+            @if (_isSubmiting)
+            {
+              <span> Ajout en cours ...</span>
+            }
+            else
+            {
+              <span>Ajouter membre</span>
+            }
+          </button>
+        </EditForm>
+      }
+      
+      @if (_message is not null)
+      {
+        <p class="text-green-900 mt-4">@_message</p>
+      }
+      
+      <div class="flex flex-wrap gap-4 mt-8 border-t border-gray-600 pt-8 justify-center">
+        @foreach (var member in _groupDetails.Members)
+        {
+          <div class="flex flex-col items-center w-24">
+            <div
+              class="w-24 h-24 rounded-full shadow-black shadow-lg bg-orange-700 text-white flex items-center justify-center text-2xl font-bold">
+              @member.Pseudo[0]
+            </div>
+            <span class="mt-3 text-lg font-medium">@member.Pseudo</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- CONTENU PRINCIPAL à droite -->
+    <div class="flex-1 p-6">
+      <div class="max-w-2xl bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6">
+        <h1 class="text-3xl font-bold">@_groupDetails.Name</h1>
+        @if (_groupDetails.Description is not null)
+        {
+          <p class="text-gray-600 mt-1">@_groupDetails.Description</p>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+  [Parameter] public Guid GroupId { get; set; }
+
+  private GroupDetailResponseModel? _groupDetails;
+  private string? _errorMessage;
+  private bool _showAddMemberForm;
+  private string? _message;
+  private bool _isSubmiting = false;
+
+  private AddGroupMemberModel _model = new()
+  {
+    SearchValue = ""
+  };
+
+  private void ToggleAddMemberForm()
+  {
+    _showAddMemberForm = !_showAddMemberForm;
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadGroupDetailsAsync();
+  }
+
+  private async Task LoadGroupDetailsAsync()
+  {
+    var response = await GroupApiClient.GetGroupDetailsAsync(GroupId);
+
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger ce groupe";
+      return;
+    }
+
+    _groupDetails = await response.Content.ReadFromJsonAsync<GroupDetailResponseModel>();
+  }
+
+  private async Task HandleAddGroupMember()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await GroupApiClient.AddGroupMemberAsync(_model, GroupId);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de l'ajout du membre";
+        return;
+      }
+
+      _message = "Membre ajouté au groupe avec succes";
+      _model = new AddGroupMemberModel { SearchValue = "" };
+      _showAddMemberForm = false;
+
+      await LoadGroupDetailsAsync();
+      
+      StateHasChanged();
+
+      await Task.Delay(3000);
+      _message = null;
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+
+}

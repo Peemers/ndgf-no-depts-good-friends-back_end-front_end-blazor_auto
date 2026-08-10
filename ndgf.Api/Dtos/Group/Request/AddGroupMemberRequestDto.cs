@@ -5,6 +5,6 @@ namespace ndgf.Api.Dtos.Group.Request;
 
 public record AddGroupMemberRequestDto
 {
-  [Required]
+  [Required (ErrorMessage = "Entrez un email ou un pseudo")]
   public required string SearchValue { get; init; }
 }

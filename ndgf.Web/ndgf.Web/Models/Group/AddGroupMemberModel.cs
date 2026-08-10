@@ -2,8 +2,8 @@
 
 namespace ndgf.Web.Models.Group;
 
-public class AddGroupMemberModel
+public record AddGroupMemberModel
 {
-  [Required]
+  [Required(ErrorMessage = "Entrez un mail ou un pseudo")]
   public required string SearchValue { get; set; }
 }
