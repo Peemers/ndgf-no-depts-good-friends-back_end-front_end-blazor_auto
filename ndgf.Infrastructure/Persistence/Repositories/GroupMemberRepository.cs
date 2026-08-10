@@ -24,4 +24,10 @@ public class GroupMemberRepository(NdgfDbContext context) : IGroupMemberReposito
     return await context.GroupMembers
       .Where(gm => gm.GroupId == groupId).ToListAsync();
   }
+
+  public async Task<IEnumerable<GroupMember>> GetMembershipsByUserIdAsync(Guid userId)
+  {
+    return await context.GroupMembers
+      .Where(gm => gm.UserId == userId).ToListAsync();
+  }
 }

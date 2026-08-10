@@ -1,8 +1,7 @@
 ﻿using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Group;
-using ndgf.Application.Queries;
+using ndgf.Application.Queries.Group;
 using ndgf.Domain.Common;
-using ndgf.Domain.Entities;
 
 namespace ndgf.Application.Handlers.Group;
 

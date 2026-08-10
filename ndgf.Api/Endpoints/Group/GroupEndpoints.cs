@@ -5,7 +5,7 @@ using ndgf.Api.Dtos.Group.Response;
 using ndgf.Api.Mappers.Group;
 using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
-using ndgf.Application.Queries;
+using ndgf.Application.Queries.Group;
 
 namespace ndgf.Api.Endpoints.Group;
 

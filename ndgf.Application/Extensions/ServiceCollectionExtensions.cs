@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<CreateGroupeHandler>();
     services.AddScoped<AddGroupMemberHandler>();
     services.AddScoped<GetGroupDetailsHandler>();
+    services.AddScoped<GetUserGroupsHandler>();
     return services;
   }
 }
