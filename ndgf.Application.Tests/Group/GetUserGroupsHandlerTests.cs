@@ -56,7 +56,7 @@ public class GetUserGroupsHandlerTests
     
     var result = await handler.HandleAsync(query);
     
-    Assert.Empty(result.Value.Groups);
+    Assert.Empty(result.Value!.Groups);
     Assert.True(result.IsSuccess);
     Assert.NotNull(result.Value);
   }

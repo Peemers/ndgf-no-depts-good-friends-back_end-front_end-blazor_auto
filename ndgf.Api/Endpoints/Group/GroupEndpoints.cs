@@ -95,6 +95,32 @@ public static class GroupEndpoints
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized);
 
+    app.MapGet("/api/groups/mine", async (
+      ClaimsPrincipal user,
+      GetUserGroupsHandler handler) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+
+      var query = new GetUserGroupsQuery(userId);
+      var result = await handler.HandleAsync(query);
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+      
+      var response = result.Value!.ToResponseDto();
+      
+      return Results.Ok(response);
+    })
+    .RequireAuthorization()
+    .WithName("GetUserGroups")
+    .WithSummary("Consulte les groupes intégrés par le user")
+    .WithDescription("Retourne groupes des users")
+    .Produces<GetUserGroupsResponseDto>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized);
+
     return app;
   }
 }
