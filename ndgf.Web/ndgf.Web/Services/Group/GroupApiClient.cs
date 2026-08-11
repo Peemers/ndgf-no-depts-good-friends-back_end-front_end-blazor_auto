@@ -19,8 +19,8 @@ public class GroupApiClient(HttpClient httpClient)
     return await httpClient.GetAsync($"/api/groups/{groupId}");
   }
 
-  public async Task<HttpResponseMessage> GetUserGroupsAsync(Guid userId)
+  public async Task<HttpResponseMessage> GetUserGroupsAsync()
   {
-    return await httpClient.GetAsync($"/api/groups/mine?userId={userId}");
+    return await httpClient.GetAsync($"/api/groups/mine");
   }
 }

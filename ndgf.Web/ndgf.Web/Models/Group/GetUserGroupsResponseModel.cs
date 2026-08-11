@@ -1,6 +1,6 @@
 ﻿namespace ndgf.Web.Models.Group;
 
-public record GetUserGroupsResponseDto
+public record GetUserGroupsResponseModel
 {
-  public required List<UserGroupSummaryDto> Groups { get; init; }
+  public required List<UserGroupSummaryModel> Groups { get; init; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ndgf.Web.Models.Group;
 
-public record UserGroupSummaryDto
+public record UserGroupSummaryModel
 {
   public required Guid Id { get; init; }
   public required string Name { get; init; }
