@@ -26,6 +26,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
       .IsRequired()
       .HasMaxLength(30);
     
+    builder.HasIndex(u => u.Pseudo)
+      .IsUnique();
+    
     builder.Property(u => u.FirstName)
       .IsRequired()
       .HasMaxLength(30);

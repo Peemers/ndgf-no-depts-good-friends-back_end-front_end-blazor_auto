@@ -2,7 +2,7 @@
 
 namespace ndgf.Web.Models.Group;
 
-public class CreateGroupeModel
+public record CreateGroupeModel
 {
   [Required]
   [MinLength(3, ErrorMessage = "Le nom doit comporter minimum 3 caractères")]

@@ -2,12 +2,12 @@
 @layout AuthLayout
 @using ndgf.Web.Models.User
 @using ndgf.Web.Services.User
-@inject NavigationManager NavigationManager
 @inject UserApiClient UserApiCLient
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
 
-<div class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
+<div
+  class="min-h-screen flex flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C] p-6 items-center justify-center border-2">
   <div class="border rounded-2xl flex-row flex p-6 bg-linear-to-br from-white to-violet-200 shadow-2xl">
     <img src="images/ngdf3.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl hidden md:block shadow-xl w-4xl">
@@ -28,7 +28,8 @@
 
       <div>
         <label class="text-xl">Mot de passe</label>
-        <InputText type="password" @bind-Value="_model.Password" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
+        <InputText type="password" @bind-Value="_model.Password"
+                   class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.Password"/>
       </div>
 
@@ -61,16 +62,17 @@
   </div>
   @if (_loginResponse is not null)
   {
+    // "Faux forms pour la connection et le probleme de header deja envoyé"
     <form action="/auth/signin" method="post" id="signin-form">
-      <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken" />
-      <input type="hidden" name="userId" value="@_loginResponse.Id" />
-      <input type="hidden" name="email" value="@_loginResponse.Email" />
-      <input type="hidden" name="accessToken" value="@_loginResponse.AccessToken" />
-      <input type="hidden" name="refreshToken" value="@_loginResponse.RefreshToken" />
+      <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken"/>
+      <input type="hidden" name="userId" value="@_loginResponse.Id"/>
+      <input type="hidden" name="email" value="@_loginResponse.Email"/>
+      <input type="hidden" name="accessToken" value="@_loginResponse.AccessToken"/>
+      <input type="hidden" name="refreshToken" value="@_loginResponse.RefreshToken"/>
     </form>
 
     <script>
-        document.getElementById('signin-form').submit();
+      document.getElementById('signin-form').submit();
     </script>
   }
 </div>
@@ -78,7 +80,7 @@
 @code {
   private string? _message;
   private bool _isSubmiting;
-  
+
   private string? _antiforgeryToken;
 
   protected override void OnInitialized()
@@ -122,4 +124,5 @@
       _isSubmiting = false;
     }
   }
+
 }

@@ -5,7 +5,7 @@ using NSubstitute;
 namespace ndgf.Application.Tests.Group;
 
 
-public class CreateGroupHandler
+public class CreateGroupHandlerTests
 {
   [Fact]
   public async Task HandleAsync_WithValidCommand_ShouldReturnSuccessResult()

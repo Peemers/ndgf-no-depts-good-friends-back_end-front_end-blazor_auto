@@ -1,0 +1,91 @@
+﻿@page "/groups"
+@using System.Security.Cryptography
+@using Microsoft.AspNetCore.Authorization
+@using ndgf.Web.Models.Group
+@using ndgf.Web.Services.Group
+@inject GroupApiClient GroupApiClient
+@attribute [Authorize]
+
+<div class="min-h-screen flex flex-col bg-linear-to-bl from-[#F3EBD8] bg-[#F5F3EE]">
+  <h1 class="text-3xl text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit : </h1>
+  <div class="justify-center flex flex-col md:flex-row">
+
+    @if (_errorMessage is not null)
+    {
+      <p class="text-center text-2xl text-red-600 p-6">@_errorMessage</p>
+    }
+    else if (_userGroups is null)
+    {
+      <p class="text-center text-2xl p-6">Chargement en cours</p>
+    }
+    else
+    {
+      <div
+        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8 items-center justify-center">
+
+        @if (_userGroups.Groups.Count == 0)
+        {
+          <div class="flex flex-col self-start">
+            <div>
+              <img src="images/notfound.jpg" alt="" class="w-sm rounded-2xl opacity-70">
+            </div>
+            <div class="text-2xl text-center mt-5">
+              <p class="text-gray-600">Pas de groupe à afficher</p>
+              <NavLink href="@($"/groups/create")" class="text-blue-700 hover:text-green-900 underline">Créez un groupe
+                de dépense
+              </NavLink>
+            </div>
+          </div>
+        }
+
+        @foreach (var group in _userGroups.Groups)
+        {
+          <div
+            class="flex flex-wrap hover:scale-[0.95] active:scale-[0.95] hover:shadow-amber-800 transition-all shadow-black shadow-2xl rounded-2xl bg-linear-to-tl to-[#B07D4C] w-full sm:w-110">
+            <NavLink href="@($"/groups/{group.Id}")" class="p-4 w-full">
+              <img src="images/ndgf-card.jpg" class="w-full h-auto rounded-lg" alt="">
+              <h1 class="text-center tracking-tight text-3xl mt-2 underline">@group.Name</h1>
+              @if (group.Description is not null)
+              {
+                <h2 class="text-center text-lg mt-2 text-gray-600">@group.Description</h2>
+              }
+
+              <div class="flex justify-between mt-8">
+                <p class="text-gray-700">Cliquez pour afficher ce groupe</p>
+                <span class="inline-flex items-center gap-1 bg-white/80 rounded-full px-3 py-1 text-sm font-medium">
+                  👥 @group.MemberCount membre@(group.MemberCount > 1 ? "s" : "")
+                </span>
+              </div>
+
+            </NavLink>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@code {
+
+  private string? _errorMessage;
+  private GetUserGroupsResponseModel? _userGroups;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadUserGroupsAsync();
+  }
+
+  private async Task LoadUserGroupsAsync()
+  {
+    var response = await GroupApiClient.GetUserGroupsAsync();
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger les groupes";
+      return;
+    }
+
+    _userGroups = await response.Content.ReadFromJsonAsync<GetUserGroupsResponseModel>();
+  }
+
+
+}
