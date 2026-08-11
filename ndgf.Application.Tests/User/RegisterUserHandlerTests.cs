@@ -52,6 +52,29 @@ public class RegisterUserHandlerTests
     //Assert
     Assert.False(result.IsSuccess);
     Assert.NotNull(result.ErrorMessage);
+    passwordHasher.DidNotReceiveWithAnyArgs().HashPassword(Arg.Any<string>());
+    await userRepository.DidNotReceive().AddAsync(Arg.Any<Domain.Entities.User>());
+    
+  }
+  
+  [Fact]
+  public async Task HandleAsync_WithExistingPseudo_ShouldReturnFailureResult()
+  {
+    var userRepository = Substitute.For<IUserRepository>();
+    var passwordHasher = Substitute.For<IPasswordHasher>();
+    
+    userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(false);
+    userRepository.PseudoAlreadyExistsAsync(Arg.Any<string>()).Returns(true);
+    
+    var handler = new RegisterUserHandler(userRepository, passwordHasher);
+    var command = new RegisterUserCommand("test@test.be", "Test1234=", "Toto", "Jean", "Dupont");
+    
+    var result = await handler.HandleAsync(command);
+    
+    Assert.False(result.IsSuccess);
+    Assert.NotNull(result.ErrorMessage);
+    
+    passwordHasher.DidNotReceiveWithAnyArgs().HashPassword(Arg.Any<string>());
     await userRepository.DidNotReceive().AddAsync(Arg.Any<Domain.Entities.User>());
   }
 }

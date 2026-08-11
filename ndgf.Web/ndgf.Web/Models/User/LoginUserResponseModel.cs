@@ -2,8 +2,8 @@
 
 public class LoginUserResponseModel
 {
-  public Guid Id { get; set; }
-  public required string Email { get; set; }
-  public required string AccessToken { get; set; }
-  public required string RefreshToken { get; set; }
+  public Guid Id { get; init; }
+  public required string Email { get; init; }
+  public required string AccessToken { get; init; }
+  public required string RefreshToken { get; init; }
 }
