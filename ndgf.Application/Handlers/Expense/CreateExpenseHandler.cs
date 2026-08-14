@@ -8,7 +8,6 @@ namespace ndgf.Application.Handlers.Expense;
 public class CreateExpenseHandler(
   IUserRepository userRepository,
   IExpenseRepository expenseRepository,
-  IGroupRepository groupRepository,
   IGroupMemberRepository groupMemberRepository)
 {
   public async Task<Result<CreateExpenseResult>> HandleAsync(CreateExpenseCommand command)
