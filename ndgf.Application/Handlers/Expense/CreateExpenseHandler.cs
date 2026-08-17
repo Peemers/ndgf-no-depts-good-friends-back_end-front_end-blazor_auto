@@ -12,23 +12,23 @@ public class CreateExpenseHandler(
 {
   public async Task<Result<CreateExpenseResult>> HandleAsync(CreateExpenseCommand command)
   {
-    bool isMember = await groupMemberRepository.IsMemberAsync(command.UserId, command.GroupId);
+    bool isMember = await groupMemberRepository.IsMemberAsync(command.RequestingUserId, command.GroupId);
     if (!isMember)
     {
       return Result<CreateExpenseResult>.Failure("Vous devez être membre du groupe pour creer une dépense.");
     }
-
-    Domain.Entities.Expense newExpense =
-      Domain.Entities.Expense.Create(command.UserId, command.ExpensePartInputs, command.Amount, command.Description, command.GroupId);
-
-    Domain.Entities.Expense savedExpense = await expenseRepository.AddAsync(newExpense);
-
-    Domain.Entities.User? payer = await userRepository.GetUserByIdAsync(savedExpense.UserId);
+    
+    Domain.Entities.User? payer = await userRepository.GetUserByIdAsync(command.PayerId);
     if (payer is null)
     {
       return Result<CreateExpenseResult>.Failure("Membre introuvable");
     }
 
+    Domain.Entities.Expense newExpense =
+      Domain.Entities.Expense.Create(command.PayerId, command.ExpensePartInputs, command.Amount, command.Description, command.GroupId);
+
+    Domain.Entities.Expense savedExpense = await expenseRepository.AddAsync(newExpense);
+    
     var amountsByUser = savedExpense.CalculateAmountsByUser();
     var userExpenseInfos = new List<UserExpenseInfoResult>();
 
