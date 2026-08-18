@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<GetGroupDetailsHandler>();
     services.AddScoped<GetUserGroupsHandler>();
     services.AddScoped<CreateExpenseHandler>();
+    services.AddScoped<GetGroupExpenseHandler>();
     return services;
   }
 }
