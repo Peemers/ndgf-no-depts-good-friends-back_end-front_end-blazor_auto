@@ -4,6 +4,7 @@ using ndgf.Api.Dtos.Expense.Request;
 using ndgf.Api.Dtos.Expense.Response;
 using ndgf.Api.Mappers.Expense;
 using ndgf.Application.Handlers.Expense;
+using ndgf.Application.Queries.Expense;
 
 namespace ndgf.Api.Endpoints.Expense;
 
@@ -40,6 +41,38 @@ public static class ExpenseEndPoints
     .Produces<CreateExpenseResponseDto>(StatusCodes.Status201Created)
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized);
+    
+    app.MapGet("/api/groups/{groupId}/expenses", async (
+        Guid groupId,
+        int page,
+        int pageSize,
+        bool sortDescending,
+        GetGroupExpenseHandler handler,
+        ClaimsPrincipal user) =>
+      {
+        var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = Guid.Parse(userIdClaim!);
+
+        var query = new GetGroupExpenseQuery(groupId, userId, page, pageSize, sortDescending);
+
+        var result = await handler.HandleAsync(query);
+
+        if (!result.IsSuccess)
+        {
+          return Results.BadRequest(result.ErrorMessage);
+        }
+
+        var response = result.Value!.ToResponseDto();
+
+        return Results.Ok(response);
+      })
+      .RequireAuthorization()
+      .WithName("GetGroupExpenses")
+      .WithSummary("Consulte les dépenses paginées d'un groupe")
+      .WithDescription("Retourne une liste paginée des dépenses d'un groupe, triée par date.")
+      .Produces<GetGroupExpensesResponseDto>(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status400BadRequest)
+      .Produces(StatusCodes.Status401Unauthorized);
     
     return app;
   }
