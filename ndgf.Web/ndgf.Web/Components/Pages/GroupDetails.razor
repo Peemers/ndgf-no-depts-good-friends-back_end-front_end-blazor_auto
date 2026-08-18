@@ -1,8 +1,11 @@
 ﻿@page "/groups/{groupId:guid}"
 @using Microsoft.AspNetCore.Authorization
+@using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
+@using ndgf.Web.Services.Expense
 @using ndgf.Web.Services.Group
 @inject GroupApiClient GroupApiClient
+@inject ExpenseApiClient ExpenseApiClient
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
@@ -62,22 +65,113 @@
         {
           <div class="flex flex-col items-center w-24">
             <div
-              class="w-24 h-24 rounded-full shadow-black shadow-lg bg-orange-700 text-white flex items-center justify-center text-2xl font-bold">
-              @member.Pseudo[0]
+              class="w-24 h-24 rounded-full shadow-black shadow-lg bg-linear-to-t from-amber-700 to-amber-900 text-white flex items-center justify-center text-2xl font-bold">
+              @member.Pseudo[0]@member.Pseudo[1]@member.Pseudo[2]
             </div>
-            <span class="mt-3 text-lg font-medium">@member.Pseudo</span>
+            <span class="mt-3 bg-gray-300/30 rounded-lg shadow-black shadow-sm p-1 text-lg font-medium">@member.Pseudo</span>
           </div>
         }
       </div>
     </div>
 
 
-    <div class="flex-1 p-6">
-      <div class="max-w-2xl bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6">
+    <div class="flex-1 p-8">
+      <div class="bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6 min-h-screen max-w-screen">
         <h1 class="text-3xl font-bold">@_groupDetails.Name</h1>
         @if (_groupDetails.Description is not null)
         {
           <p class="text-gray-600 mt-1">@_groupDetails.Description</p>
+        }
+        @if (_message is not null)
+        {
+          <p class="mb-4 text-lg text-red-600">@_message</p>
+        }
+        <div class="justify-end flex">
+          <button @onclick="OpenModal" class="bg-linear-to-l rounded-2xl shadow-black shadow-lg from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+            ➕ créer une nouvelle dépense
+          </button>
+        </div>
+        @if (_showModal)
+        {
+          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+              <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
+                <DataAnnotationsValidator/>
+                <div class="flex justify-end">
+                  <button type="button" @onclick="CloseModal"
+                          class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
+                  </button>
+                </div>
+                <h1 class="text-2xl font-bold mb-6 flex underline">Création d'une nouvelle dépense</h1>
+
+                @if (_message is not null)
+                {
+                  <p class="mb-4 text-xl text-green-500">@_message</p>
+                }
+
+                <div>
+                  <label class="text-xl">Montant dépensé</label>
+                  <InputNumber @bind-Value="_createExpenseModel.Amount"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createExpenseModel.Amount"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Déscription de la dépense</label>
+                  <InputText @bind-Value="_createExpenseModel.Description"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createExpenseModel.Description"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Qui a fait cette dépense ?</label>
+                  <InputSelect @bind-Value="_createExpenseModel.UserId"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                    <option value="">Choisir un membre du groupe</option>
+                    @foreach (var member in _groupDetails.Members)
+                    {
+                      <option value="@member.UserId">@member.Pseudo</option>
+                    }
+                  </InputSelect>
+                </div>
+
+
+                <label class="text-xl">Qui participe à cette dépense ?</label>
+
+                <div class="mt-3">
+                  @foreach (var member in _groupDetails.Members)
+                  {
+                    <div class="flex p-2 mb-1 w-fit items-center bg-[#B07D4C]/50 rounded-2xl">
+                      <input class="ml-2 mr-2" type="checkbox"
+                             checked="@_selectedUserIds.Contains(member.UserId)"
+                             @onchange="() => ToggleParticipant(member.UserId)"/>
+                      <label class="text-xl">@member.Pseudo - @member.Email</label>
+                    </div>
+                  }
+                </div>
+
+                <div class="flex">
+                  <button type="submit" disabled="@_isSubmiting"
+                          class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
+                    @if (_isSubmiting)
+                    {
+                      <span>Création en cours ...</span>
+                    }
+                    else
+                    {
+                      <span>Créer la dépense</span>
+                    }
+                  </button>
+                  <button type="button" @onclick="CloseModal"
+                          class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
+                    Annuler
+                  </button>
+                </div>
+
+              </EditForm>
+
+            </div>
+          </div>
         }
       </div>
     </div>
@@ -91,11 +185,23 @@
   private string? _errorMessage;
   private bool _showAddMemberForm;
   private string? _message;
-  private bool _isSubmiting = false;
+  private bool _isSubmiting;
+  private bool _showModal;
+  private void OpenModal() => _showModal = true;
+  private void CloseModal() => _showModal = false;
+  private List<Guid> _selectedUserIds = new();
 
   private AddGroupMemberModel _model = new()
   {
     SearchValue = ""
+  };
+
+  private CreateExpenseRequestModel _createExpenseModel = new()
+  {
+    Amount = 0,
+    Description = "",
+    UserId = Guid.Empty,
+    ExpenseParts = new List<ExpensePartInputModel>()
   };
 
   private void ToggleAddMemberForm()
@@ -149,6 +255,62 @@
     finally
     {
       _isSubmiting = false;
+    }
+  }
+
+  private void CalculatePartPerUser()
+  {
+    var baseShare = 100 / _selectedUserIds.Count;
+    var reminder = 100 % _selectedUserIds.Count;
+
+    for (int i = 0; i < _selectedUserIds.Count; i++)
+    {
+      int percentage = (i == 0) ? baseShare + reminder : baseShare;
+      _createExpenseModel.ExpenseParts.Add(new ExpensePartInputModel { UserId = _selectedUserIds[i], Percentage = percentage });
+    }
+  }
+
+  private async Task HandleCreateExpense()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      CalculatePartPerUser();
+
+      var response = await ExpenseApiClient.CreateExpenseAsync(_createExpenseModel, GroupId);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de la création de la dépense";
+        return;
+      }
+
+      _message = "Dépense créée avec succes";
+
+      StateHasChanged();
+
+      await Task.Delay(3000);
+      _message = null;
+
+      CloseModal();
+    }
+    finally
+    {
+      _isSubmiting = false;
+      _createExpenseModel.ExpenseParts.Clear();
+    }
+  }
+
+  private void ToggleParticipant(Guid userId)
+  {
+    if (_selectedUserIds.Contains(userId))
+    {
+      _selectedUserIds.Remove(userId);
+    }
+    else
+    {
+      _selectedUserIds.Add(userId);
     }
   }
 

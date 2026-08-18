@@ -13,6 +13,7 @@ public class NdgfDbContext : DbContext
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
   public DbSet<Group> Groups => Set<Group>();
   public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+  public DbSet<Expense> Expenses => Set<Expense>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
