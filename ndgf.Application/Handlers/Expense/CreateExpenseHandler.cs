@@ -37,7 +37,7 @@ public class CreateExpenseHandler(
       var user = await userRepository.GetUserByIdAsync(part.UserId);
       if (user is not null)
       {
-        var amount = amountsByUser[user.Id];
+        var amount = amountsByUser[part.UserId];
         userExpenseInfos.Add(new UserExpenseInfoResult(user.Id, user.Pseudo, part.Percentage, amount, user.Email));
       }
     }
