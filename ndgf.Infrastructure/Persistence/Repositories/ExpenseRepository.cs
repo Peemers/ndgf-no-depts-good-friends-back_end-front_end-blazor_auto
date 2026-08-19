@@ -15,7 +15,9 @@ public class ExpenseRepository(NdgfDbContext context) : IExpenseRepository
 
   public async Task<IEnumerable<Expense>> GetGroupExpensesAsync(Guid groupId, int pageNumber, int pageSize, bool sortDescending)
   {
-    var query = context.Expenses.Where(e => e.GroupId == groupId);
+    var query = context.Expenses
+      .Include(e => e.ExpenseParts)
+      .Where(e => e.GroupId == groupId);
 
     query = sortDescending
       ? query.OrderByDescending(e => e.CreatedAt)
