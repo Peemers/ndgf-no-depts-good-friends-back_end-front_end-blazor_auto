@@ -20,7 +20,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
       .IsRequired()
       .HasMaxLength(256);
     
-    builder.HasMany<ExpensePart>()
+    builder.HasMany(e => e.ExpenseParts)
       .WithOne()
       .HasForeignKey(ep => ep.ExpenseId)
       .OnDelete(DeleteBehavior.Cascade);
