@@ -1,3 +1,4 @@
+using ndgf.Api.Endpoints.Expense;
 using ndgf.Api.Endpoints.Group;
 using ndgf.Api.Endpoints.User;
 using ndgf.Api.Extensions;
@@ -33,6 +34,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapUserEndpoints();
 app.MapGroupEndpoints();
+app.MapExpenseEndPoints();
 app.UseHttpsRedirection();
 
 app.Run();

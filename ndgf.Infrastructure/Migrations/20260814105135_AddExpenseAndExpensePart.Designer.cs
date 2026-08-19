@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ndgf.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using ndgf.Infrastructure.Persistence;
 namespace ndgf.Infrastructure.Migrations
 {
     [DbContext(typeof(NdgfDbContext))]
-    partial class NdgfDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260814105135_AddExpenseAndExpensePart")]
+    partial class AddExpenseAndExpensePart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,10 +69,15 @@ namespace ndgf.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ExpenseId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Percentage")
                         .HasColumnType("int");
 
                     b.HasKey("ExpenseId", "UserId");
+
+                    b.HasIndex("ExpenseId1");
 
                     b.HasIndex("UserId");
 
@@ -224,10 +232,14 @@ namespace ndgf.Infrastructure.Migrations
             modelBuilder.Entity("ndgf.Domain.Entities.ExpensePart", b =>
                 {
                     b.HasOne("ndgf.Domain.Entities.Expense", null)
-                        .WithMany("ExpenseParts")
+                        .WithMany()
                         .HasForeignKey("ExpenseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("ndgf.Domain.Entities.Expense", null)
+                        .WithMany("ExpenseParts")
+                        .HasForeignKey("ExpenseId1");
 
                     b.HasOne("ndgf.Domain.Entities.User", null)
                         .WithMany()

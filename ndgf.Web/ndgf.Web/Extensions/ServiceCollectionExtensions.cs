@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using ndgf.Web.Services.Auth;
+using ndgf.Web.Services.Expense;
 using ndgf.Web.Services.Group;
 using ndgf.Web.Services.User;
 
@@ -33,6 +34,12 @@ public static class ServiceCollectionExtensions
         client.BaseAddress = new Uri(apiUri);
       })
       .AddHttpMessageHandler<AuthTokenHandler>();
+    
+    services.AddHttpClient<ExpenseApiClient>(client =>
+    {
+      client.BaseAddress = new Uri(apiUri);
+    })
+    .AddHttpMessageHandler<AuthTokenHandler>();
 
     services.AddHttpClient<GroupApiClient>(client =>
       {
