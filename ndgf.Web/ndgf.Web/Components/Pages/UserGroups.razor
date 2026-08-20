@@ -7,7 +7,7 @@
 @attribute [Authorize]
 
 <div class="min-h-screen flex flex-col bg-linear-to-bl from-[#F3EBD8] bg-[#F5F3EE]">
-  <h1 class="text-3xl text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit : </h1>
+  <h1 class="text-3xl underline p-2 text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit : </h1>
   <div class="justify-center flex flex-col md:flex-row">
 
     @if (_errorMessage is not null)
@@ -21,13 +21,13 @@
     else
     {
       <div
-        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8 items-center justify-center">
+        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8">
 
         @if (_userGroups.Groups.Count == 0)
         {
           <div class="flex flex-col self-start">
             <div>
-              <img src="images/notfound.jpg" alt="" class="w-sm rounded-2xl opacity-70">
+              <img src="images/notfound.jpg" alt="" class="w-xl rounded-2xl opacity-70">
             </div>
             <div class="text-2xl text-center mt-5">
               <p class="text-gray-600">Pas de groupe à afficher</p>
