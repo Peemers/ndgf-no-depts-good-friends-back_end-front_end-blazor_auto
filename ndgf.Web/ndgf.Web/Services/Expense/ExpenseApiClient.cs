@@ -13,4 +13,9 @@ public class ExpenseApiClient(HttpClient httpClient)
   {
     return await httpClient.GetAsync($"/api/groups/{groupId}/expenses?page={pageNumber}&pageSize={pageSize}&sortDescending={sortDescending}");
   }
+
+  public async Task<HttpResponseMessage> GetGroupBalanceAsync(Guid groupId)
+  {
+    return await httpClient.GetAsync($"/api/groups/{groupId}/balance");
+  }
 }

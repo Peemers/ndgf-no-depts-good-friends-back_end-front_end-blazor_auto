@@ -7,6 +7,7 @@
 @inject GroupApiClient GroupApiClient
 @inject ExpenseApiClient ExpenseApiClient
 @inject NavigationManager NavigationManager
+
 @attribute [Authorize]
 
 <div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
@@ -80,6 +81,31 @@
         @if (_groupDetails.Description is not null)
         {
           <p class="text-gray-600 text-lg mt-2 text-center md:text-left">@_groupDetails.Description</p>
+        }
+        
+        @if (_getGroupBalance is not null)
+        {
+          <div class="mt-6 space-y-2">
+            @foreach (var balance in _getGroupBalance.Balances)
+            {
+              <div class="flex justify-between items-center p-3 rounded-xl bg-white/70">
+                <p class="text-lg font-medium">@balance.Pseudo</p>
+
+                @if (balance.Balance > 0)
+                {
+                  <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p>
+                }
+                else if (balance.Balance < 0)
+                {
+                  <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p>
+                }
+                else
+                {
+                  <p class="text-lg font-semibold text-gray-500">À jour</p>
+                }
+              </div>
+            }
+          </div>
         }
 
         <div class="flex justify-end mt-4">
@@ -225,6 +251,7 @@
 
   private GroupDetailResponseModel? _groupDetails;
   private GetGroupExpensesResponseModel? _getGroupExpenses;
+  private GetGroupBalanceResponseModel? _getGroupBalance;
   private string? _errorMessage;
   private bool _showAddMemberForm;
   private string? _message;
@@ -259,6 +286,7 @@
   {
     await LoadGroupDetailsAsync();
     await GetGroupExpenses();
+    await GetGroupBalance();
   }
 
   private async Task LoadGroupDetailsAsync()
@@ -284,6 +312,18 @@
     }
 
     _getGroupExpenses = await response.Content.ReadFromJsonAsync<GetGroupExpensesResponseModel>();
+  }
+
+  private async Task GetGroupBalance()
+  {
+    var response = await ExpenseApiClient.GetGroupBalanceAsync(GroupId);
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger la balance";
+      return;
+    }
+    
+    _getGroupBalance = await response.Content.ReadFromJsonAsync<GetGroupBalanceResponseModel>();
   }
 
   private async Task HandleAddGroupMember()
@@ -398,4 +438,4 @@
     }
   }
 
-}
+}}
