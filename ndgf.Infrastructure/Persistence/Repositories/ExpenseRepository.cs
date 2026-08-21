@@ -33,4 +33,12 @@ public class ExpenseRepository(NdgfDbContext context) : IExpenseRepository
   {
     return await context.Expenses.CountAsync(e => e.GroupId == groupId);
   }
+
+  public async Task<IEnumerable<Expense>> GetAllGroupExpensesAsync(Guid groupId)
+  {
+    return await  context.Expenses
+      .Include(e => e.ExpenseParts)
+      .Where(e => e.GroupId == groupId)
+      .ToListAsync();
+  }
 }
