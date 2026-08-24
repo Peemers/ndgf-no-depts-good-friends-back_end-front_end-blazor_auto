@@ -13,7 +13,20 @@ public static class GetGroupBalanceMapper
       Pseudo = b.Pseudo,
       Balance = b.Balance
     }).ToList();
+    
+    var suggestedRepayments = result.SuggestedRepayments.Select(sr => new SuggestedRepaymentResponseDto
+    {
+      PayerId = sr.PayerId,
+      PayerPseudo = sr.PayerPseudo,
+      ReceiverId = sr.ReceiverId,
+      ReceiverPseudo = sr.ReceiverPseudo,
+      Amount = sr.Amount
+    }).ToList();
 
-    return new GetGroupBalanceResponseDto { Balances = balances };
+    return new GetGroupBalanceResponseDto
+    {
+      Balances = balances,
+      SuggestedRepayments = suggestedRepayments
+    };
   }
 }
