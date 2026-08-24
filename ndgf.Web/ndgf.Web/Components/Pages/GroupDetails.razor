@@ -89,25 +89,31 @@
         @if (_getGroupBalance is not null)
         {
           <div class="mt-6 space-y-2">
-            @foreach (var balance in _getGroupBalance.Balances)
+            @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
             {
-              <div class="flex justify-between items-center p-3 rounded-xl bg-white/70">
-                <p class="text-lg font-medium">@balance.Pseudo</p>
-
-                @if (balance.Balance > 0)
-                {
-                  <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p>
-                }
-                else if (balance.Balance < 0)
-                {
-                  <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p>
-                }
-                else
-                {
-                  <p class="text-lg font-semibold text-gray-500">À jour</p>
-                }
+              <div class="flex justify-between items-center p-3 rounded-xl bg-amber-100">
+                <p class="text-lg font-medium">@repayment.PayerPseudo doit payer @repayment.Amount € à @repayment.ReceiverPseudo</p>
               </div>
             }
+            @* @foreach (var balance in _getGroupBalance.Balances) *@
+            @* { *@
+            @*   <div class="flex justify-between items-center p-3 rounded-xl bg-white/70"> *@
+            @*     <p class="text-lg font-medium">@balance.Pseudo</p> *@
+            @* *@
+            @*     @if (balance.Balance > 0) *@
+            @*     { *@
+            @*       <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p> *@
+            @*     } *@
+            @*     else if (balance.Balance < 0) *@
+            @*     { *@
+            @*       <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p> *@
+            @*     } *@
+            @*     else *@
+            @*     { *@
+            @*       <p class="text-lg font-semibold text-gray-500">À jour</p> *@
+            @*     } *@
+            @*   </div> *@
+            @* } *@
           </div>
         }
 
@@ -336,6 +342,7 @@
   private GroupDetailResponseModel? _groupDetails;
   private GetGroupExpensesResponseModel? _getGroupExpenses;
   private GetGroupBalanceResponseModel? _getGroupBalance;
+  private SuggestedRepaymentResponseModel? _suggestedRepayments;
   private string? _errorMessage;
   private bool _showAddMemberForm;
   private string? _message;

@@ -1,0 +1,10 @@
+﻿namespace ndgf.Web.Models.Expense;
+
+public record SuggestedRepaymentResponseModel
+{
+  public required Guid PayerId { get; init; }
+  public required string PayerPseudo { get; init; }
+  public required Guid ReceiverId { get; init; }
+  public required string ReceiverPseudo { get; init; }
+  public decimal Amount { get; init; }
+};
