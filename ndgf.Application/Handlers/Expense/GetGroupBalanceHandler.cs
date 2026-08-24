@@ -8,7 +8,8 @@ namespace ndgf.Application.Handlers.Expense;
 public class GetGroupBalanceHandler(
   IUserRepository userRepository,
   IGroupMemberRepository groupMemberRepository,
-  IExpenseRepository expenseRepository)
+  IExpenseRepository expenseRepository,
+  IRefundRepository refundRepository)
 {
   public async Task<Result<GetGroupBalanceResult>> HandleAsync(GetGroupBalanceQuery query)
   {
@@ -22,12 +23,27 @@ public class GetGroupBalanceHandler(
 
     var expenses = await expenseRepository.GetAllGroupExpensesAsync(query.GroupId);
     
+    var refunds = await refundRepository.GetAllGroupRefundAsync(query.GroupId);
+    
     var userBalance = new List<UserBalanceResult>();
 
     foreach (var member in groupMembers)
     {
       decimal balance = 0;
       var user = await userRepository.GetUserByIdAsync(member.UserId);
+
+      foreach (var refund in refunds)
+      {
+        if (refund.PayerId == member.UserId)
+        {
+          balance += refund.Amount;
+        }
+
+        if (refund.ReceiverId == member.UserId)
+        {
+          balance -= refund.Amount;
+        }
+      }
 
       foreach (var expense in expenses)
       {
