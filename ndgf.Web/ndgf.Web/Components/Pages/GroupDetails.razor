@@ -2,10 +2,13 @@
 @using Microsoft.AspNetCore.Authorization
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
+@using ndgf.Web.Models.Refund
 @using ndgf.Web.Services.Expense
 @using ndgf.Web.Services.Group
+@using ndgf.Web.Services.Refund
 @inject GroupApiClient GroupApiClient
 @inject ExpenseApiClient ExpenseApiClient
+@inject RefundApiClient RefundApiClient
 @inject NavigationManager NavigationManager
 
 @attribute [Authorize]
@@ -114,7 +117,7 @@
             🔙 Retour aux groupes
           </NavLink>
 
-          <button @onclick="OpenModal"
+          <button @onclick="OpenExpenseModal"
                   class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             ➕ Créer une nouvelle dépense
           </button>
@@ -144,14 +147,14 @@
           <p>Pas de dépense à afficher dans le groupe</p>
         }
 
-        @if (_showModal)
+        @if (_showExpenseModal)
         {
           <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded-2xl p-6 max-w-md w-full">
               <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
                 <DataAnnotationsValidator/>
                 <div class="flex justify-end">
-                  <button type="button" @onclick="CloseModal"
+                  <button type="button" @onclick="CloseExpenseModal"
                           class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
                   </button>
                 </div>
@@ -215,16 +218,16 @@
                       <span>Créer la dépense</span>
                     }
                   </button>
-                  <button type="button" @onclick="CloseModal"
+                  <button type="button" @onclick="CloseExpenseModal"
                           class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
               </EditForm>
-
             </div>
           </div>
         }
+        
       </div>
       @if (_getGroupExpenses is not null && _getGroupExpenses.Expenses.Items.Any())
       {
@@ -256,9 +259,12 @@
   private bool _showAddMemberForm;
   private string? _message;
   private bool _isSubmiting;
-  private bool _showModal;
-  private void OpenModal() => _showModal = true;
-  private void CloseModal() => _showModal = false;
+  private bool _showExpenseModal;
+  private void OpenExpenseModal() => _showExpenseModal = true;
+  private void CloseExpenseModal() => _showExpenseModal = false;
+  private bool _showRefundModal;
+  private void OpenRefundModal() => _showRefundModal = true;
+  private void CloseRefundModal() => _showRefundModal = false;
   private List<Guid> _selectedUserIds = new();
   private int _pageNumber = 1;
   private int _pageSize = 10;
@@ -275,6 +281,14 @@
     Description = "",
     UserId = Guid.Empty,
     ExpenseParts = new List<ExpensePartInputModel>()
+  };
+
+  private CreateRefundRequestModel _createRefundModel = new()
+  {
+    Amount = 0,
+    PayerId = Guid.Empty,
+    ReceiverId = Guid.Empty,
+    Description = "",
   };
 
   private void ToggleAddMemberForm()
@@ -398,13 +412,42 @@
       await Task.Delay(3000);
       _message = null;
 
-      CloseModal();
+      CloseExpenseModal();
     }
     finally
     {
       _isSubmiting = false;
       _createExpenseModel.ExpenseParts.Clear();
       _selectedUserIds.Clear();
+    }
+  }
+
+  private async Task HandleCreateRefund()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await RefundApiClient.CreateRefundAsync(_createRefundModel, GroupId);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de la création du remboursement";
+        return;
+      }
+
+      _message = "Remboursement bien effectué";
+
+      StateHasChanged();
+
+      await Task.Delay(3000);
+      _message = null;
+
+      CloseExpenseModal();
+    }
+    finally
+    {
+      _isSubmiting = false;
     }
   }
 
@@ -438,4 +481,4 @@
     }
   }
 
-}}
+}

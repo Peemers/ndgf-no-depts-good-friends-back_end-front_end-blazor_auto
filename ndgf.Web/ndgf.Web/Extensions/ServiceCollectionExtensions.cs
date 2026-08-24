@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using ndgf.Web.Services.Auth;
 using ndgf.Web.Services.Expense;
 using ndgf.Web.Services.Group;
+using ndgf.Web.Services.Refund;
 using ndgf.Web.Services.User;
 
 namespace ndgf.Web.Extensions;
@@ -36,6 +37,12 @@ public static class ServiceCollectionExtensions
       .AddHttpMessageHandler<AuthTokenHandler>();
     
     services.AddHttpClient<ExpenseApiClient>(client =>
+    {
+      client.BaseAddress = new Uri(apiUri);
+    })
+    .AddHttpMessageHandler<AuthTokenHandler>();
+    
+    services.AddHttpClient<RefundApiClient>(client =>
     {
       client.BaseAddress = new Uri(apiUri);
     })
