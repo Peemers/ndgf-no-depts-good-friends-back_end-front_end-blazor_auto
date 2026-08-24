@@ -118,8 +118,13 @@
           </NavLink>
 
           <button @onclick="OpenExpenseModal"
-                  class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+                  class="bg-linear-to-l rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             ➕ Créer une nouvelle dépense
+          </button>
+          
+          <button @onclick="OpenRefundModal"
+                  class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+            ➕ Créer un nouveau remboursement
           </button>
         </div>
 
@@ -227,7 +232,83 @@
             </div>
           </div>
         }
-        
+        @if (_showRefundModal)
+        {
+          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+              <EditForm Model="_createRefundModel" OnValidSubmit="HandleCreateRefund" class="space-y-4">
+                <DataAnnotationsValidator/>
+                <div class="flex justify-end">
+                  <button type="button" @onclick="CloseRefundModal"
+                          class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
+                  </button>
+                </div>
+                <h1 class="text-2xl font-bold mb-6 flex underline">Création d'un remboursement</h1>
+
+                @if (_message is not null)
+                {
+                  <p class="mb-4 text-xl text-green-500">@_message</p>
+                }
+
+                <div>
+                  <label class="text-xl">Montant remboursé</label>
+                  <InputNumber @bind-Value="_createRefundModel.Amount"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createRefundModel.Amount"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Déscription du remboursement (optionnel)</label>
+                  <InputText @bind-Value="_createRefundModel.Description"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createRefundModel.Description"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Qui rembourse cet argent ?</label>
+                  <InputSelect @bind-Value="_createRefundModel.PayerId"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                    <option value="">Choisir un membre du groupe</option>
+                    @foreach (var member in _groupDetails.Members)
+                    {
+                      <option value="@member.UserId">@member.Pseudo</option>
+                    }
+                  </InputSelect>
+                </div>
+                
+                <div>
+                  <label class="text-xl">Qui reçoit cet argent ?</label>
+                  <InputSelect @bind-Value="_createRefundModel.ReceiverId"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                    <option value="">Choisir un membre du groupe</option>
+                    @foreach (var member in _groupDetails.Members)
+                    {
+                      <option value="@member.UserId">@member.Pseudo</option>
+                    }
+                  </InputSelect>
+                </div>
+                
+                <div class="flex">
+                  <button type="submit" disabled="@_isSubmiting"
+                          class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
+                    @if (_isSubmiting)
+                    {
+                      <span>Remboursement ...</span>
+                    }
+                    else
+                    {
+                      <span>Valider Remboursement</span>
+                    }
+                  </button>
+                  <button type="button" @onclick="CloseRefundModal"
+                          class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
+                    Annuler
+                  </button>
+                </div>
+              </EditForm>
+            </div>
+          </div>
+        }
       </div>
       @if (_getGroupExpenses is not null && _getGroupExpenses.Expenses.Items.Any())
       {
@@ -435,6 +516,8 @@
         _message = "Erreur lors de la création du remboursement";
         return;
       }
+      
+      await GetGroupBalance();
 
       _message = "Remboursement bien effectué";
 
@@ -443,7 +526,7 @@
       await Task.Delay(3000);
       _message = null;
 
-      CloseExpenseModal();
+      CloseRefundModal();
     }
     finally
     {
