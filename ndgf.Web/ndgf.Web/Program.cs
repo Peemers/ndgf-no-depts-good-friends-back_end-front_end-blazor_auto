@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Components.Authorization;
 using ndgf.Web.Components;
 using ndgf.Web.Endpoints;
 using ndgf.Web.Extensions;
-using ndgf.Web.Services.Auth;
-using ndgf.Web.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 

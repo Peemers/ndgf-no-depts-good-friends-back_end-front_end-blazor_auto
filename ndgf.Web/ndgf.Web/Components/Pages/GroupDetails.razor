@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
+@using ndgf.Web.Models.GroupHistory
 @using ndgf.Web.Models.Refund
 @using ndgf.Web.Services.Expense
 @using ndgf.Web.Services.Group
@@ -85,35 +86,36 @@
         {
           <p class="text-gray-600 text-lg mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
-        
+
         @if (_getGroupBalance is not null)
         {
           <div class="mt-6 space-y-2">
             @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
             {
               <div class="flex justify-between items-center p-3 rounded-xl bg-amber-100">
-                <p class="text-lg font-medium">@repayment.PayerPseudo doit payer @repayment.Amount € à @repayment.ReceiverPseudo</p>
+                <p class="text-lg font-medium">@repayment.PayerPseudo doit payer @repayment.Amount €
+                  à @repayment.ReceiverPseudo</p>
               </div>
             }
-            @* @foreach (var balance in _getGroupBalance.Balances) *@
-            @* { *@
-            @*   <div class="flex justify-between items-center p-3 rounded-xl bg-white/70"> *@
-            @*     <p class="text-lg font-medium">@balance.Pseudo</p> *@
-            @* *@
-            @*     @if (balance.Balance > 0) *@
-            @*     { *@
-            @*       <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p> *@
-            @*     } *@
-            @*     else if (balance.Balance < 0) *@
-            @*     { *@
-            @*       <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p> *@
-            @*     } *@
-            @*     else *@
-            @*     { *@
-            @*       <p class="text-lg font-semibold text-gray-500">À jour</p> *@
-            @*     } *@
-            @*   </div> *@
-            @* } *@
+            @foreach (var balance in _getGroupBalance.Balances)
+            {
+              <div class="flex justify-between items-center p-3 rounded-xl bg-white/70">
+                <p class="text-lg font-medium">@balance.Pseudo</p>
+            
+                @if (balance.Balance > 0)
+                {
+                  <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p>
+                }
+                else if (balance.Balance < 0)
+                {
+                  <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p>
+                }
+                else
+                {
+                  <p class="text-lg font-semibold text-gray-500">À jour</p>
+                }
+              </div>
+            }
           </div>
         }
 
@@ -127,27 +129,41 @@
                   class="bg-linear-to-l rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             ➕ Créer une nouvelle dépense
           </button>
-          
+
           <button @onclick="OpenRefundModal"
                   class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             ➕ Créer un nouveau remboursement
           </button>
         </div>
-
-        @if (_getGroupExpenses is not null && _getGroupExpenses.Expenses.Items.Any())
+        
+        @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
         {
           <div class="mt-6 divide-y divide-gray-300">
-            @foreach (var expense in _getGroupExpenses.Expenses.Items)
+            @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
             {
               <div class="flex justify-between items-center pb-8">
                 <div>
-                  <p class="text-xl mt-3 font-semibold">@expense.Description</p>
-                  <p class="text-lg text-gray-600">Payé
-                    par @expense.PayerPseudo - @expense.ParticipantCount participants</p>
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
+                  {
+                    <p class="text-xl mt-3 font-semibold text-red-600">💸 @transaction.Description</p>
+                    <p class="text-lg text-gray-600">Payé par @transaction.MainActorPseudo</p>
+                  }
+                  else
+                  {
+                    <p class="text-xl mt-3 font-semibold text-green-700">💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
+                    <p class="text-lg text-gray-600">Remboursé par @transaction.MainActorPseudo</p>
+                  }
                 </div>
                 <div class="flex flex-col divide-amber-800 divide-y justify-center mr-2">
-                  <p class="font-semibold divide-y divide-amber-400">@expense.Amount€</p>
-                  <p class="text-sm text-gray-800">@expense.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
+                  {
+                    <p class="font-semibold text-red-500">@transaction.Amount€</p>
+                  }
+                  else
+                  {
+                    <p class="font-semibold text-green-500">@transaction.Amount€</p>
+                  }
+                  <p class="text-sm text-gray-800">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
                 </div>
               </div>
             }
@@ -155,7 +171,7 @@
         }
         else
         {
-          <p>Pas de dépense à afficher dans le groupe</p>
+          <p>Pas d'historique à afficher dans le groupe</p>
         }
 
         @if (_showExpenseModal)
@@ -281,7 +297,7 @@
                     }
                   </InputSelect>
                 </div>
-                
+
                 <div>
                   <label class="text-xl">Qui reçoit cet argent ?</label>
                   <InputSelect @bind-Value="_createRefundModel.ReceiverId"
@@ -293,7 +309,7 @@
                     }
                   </InputSelect>
                 </div>
-                
+
                 <div class="flex">
                   <button type="submit" disabled="@_isSubmiting"
                           class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
@@ -343,6 +359,7 @@
   private GetGroupExpensesResponseModel? _getGroupExpenses;
   private GetGroupBalanceResponseModel? _getGroupBalance;
   private SuggestedRepaymentResponseModel? _suggestedRepayments;
+  private GetGroupHistoryResponseModel? _getGroupHistory;
   private string? _errorMessage;
   private bool _showAddMemberForm;
   private string? _message;
@@ -376,7 +393,7 @@
     Amount = 0,
     PayerId = Guid.Empty,
     ReceiverId = Guid.Empty,
-    Description = "",
+    Description = ""
   };
 
   private void ToggleAddMemberForm()
@@ -389,6 +406,7 @@
     await LoadGroupDetailsAsync();
     await GetGroupExpenses();
     await GetGroupBalance();
+    await GetGroupHistory();
   }
 
   private async Task LoadGroupDetailsAsync()
@@ -424,8 +442,20 @@
       _errorMessage = "Impossible de charger la balance";
       return;
     }
-    
+
     _getGroupBalance = await response.Content.ReadFromJsonAsync<GetGroupBalanceResponseModel>();
+  }
+
+  private async Task GetGroupHistory()
+  {
+    var response = await ExpenseApiClient.GetGroupHistoryAsync(GroupId, _pageNumber, _pageSize, _sortDescending);
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger l'historique de dépense ET de remboursement";
+      return;
+    }
+
+    _getGroupHistory = await response.Content.ReadFromJsonAsync<GetGroupHistoryResponseModel>();
   }
 
   private async Task HandleAddGroupMember()
@@ -523,7 +553,7 @@
         _message = "Erreur lors de la création du remboursement";
         return;
       }
-      
+
       await GetGroupBalance();
 
       _message = "Remboursement bien effectué";
@@ -543,19 +573,19 @@
 
   private async Task NextPage()
   {
-    if (_getGroupExpenses is not null && _pageNumber < _getGroupExpenses.Expenses.TotalPages)
+    if (_getGroupHistory is not null && _pageNumber < _getGroupHistory.TransactionSummary.TotalPages)
     {
       _pageNumber++;
-      await GetGroupExpenses();
+      await GetGroupHistory();
     }
   }
 
   private async Task PreviousPage()
   {
-    if (_getGroupExpenses is not null && _pageNumber > 1)
+    if (_getGroupHistory is not null && _pageNumber > 1)
     {
       _pageNumber--;
-      await GetGroupExpenses();
+      await GetGroupHistory();
     }
   }
 
