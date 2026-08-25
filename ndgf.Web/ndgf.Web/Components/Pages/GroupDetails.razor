@@ -2,11 +2,16 @@
 @using Microsoft.AspNetCore.Authorization
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
+@using ndgf.Web.Models.GroupHistory
+@using ndgf.Web.Models.Refund
 @using ndgf.Web.Services.Expense
 @using ndgf.Web.Services.Group
+@using ndgf.Web.Services.Refund
 @inject GroupApiClient GroupApiClient
 @inject ExpenseApiClient ExpenseApiClient
+@inject RefundApiClient RefundApiClient
 @inject NavigationManager NavigationManager
+
 @attribute [Authorize]
 
 <div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
@@ -82,32 +87,83 @@
           <p class="text-gray-600 text-lg mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
 
+        @if (_getGroupBalance is not null)
+        {
+          <div class="mt-6 space-y-2">
+            @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
+            {
+              <div class="flex justify-between items-center p-3 rounded-xl bg-amber-100">
+                <p class="text-lg font-medium">@repayment.PayerPseudo doit payer @repayment.Amount €
+                  à @repayment.ReceiverPseudo</p>
+              </div>
+            }
+            @foreach (var balance in _getGroupBalance.Balances)
+            {
+              <div class="flex justify-between items-center p-3 rounded-xl bg-white/70">
+                <p class="text-lg font-medium">@balance.Pseudo</p>
+            
+                @if (balance.Balance > 0)
+                {
+                  <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p>
+                }
+                else if (balance.Balance < 0)
+                {
+                  <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p>
+                }
+                else
+                {
+                  <p class="text-lg font-semibold text-gray-500">À jour</p>
+                }
+              </div>
+            }
+          </div>
+        }
+
         <div class="flex justify-end mt-4">
           <NavLink href="/groups"
                    class="bg-linear-to-r rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-600 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             🔙 Retour aux groupes
           </NavLink>
 
-          <button @onclick="OpenModal"
-                  class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+          <button @onclick="OpenExpenseModal"
+                  class="bg-linear-to-l rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
             ➕ Créer une nouvelle dépense
           </button>
-        </div>
 
-        @if (_getGroupExpenses is not null && _getGroupExpenses.Expenses.Items.Any())
+          <button @onclick="OpenRefundModal"
+                  class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+            ➕ Créer un nouveau remboursement
+          </button>
+        </div>
+        
+        @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
         {
           <div class="mt-6 divide-y divide-gray-300">
-            @foreach (var expense in _getGroupExpenses.Expenses.Items)
+            @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
             {
               <div class="flex justify-between items-center pb-8">
                 <div>
-                  <p class="text-xl mt-3 font-semibold">@expense.Description</p>
-                  <p class="text-lg text-gray-600">Payé
-                    par @expense.PayerPseudo - @expense.ParticipantCount participants</p>
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
+                  {
+                    <p class="text-xl mt-3 font-semibold text-red-600">💸 @transaction.Description</p>
+                    <p class="text-lg text-gray-600">Payé par @transaction.MainActorPseudo</p>
+                  }
+                  else
+                  {
+                    <p class="text-xl mt-3 font-semibold text-green-700">💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
+                    <p class="text-lg text-gray-600">Remboursé par @transaction.MainActorPseudo vers @transaction.ReceiverPseudo</p>
+                  }
                 </div>
                 <div class="flex flex-col divide-amber-800 divide-y justify-center mr-2">
-                  <p class="font-semibold divide-y divide-amber-400">@expense.Amount€</p>
-                  <p class="text-sm text-gray-800">@expense.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
+                  {
+                    <p class="font-semibold text-red-500">@transaction.Amount€</p>
+                  }
+                  else
+                  {
+                    <p class="font-semibold text-green-500">@transaction.Amount€</p>
+                  }
+                  <p class="text-sm text-gray-800">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
                 </div>
               </div>
             }
@@ -115,17 +171,17 @@
         }
         else
         {
-          <p>Pas de dépense à afficher dans le groupe</p>
+          <p>Pas d'historique à afficher dans le groupe</p>
         }
 
-        @if (_showModal)
+        @if (_showExpenseModal)
         {
           <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded-2xl p-6 max-w-md w-full">
               <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
                 <DataAnnotationsValidator/>
                 <div class="flex justify-end">
-                  <button type="button" @onclick="CloseModal"
+                  <button type="button" @onclick="CloseExpenseModal"
                           class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
                   </button>
                 </div>
@@ -189,13 +245,89 @@
                       <span>Créer la dépense</span>
                     }
                   </button>
-                  <button type="button" @onclick="CloseModal"
+                  <button type="button" @onclick="CloseExpenseModal"
                           class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
               </EditForm>
+            </div>
+          </div>
+        }
+        @if (_showRefundModal)
+        {
+          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+              <EditForm Model="_createRefundModel" OnValidSubmit="HandleCreateRefund" class="space-y-4">
+                <DataAnnotationsValidator/>
+                <div class="flex justify-end">
+                  <button type="button" @onclick="CloseRefundModal"
+                          class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
+                  </button>
+                </div>
+                <h1 class="text-2xl font-bold mb-6 flex underline">Création d'un remboursement</h1>
 
+                @if (_message is not null)
+                {
+                  <p class="mb-4 text-xl text-green-500">@_message</p>
+                }
+
+                <div>
+                  <label class="text-xl">Montant remboursé</label>
+                  <InputNumber @bind-Value="_createRefundModel.Amount"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createRefundModel.Amount"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Déscription du remboursement (optionnel)</label>
+                  <InputText @bind-Value="_createRefundModel.Description"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                  <ValidationMessage For="() => _createRefundModel.Description"/>
+                </div>
+
+                <div>
+                  <label class="text-xl">Qui rembourse cet argent ?</label>
+                  <InputSelect @bind-Value="_createRefundModel.PayerId"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                    <option value="">Choisir un membre du groupe</option>
+                    @foreach (var member in _groupDetails.Members)
+                    {
+                      <option value="@member.UserId">@member.Pseudo</option>
+                    }
+                  </InputSelect>
+                </div>
+
+                <div>
+                  <label class="text-xl">Qui reçoit cet argent ?</label>
+                  <InputSelect @bind-Value="_createRefundModel.ReceiverId"
+                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                    <option value="">Choisir un membre du groupe</option>
+                    @foreach (var member in _groupDetails.Members)
+                    {
+                      <option value="@member.UserId">@member.Pseudo</option>
+                    }
+                  </InputSelect>
+                </div>
+
+                <div class="flex">
+                  <button type="submit" disabled="@_isSubmiting"
+                          class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
+                    @if (_isSubmiting)
+                    {
+                      <span>Remboursement ...</span>
+                    }
+                    else
+                    {
+                      <span>Valider Remboursement</span>
+                    }
+                  </button>
+                  <button type="button" @onclick="CloseRefundModal"
+                          class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
+                    Annuler
+                  </button>
+                </div>
+              </EditForm>
             </div>
           </div>
         }
@@ -225,13 +357,19 @@
 
   private GroupDetailResponseModel? _groupDetails;
   private GetGroupExpensesResponseModel? _getGroupExpenses;
+  private GetGroupBalanceResponseModel? _getGroupBalance;
+  private SuggestedRepaymentResponseModel? _suggestedRepayments;
+  private GetGroupHistoryResponseModel? _getGroupHistory;
   private string? _errorMessage;
   private bool _showAddMemberForm;
   private string? _message;
   private bool _isSubmiting;
-  private bool _showModal;
-  private void OpenModal() => _showModal = true;
-  private void CloseModal() => _showModal = false;
+  private bool _showExpenseModal;
+  private void OpenExpenseModal() => _showExpenseModal = true;
+  private void CloseExpenseModal() => _showExpenseModal = false;
+  private bool _showRefundModal;
+  private void OpenRefundModal() => _showRefundModal = true;
+  private void CloseRefundModal() => _showRefundModal = false;
   private List<Guid> _selectedUserIds = new();
   private int _pageNumber = 1;
   private int _pageSize = 10;
@@ -250,6 +388,14 @@
     ExpenseParts = new List<ExpensePartInputModel>()
   };
 
+  private CreateRefundRequestModel _createRefundModel = new()
+  {
+    Amount = 0,
+    PayerId = Guid.Empty,
+    ReceiverId = Guid.Empty,
+    Description = ""
+  };
+
   private void ToggleAddMemberForm()
   {
     _showAddMemberForm = !_showAddMemberForm;
@@ -259,6 +405,8 @@
   {
     await LoadGroupDetailsAsync();
     await GetGroupExpenses();
+    await GetGroupBalance();
+    await GetGroupHistory();
   }
 
   private async Task LoadGroupDetailsAsync()
@@ -284,6 +432,30 @@
     }
 
     _getGroupExpenses = await response.Content.ReadFromJsonAsync<GetGroupExpensesResponseModel>();
+  }
+
+  private async Task GetGroupBalance()
+  {
+    var response = await ExpenseApiClient.GetGroupBalanceAsync(GroupId);
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger la balance";
+      return;
+    }
+
+    _getGroupBalance = await response.Content.ReadFromJsonAsync<GetGroupBalanceResponseModel>();
+  }
+
+  private async Task GetGroupHistory()
+  {
+    var response = await ExpenseApiClient.GetGroupHistoryAsync(GroupId, _pageNumber, _pageSize, _sortDescending);
+    if (!response.IsSuccessStatusCode)
+    {
+      _errorMessage = "Impossible de charger l'historique de dépense ET de remboursement";
+      return;
+    }
+
+    _getGroupHistory = await response.Content.ReadFromJsonAsync<GetGroupHistoryResponseModel>();
   }
 
   private async Task HandleAddGroupMember()
@@ -358,7 +530,7 @@
       await Task.Delay(3000);
       _message = null;
 
-      CloseModal();
+      CloseExpenseModal();
     }
     finally
     {
@@ -368,21 +540,52 @@
     }
   }
 
+  private async Task HandleCreateRefund()
+  {
+    _isSubmiting = true;
+
+    try
+    {
+      var response = await RefundApiClient.CreateRefundAsync(_createRefundModel, GroupId);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de la création du remboursement";
+        return;
+      }
+
+      await GetGroupBalance();
+
+      _message = "Remboursement bien effectué";
+
+      StateHasChanged();
+
+      await Task.Delay(3000);
+      _message = null;
+
+      CloseRefundModal();
+    }
+    finally
+    {
+      _isSubmiting = false;
+    }
+  }
+
   private async Task NextPage()
   {
-    if (_getGroupExpenses is not null && _pageNumber < _getGroupExpenses.Expenses.TotalPages)
+    if (_getGroupHistory is not null && _pageNumber < _getGroupHistory.TransactionSummary.TotalPages)
     {
       _pageNumber++;
-      await GetGroupExpenses();
+      await GetGroupHistory();
     }
   }
 
   private async Task PreviousPage()
   {
-    if (_getGroupExpenses is not null && _pageNumber > 1)
+    if (_getGroupHistory is not null && _pageNumber > 1)
     {
       _pageNumber--;
-      await GetGroupExpenses();
+      await GetGroupHistory();
     }
   }
 

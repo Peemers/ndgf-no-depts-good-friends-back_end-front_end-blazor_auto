@@ -14,6 +14,7 @@ public class NdgfDbContext : DbContext
   public DbSet<Group> Groups => Set<Group>();
   public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
   public DbSet<Expense> Expenses => Set<Expense>();
+  public DbSet<Refund> Refunds => Set<Refund>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
