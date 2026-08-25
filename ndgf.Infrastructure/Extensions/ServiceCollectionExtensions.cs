@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<IGroupRepository, GroupRepository>();
     services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
     services.AddScoped<IExpenseRepository, ExpenseRepository>();
+    services.AddScoped<IRefundRepository, RefundRepository>();
     
     return services;
   }

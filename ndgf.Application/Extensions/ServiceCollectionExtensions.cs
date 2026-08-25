@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Handlers.Group;
+using ndgf.Application.Handlers.GroupHistory;
+using ndgf.Application.Handlers.Refund;
 using ndgf.Application.Handlers.User;
 
 namespace ndgf.Application.Extensions;
@@ -17,6 +19,9 @@ public static class ServiceCollectionExtensions
     services.AddScoped<GetUserGroupsHandler>();
     services.AddScoped<CreateExpenseHandler>();
     services.AddScoped<GetGroupExpenseHandler>();
+    services.AddScoped<GetGroupBalanceHandler>();
+    services.AddScoped<CreateRefundHandler>();
+    services.AddScoped<GetGroupHistoryHandler>();
     return services;
   }
 }

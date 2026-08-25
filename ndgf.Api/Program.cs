@@ -1,5 +1,7 @@
 using ndgf.Api.Endpoints.Expense;
 using ndgf.Api.Endpoints.Group;
+using ndgf.Api.Endpoints.GroupHistory;
+using ndgf.Api.Endpoints.Refund;
 using ndgf.Api.Endpoints.User;
 using ndgf.Api.Extensions;
 using ndgf.Application.Extensions;
@@ -34,7 +36,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapUserEndpoints();
 app.MapGroupEndpoints();
+app.MapRefundEndPoints();
 app.MapExpenseEndPoints();
+app.MapGroupHistoryEndpoint();
 app.UseHttpsRedirection();
 
 app.Run();

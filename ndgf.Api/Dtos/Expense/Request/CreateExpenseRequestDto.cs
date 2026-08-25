@@ -10,7 +10,7 @@ public record CreateExpenseRequestDto
   [Required(ErrorMessage = "La déscription de la dépense est requise")]
   public required string Description { get; init; }
 
-  public required Guid UserId { get; init; }
+  public required Guid UserId { get; init; } //incohérence nommage -> payerId en fait.
   
   public required List<ExpensePartInputDto> ExpenseParts { get; init; }
 }

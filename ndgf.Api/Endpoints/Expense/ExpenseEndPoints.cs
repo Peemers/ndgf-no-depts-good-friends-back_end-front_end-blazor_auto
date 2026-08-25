@@ -73,6 +73,35 @@ public static class ExpenseEndPoints
       .Produces<GetGroupExpensesResponseDto>(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status400BadRequest)
       .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapGet("/api/groups/{groupId}/balance", async (
+      Guid groupId,
+      GetGroupBalanceHandler getGroupBalanceHandler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+      
+      var query = new GetGroupBalanceQuery(groupId, userId);
+      
+      var result = await getGroupBalanceHandler.HandleAsync(query);
+
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+
+      var response = result.Value!.ToResponseDto();
+      
+      return Results.Ok(response);
+    })
+    .RequireAuthorization()
+    .WithName("GetGroupBalance")
+    .WithSummary("Consulte la balance des users du groupe")
+    .WithDescription("Retourne la balance d'un groupe")
+    .Produces<GetGroupBalanceResponseDto>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized);
     
     return app;
   }

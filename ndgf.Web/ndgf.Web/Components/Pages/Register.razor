@@ -5,9 +5,11 @@
 @inject UserApiClient UserApiClient
 
 <div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]  items-center justify-center p-4 border-2">
-  <div class="border rounded-2xl flex-row flex p-3 bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
+  <div class="border rounded-2xl flex-row flex p-2 bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
+    
     <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
-         class="border rounded-2xl mr-10 hidden md:block">
+         class="border rounded-2xl mr-2 hidden md:block">
+
 
     @if (_message is not null)
     {
@@ -72,8 +74,9 @@
         <NavLink href="/login" class="text-orange-600 hover:text-[#7B9668]">Connectez-vous</NavLink>
       </div>
 
-      <div class="pt-1 -mt-4">
-        <p class="text-xl text-gray-600 font-semibold mb-3 justify-center items-center flex">Avec No Debts, Good Friends, vous pouvez :</p>
+      <div class="pt-1 mt-1">
+        <p class="text-xl text-gray-600 font-semibold mb-1 justify-center items-center flex">Avec No Debts, Good
+          Friends, vous pouvez :</p>
         <ul class="space-y-2 text-xl text-gray-700">
           <li class="flex items-center justify-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
           <li class="flex items-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>

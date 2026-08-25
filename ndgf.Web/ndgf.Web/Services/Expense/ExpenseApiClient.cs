@@ -13,4 +13,14 @@ public class ExpenseApiClient(HttpClient httpClient)
   {
     return await httpClient.GetAsync($"/api/groups/{groupId}/expenses?page={pageNumber}&pageSize={pageSize}&sortDescending={sortDescending}");
   }
+
+  public async Task<HttpResponseMessage> GetGroupBalanceAsync(Guid groupId)
+  {
+    return await httpClient.GetAsync($"/api/groups/{groupId}/balance");
+  }
+
+  public async Task<HttpResponseMessage> GetGroupHistoryAsync(Guid groupId, int pageNumber, int pageSize, bool sortDescending)
+  {
+    return await httpClient.GetAsync($"/api/groups/{groupId}/history?page={pageNumber}&pageSize={pageSize}&sortDescending={sortDescending}");
+  }
 }
