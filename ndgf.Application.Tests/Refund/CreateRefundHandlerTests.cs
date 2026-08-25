@@ -27,6 +27,8 @@ public class CreateRefundHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     userRepository.GetUserByIdAsync(payerId).Returns(expectedPayer);
     userRepository.GetUserByIdAsync(receiverId).Returns(expectedReceiver);
+    var expectedRefund = Domain.Entities.Refund.Create(payerId, receiverId, amount, description, groupId);
+    refundRepository.AddAsync(Arg.Any<Domain.Entities.Refund>()).Returns(expectedRefund);
     
     var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository);
     var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
