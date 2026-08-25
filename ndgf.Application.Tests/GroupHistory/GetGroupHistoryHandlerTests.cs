@@ -1,8 +1,8 @@
 ﻿using ndgf.Application.Handlers.GroupHistory;
 using ndgf.Application.Interfaces.Repositories;
+using ndgf.Application.Models.GroupHistory;
 using ndgf.Application.Queries.GroupHistory;
 using ndgf.Domain.Common;
-using ndgf.Domain.Entities;
 using NSubstitute;
 
 namespace ndgf.Application.Tests.GroupHistory;
@@ -41,6 +41,8 @@ public class GetGroupHistoryHandlerTests
         Assert.NotNull(result.Value);
         Assert.Equal(2, result.Value.TransactionSummary.TotalCount);
         Assert.Equal(2, result.Value.TransactionSummary.Items.Count());
+        var refundSummary = result.Value.TransactionSummary.Items.First(t => t.Type == TransactionType.Refund);
+        Assert.Equal(expectedUser.Pseudo, refundSummary.ReceiverPseudo);
     }
 
     [Fact]

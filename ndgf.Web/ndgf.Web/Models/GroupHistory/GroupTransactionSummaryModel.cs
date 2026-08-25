@@ -8,4 +8,5 @@ public record GroupTransactionSummaryModel
   public string? Description { get; init; }
   public DateTime CreatedAt { get; init; }
   public required string MainActorPseudo { get; init; }
+  public string? ReceiverPseudo { get; init; }
 }

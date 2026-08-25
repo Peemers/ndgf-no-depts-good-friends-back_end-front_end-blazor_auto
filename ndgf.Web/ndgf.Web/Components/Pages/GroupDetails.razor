@@ -151,7 +151,7 @@
                   else
                   {
                     <p class="text-xl mt-3 font-semibold text-green-700">💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
-                    <p class="text-lg text-gray-600">Remboursé par @transaction.MainActorPseudo</p>
+                    <p class="text-lg text-gray-600">Remboursé par @transaction.MainActorPseudo vers @transaction.ReceiverPseudo</p>
                   }
                 </div>
                 <div class="flex flex-col divide-amber-800 divide-y justify-center mr-2">

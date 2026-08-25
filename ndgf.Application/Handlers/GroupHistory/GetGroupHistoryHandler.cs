@@ -35,14 +35,16 @@ public class GetGroupHistoryHandler(
           expense.Amount,
           expense.Description,
           expense.CreatedAt,
-          payer.Pseudo));
+          payer.Pseudo,
+          null));
       }
     }
 
     foreach (var refund in refunds)
     {
       var payer = await userRepository.GetUserByIdAsync(refund.PayerId);
-      if (payer is not null)
+      var receiver = await userRepository.GetUserByIdAsync(refund.ReceiverId);
+      if (payer is not null && receiver is not null)
       {
         transactionsSummary.Add(new GroupTransactionSummary(
           refund.Id,
@@ -50,7 +52,8 @@ public class GetGroupHistoryHandler(
           refund.Amount,
           refund.Description,
           refund.CreatedAt,
-          payer.Pseudo));
+          payer.Pseudo,
+          receiver.Pseudo));
       }
     }
     

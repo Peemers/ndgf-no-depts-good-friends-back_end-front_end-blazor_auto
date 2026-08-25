@@ -6,4 +6,5 @@ public record GroupTransactionSummary(
   decimal Amount,
   string? Description,
   DateTime CreatedAt,
-  string MainActorPseudo);
+  string MainActorPseudo,
+  string? ReceiverPseudo);
