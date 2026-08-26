@@ -26,31 +26,35 @@
   }
   else
   {
-    <div class="w-full bg-white/70 p-6 shadow-lg md:w-80">
-      <div class="flex flex-col justify-between items-center">
-        <h2 class="text-xl mb-4 font-semibold">Membres dans le groupe : </h2>
-        <button @onclick="ToggleAddMemberForm"
-                class="bg-linear-to-l rounded-xl shadow-black shadow-lg border-black from-amber-700 to-orange-800 text-white px-4 py-2 hover:from-green-600 hover:to-[#7B9668]">
-          + Ajouter
-        </button>
+    <div class="w-full text-2xl bg-white/70 p-6 shadow-lg md:w-80 md:sticky md:top-0 md:h-screen md:overflow-y-auto">
+
+      <div class="flex justify-between items-center mb-1">
+        <h2 class="text-xl font-semibold text-gray-800">Membres</h2>
+        <span class="text-lg text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">@_groupDetails.Members.Count()</span>
       </div>
+
+      <button @onclick="ToggleAddMemberForm"
+              class="w-full mt-3 bg-linear-to-l rounded-xl shadow-black shadow-lg border-black from-amber-700 to-orange-800 text-white px-4 py-2 hover:from-green-600 hover:to-[#7B9668] flex items-center justify-center gap-2">
+        <span>+</span> Ajouter un membre
+      </button>
 
       @if (_showAddMemberForm)
       {
-        <EditForm Model="_model" OnValidSubmit="HandleAddGroupMember" class="p-2 flex flex-col items-center">
+        <EditForm Model="_model" OnValidSubmit="HandleAddGroupMember"
+                  class="p-3 mt-3 bg-amber-50 rounded-xl flex flex-col items-center">
           <DataAnnotationsValidator/>
-          <h3 class="mb-2 font-bold">Rechercher un membre à ajouter</h3>
+          <h3 class="mb-2 font-bold text-sm text-gray-700">Rechercher un membre à ajouter</h3>
 
-          <div>
-            <InputText @bind-Value="_model.SearchValue" class="border  border-gray-400 rounded-xl p-3 mb-2"/>
+          <div class="w-full">
+            <InputText @bind-Value="_model.SearchValue" class="border border-gray-400 rounded-xl p-3 mb-2 w-full"/>
             <ValidationMessage For="() => _model.SearchValue" class="text-s mb-2 text-red-800"/>
           </div>
 
           <button type="submit" disabled="@_isSubmiting"
-                  class="bg-linear-to-l rounded-2xl border-b-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 w-50 p-2 shadow-black shadow-lg">
+                  class="bg-linear-to-l rounded-2xl border-b-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 w-full p-2 shadow-black shadow-lg">
             @if (_isSubmiting)
             {
-              <span> Ajout en cours ...</span>
+              <span>Ajout en cours ...</span>
             }
             else
             {
@@ -62,16 +66,21 @@
 
       @if (_message is not null)
       {
-        <p class="text-green-900 mt-4">@_message</p>
+        <p class="text-green-900 mt-4 text-sm">@_message</p>
       }
 
-      <div class="flex flex-wrap gap-4 mt-8 border-t border-gray-600 pt-8 justify-center">
+      <div
+        class="flex flex-row md:flex-col flex-wrap gap-0 md:gap-2 md:mt-6 border-t border-gray-400 pt-4 md:pt-4 items-center md:items-start">
         @foreach (var member in _groupDetails.Members)
         {
-          <div class="flex items-center w-24">
+          <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-amber-50">
             <div
-              class="w-24 h-24 rounded-4xl shadow-black shadow-lg bg-linear-to-t from-amber-700 to-amber-900 text-white flex items-center justify-center text-2xl font-bold">
+              class="w-10 h-10 md:w-25 md:h-25 shrink-0 rounded-full shadow-md bg-linear-to-t from-amber-700 to-amber-900 text-white flex items-center justify-center text-sm font-bold">
               @member.Pseudo[0]@member.Pseudo[1]@member.Pseudo[2]
+            </div>
+            <div class="min-w-0">
+              <p class="font-bold text-lg md:text-2xl text-gray-800">@member.Pseudo</p>
+              <p class="text-lg text-gray-500">@member.Email</p>
             </div>
           </div>
         }
@@ -81,98 +90,164 @@
 
     <div class="flex-1 p-3">
       <div class="bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6 min-h-screen max-w-screen">
-        <h1 class="text-3xl font-bold text-center md:text-left">@_groupDetails.Name</h1>
+        <h1 class="text-4xl font-bold text-center md:text-left">@_groupDetails.Name</h1>
         @if (_groupDetails.Description is not null)
         {
-          <p class="text-gray-600 text-lg mt-2 text-center md:text-left">@_groupDetails.Description</p>
+          <p class="text-gray-500 text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
 
-        @if (_getGroupBalance is not null)
-        {
-          <div class="mt-6 space-y-2">
-            @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
+        <div class="flex flex-col md:flex-row gap-6 mt-4">
+          <div class="w-full md:flex-1 bg-white/60 rounded-2xl p-4 border border-amber-200">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-semibold text-gray-800">Remboursements suggérés</h3>
+            </div>
+
+            @if (_getGroupBalance is not null && _getGroupBalance.SuggestedRepayments.Any())
             {
-              <div class="flex justify-between items-center p-3 rounded-xl bg-amber-100">
-                <p class="text-lg font-medium">@repayment.PayerPseudo doit payer @repayment.Amount €
-                  à @repayment.ReceiverPseudo</p>
+              <div class="space-y-2">
+                @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
+                {
+                  <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                    <div
+                      class="w-9 h-9 rounded-full bg-amber-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      @repayment.PayerPseudo[0]@repayment.PayerPseudo[1]
+                    </div>
+                    <p class="text-base leading-snug">
+                      <span class="font-semibold">@repayment.PayerPseudo</span> doit
+                      <span class="font-semibold text-amber-800">@repayment.Amount €</span>
+                      à <span class="font-semibold">@repayment.ReceiverPseudo</span>
+                    </p>
+                  </div>
+                }
               </div>
             }
-            @foreach (var balance in _getGroupBalance.Balances)
+            else
             {
-              <div class="flex justify-between items-center p-3 rounded-xl bg-white/70">
-                <p class="text-lg font-medium">@balance.Pseudo</p>
-            
-                @if (balance.Balance > 0)
-                {
-                  <p class="text-lg font-semibold text-green-600">On lui doit @balance.Balance €</p>
-                }
-                else if (balance.Balance < 0)
-                {
-                  <p class="text-lg font-semibold text-red-600">Doit @(-balance.Balance) €</p>
-                }
-                else
-                {
-                  <p class="text-lg font-semibold text-gray-500">À jour</p>
-                }
-              </div>
+              <p class="text-gray-500 mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
             }
           </div>
-        }
 
-        <div class="flex justify-end mt-4">
-          <NavLink href="/groups"
-                   class="bg-linear-to-r rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-600 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
-            🔙 Retour aux groupes
-          </NavLink>
 
-          <button @onclick="OpenExpenseModal"
-                  class="bg-linear-to-l rounded-2xl mt-2 mr-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
-            ➕ Créer une nouvelle dépense
-          </button>
+          <div class="w-full md:flex-1 bg-white/60 rounded-2xl p-4 border border-violet-200">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xl">📊</span>
+              <h3 class="text-lg font-semibold text-gray-800">Soldes du groupe</h3>
+            </div>
 
-          <button @onclick="OpenRefundModal"
-                  class="bg-linear-to-l rounded-2xl mt-2 shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
-            ➕ Créer un nouveau remboursement
-          </button>
+            @if (_getGroupBalance is not null && _getGroupBalance.Balances.Any())
+            {
+              <div class="space-y-2">
+                @foreach (var balance in _getGroupBalance.Balances)
+                {
+                  <div class="flex justify-between items-center p-3 rounded-xl bg-white border border-gray-200">
+                    <p class="font-semibold">@balance.Pseudo</p>
+
+                    @if (balance.Balance > 0)
+                    {
+                      <span
+                        class="text-sm font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-full">+@balance.Balance €</span>
+                    }
+                    else if (balance.Balance < 0)
+                    {
+                      <span
+                        class="text-sm font-semibold text-red-700 bg-red-100 px-2 py-1 rounded-full">@balance.Balance €</span>
+                    }
+                    else
+                    {
+                      <span class="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">À jour</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            else
+            {
+              <p class="text-gray-500 text-sm italic">Aucun solde à afficher.</p>
+            }
+          </div>
         </div>
-        
-        @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
-        {
-          <div class="mt-6 divide-y divide-gray-300">
-            @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
-            {
-              <div class="flex justify-between items-center pb-8">
-                <div>
-                  @if (transaction.Transaction == TransactionTypeModel.Expense)
-                  {
-                    <p class="text-xl mt-3 font-semibold text-red-600">💸 @transaction.Description</p>
-                    <p class="text-lg text-gray-600">Payé par @transaction.MainActorPseudo</p>
-                  }
-                  else
-                  {
-                    <p class="text-xl mt-3 font-semibold text-green-700">💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
-                    <p class="text-lg text-gray-600">Remboursé par @transaction.MainActorPseudo vers @transaction.ReceiverPseudo</p>
-                  }
-                </div>
-                <div class="flex flex-col divide-amber-800 divide-y justify-center mr-2">
-                  @if (transaction.Transaction == TransactionTypeModel.Expense)
-                  {
-                    <p class="font-semibold text-red-500">@transaction.Amount€</p>
-                  }
-                  else
-                  {
-                    <p class="font-semibold text-green-500">@transaction.Amount€</p>
-                  }
-                  <p class="text-sm text-gray-800">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                </div>
-              </div>
-            }
+
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mt-2 p-3 rounded-xl gap-2 w-full">
+          @if (_getGroupBalance is not null)
+          {
+            <div class="bg-white/70 rounded-xl p-3 shadow-sm flex flex-row items-center gap-2">
+              <p class="text-gray-700 text-xl">
+                @_getGroupExpenses?.Expenses.Items.Count() dépense(s) au total
+              </p>
+              <span class="text-gray-400">•</span>
+              <p class="text-gray-700 text-xl">pour une somme de <span class="text-orange-950 font-semibold">@_getGroupBalance.TotalExpenses</span> € dépensée</p>
+            </div>
+          }
+
+          <div class="flex flex-col md:flex-row items-center bg-gray-200 p-2 mt-2 rounded-xl gap-2">
+            <NavLink href="/groups"
+                     class="bg-linear-to-r text-center rounded-2xl shadow-black shadow-sm from-amber-600 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+              🔙 Retour aux groupes
+            </NavLink>
+
+            <button @onclick="OpenExpenseModal"
+                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+              ➕ Créer une nouvelle dépense
+            </button>
+
+            <button @onclick="OpenRefundModal"
+                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+              ➕ Créer un nouveau remboursement
+            </button>
           </div>
-        }
-        else
-        {
-          <p>Pas d'historique à afficher dans le groupe</p>
-        }
+
+        </div>
+
+
+        <div class="bg-gray-200 rounded-2xl">
+          @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
+          {
+            <div class="mt-6 p-3 divide-y divide-gray-400">
+              @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
+              {
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-4">
+                  <div class="min-w-0">
+                    @if (transaction.Transaction == TransactionTypeModel.Expense)
+                    {
+                      <p class="text-xl font-semibold text-red-600 truncate">💸 @transaction.Description</p>
+                      <p class="text-lg text-gray-600">Payé par <span
+                          class="font-semibold">@transaction.MainActorPseudo</span></p>
+                    }
+                    else
+                    {
+                      <p class="text-xl font-semibold text-green-700 truncate">
+                        💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
+                      <p class="text-lg text-gray-600">Remboursé
+                        par <span class="font-semibold">@transaction.MainActorPseudo</span> vers <span
+                          class="font-semibold">@transaction.ReceiverPseudo</span></p>
+                    }
+                  </div>
+                  <div class="flex flex-row sm:flex-col justify-between sm:justify-center sm:items-end sm:divide-y sm:divide-amber-800 sm:mr-2 shrink-0">
+                    @if (transaction.Transaction == TransactionTypeModel.Expense)
+                    {
+                      <p class="font-bold text-red-500">@transaction.Amount€</p>
+                    }
+                    else
+                    {
+                      <p class="font-bold text-green-500">@transaction.Amount€</p>
+                    }
+                    <p
+                      class="text-sm font-semibold text-gray-800">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          else
+          {
+            <p class="mt-4 text-center text-2xl pt-6">Pas d'historique à afficher dans ce groupe</p>
+            <div class="flex justify-center p-3 h-fit">
+              <img src="images/notfound.jpg" alt="NotFoundImage" class="w-lg p-3 opacity-40">
+            </div>
+          }
+        </div>
 
         @if (_showExpenseModal)
         {
@@ -246,7 +321,7 @@
                     }
                   </button>
                   <button type="button" @onclick="CloseExpenseModal"
-                          class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
+                          class="bg-linear-to-l rounded-2xl from-red-400 to-red-500 text-white hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
@@ -323,7 +398,7 @@
                     }
                   </button>
                   <button type="button" @onclick="CloseRefundModal"
-                          class="bg-linear-to-l rounded-2xl from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-4 w-full">
+                          class="bg-linear-to-l rounded-2xl from-red-400 to-red-500 text-white hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-600 active:to-red-700 px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
@@ -335,15 +410,15 @@
       @if (_getGroupExpenses is not null && _getGroupExpenses.Expenses.Items.Any())
       {
         <div
-          class="justify-between items-center border bg-linear-to-tr from-white to-violet-200 border-gray-300 p-2 rounded-lg flex mt-2">
+          class="justify-between font-semibold text-xl items-center border bg-linear-to-tr from-white to-violet-200 border-gray-300 p-2 rounded-lg flex gap-2 mt-2">
           <button @onclick="PreviousPage"
-                  class="border border-gray-500 rounded-lg p-2 w-full bg-gray-300 bg-linear-to-l hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600">
+                  class="border border-gray-500 rounded-lg p-2 flex-1 bg-gray-300 bg-linear-to-l hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 text-center">
             ◀️ page précédente
           </button>
-          <p class="bg-gray-300 border border-gray-500 rounded-lg p-2 w-full text-center">Page
+          <p class="bg-gray-300 border border-gray-500 rounded-lg p-2 flex-1 text-center">Page
             : @_getGroupExpenses.Expenses.PageNumber</p>
           <button @onclick="NextPage"
-                  class="border border-gray-500 rounded-lg p-2 w-full bg-gray-300 bg-linear-to-br hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600">
+                  class="border border-gray-500 rounded-lg p-2 flex-1 bg-gray-300 bg-linear-to-br hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 text-center">
             ▶️ page suivante
           </button>
         </div>
@@ -358,7 +433,6 @@
   private GroupDetailResponseModel? _groupDetails;
   private GetGroupExpensesResponseModel? _getGroupExpenses;
   private GetGroupBalanceResponseModel? _getGroupBalance;
-  private SuggestedRepaymentResponseModel? _suggestedRepayments;
   private GetGroupHistoryResponseModel? _getGroupHistory;
   private string? _errorMessage;
   private bool _showAddMemberForm;
@@ -523,6 +597,8 @@
         return;
       }
 
+      await GetGroupBalance();
+      await GetGroupHistory();
       _message = "Dépense créée avec succes";
 
       StateHasChanged();
@@ -555,6 +631,7 @@
       }
 
       await GetGroupBalance();
+      await GetGroupHistory();
 
       _message = "Remboursement bien effectué";
 
