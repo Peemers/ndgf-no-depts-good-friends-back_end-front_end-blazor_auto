@@ -43,9 +43,9 @@ public class GetGroupBalanceTests
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember> { expectedGroupMember });
-    expenseRepository.GetAllGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
+    expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
-    refundRepository.GetAllGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
+    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
 
     var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
     var query = new GetGroupBalanceQuery(groupId, userId);
@@ -73,7 +73,7 @@ public class GetGroupBalanceTests
     var userId = Guid.NewGuid();
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
-    refundRepository.GetAllGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
+    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
 
     var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
     var query = new GetGroupBalanceQuery(groupId, userId);
@@ -109,8 +109,8 @@ public class GetGroupBalanceTests
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember> { expectedGroupMember });
-    expenseRepository.GetAllGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
-    refundRepository.GetAllGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund> { expectedRefund });
+    expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
+    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund> { expectedRefund });
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
 
     var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);

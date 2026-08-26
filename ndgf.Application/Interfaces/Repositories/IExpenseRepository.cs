@@ -8,4 +8,5 @@ public interface IExpenseRepository
   Task<IEnumerable<Expense>> GetGroupExpensesAsync(Guid groupId, int pageNumber, int pageSize, bool sortDescending);
   Task<int> GetGroupExpensesCountAsync(Guid groupId);
   Task<IEnumerable<Expense>> GetAllGroupExpensesAsync(Guid groupId);
+  Task<IEnumerable<Expense>> GetAllActiveGroupExpensesAsync(Guid groupId);
 }

@@ -19,4 +19,11 @@ public class RefundRepository(NdgfDbContext context) : IRefundRepository
       .Where(r => r.GroupId == groupId)
       .ToListAsync();
   }
+
+  public async Task<IEnumerable<Refund>> GetAllActiveGroupRefundAsync(Guid groupId)
+  {
+    return await context.Refunds
+      .Where(r => r.GroupId == groupId && r.DeletedAt == null)
+      .ToListAsync();
+  }
 }

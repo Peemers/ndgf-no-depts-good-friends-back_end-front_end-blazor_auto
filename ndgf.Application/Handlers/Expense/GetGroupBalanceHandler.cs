@@ -21,9 +21,9 @@ public class GetGroupBalanceHandler(
 
     var groupMembers = await groupMemberRepository.GetMemberByGroupIdAsync(query.GroupId);
 
-    var expenses = await expenseRepository.GetAllGroupExpensesAsync(query.GroupId);
+    var expenses = await expenseRepository.GetAllActiveGroupExpensesAsync(query.GroupId);
     
-    var refunds = await refundRepository.GetAllGroupRefundAsync(query.GroupId);
+    var refunds = await refundRepository.GetAllActiveGroupRefundAsync(query.GroupId);
     
     var userBalance = new List<UserBalanceResult>();
     var totalExpenses = expenses.Sum(expense => expense.Amount);
