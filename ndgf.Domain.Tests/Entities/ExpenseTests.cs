@@ -113,4 +113,30 @@ public class ExpenseTests
 
     Assert.Throws<DomainException>(() => Expense.Create(userId, expensePartInput, 100m, "description", groupId));
   }
+  
+  [Fact]
+  public void SoftDelete_OnActiveExpense_ShouldSetDeletedAt()
+  {
+    var userId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var expensePartInput = new List<ExpensePartInput> { new(userId, 100) };
+    var expense = Expense.Create(userId, expensePartInput, 100m, "Test", groupId);
+
+    expense.SoftDelete();
+
+    Assert.NotNull(expense.DeletedAt);
+  }
+  
+  [Fact]
+  public void SoftDelete_OnAlreadyDeletedExpense_ShouldThrowException()
+  {
+    var userId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var expensePartInput = new List<ExpensePartInput> { new(userId, 100) };
+    var expense = Expense.Create(userId, expensePartInput, 100m, "Test", groupId);
+
+    expense.SoftDelete();
+
+    Assert.Throws<DomainException>(() => expense.SoftDelete());
+  }
 }

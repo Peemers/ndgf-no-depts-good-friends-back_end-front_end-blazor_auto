@@ -56,4 +56,13 @@ public sealed partial class Refund : BaseEntity
 
     return new Refund(refundId, DateTime.UtcNow, amount, description, payerId, receiverId, groupId);
   }
+
+  public void SoftDelete()
+  {
+    if (DeletedAt is not null)
+    {
+      throw new DomainException("Ce remboursement est déja supprimé");
+    }
+    MarkAsDeleted();
+  }
 }
