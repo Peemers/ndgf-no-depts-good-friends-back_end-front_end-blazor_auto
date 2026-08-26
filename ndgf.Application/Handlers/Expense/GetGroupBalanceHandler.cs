@@ -26,6 +26,7 @@ public class GetGroupBalanceHandler(
     var refunds = await refundRepository.GetAllGroupRefundAsync(query.GroupId);
     
     var userBalance = new List<UserBalanceResult>();
+    var totalExpenses = expenses.Sum(expense => expense.Amount);
 
     foreach (var member in groupMembers)
     {
@@ -91,7 +92,7 @@ public class GetGroupBalanceHandler(
       if (creditors[creditorIndex].Balance == 0) creditorIndex++;
     }
     
-    var result = new GetGroupBalanceResult(userBalance, suggestedRepayments);
+    var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses);
     
     return Result<GetGroupBalanceResult>.Success(result);
   }
