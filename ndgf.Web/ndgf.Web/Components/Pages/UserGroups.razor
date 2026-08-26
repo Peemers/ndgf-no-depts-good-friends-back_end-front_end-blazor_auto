@@ -7,7 +7,7 @@
 @attribute [Authorize]
 
 <div class="min-h-screen flex flex-col bg-linear-to-bl from-[#F3EBD8] bg-[#F5F3EE]">
-  <h1 class="text-3xl underline p-2 text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit : </h1>
+  <h1 class="text-3xl underline p-2 text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit</h1>
   <div class="justify-center flex flex-col md:flex-row">
 
     @if (_errorMessage is not null)
@@ -21,7 +21,7 @@
     else
     {
       <div
-        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8">
+        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8 shadow-2xl">
 
         @if (_userGroups.Groups.Count == 0)
         {

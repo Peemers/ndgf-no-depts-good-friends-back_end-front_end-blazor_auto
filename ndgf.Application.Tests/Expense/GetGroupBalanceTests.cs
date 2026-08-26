@@ -58,6 +58,7 @@ public class GetGroupBalanceTests
     var balanceResult = Assert.Single(result.Value.Balances);
     Assert.Equal(expectedUser.Pseudo, balanceResult.Pseudo);
     Assert.Equal(-250m, balanceResult.Balance);
+    Assert.Equal(250m, result.Value.TotalExpenses);
   }
 
   [Fact]

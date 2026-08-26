@@ -26,7 +26,8 @@ public static class GetGroupBalanceMapper
     return new GetGroupBalanceResponseDto
     {
       Balances = balances,
-      SuggestedRepayments = suggestedRepayments
+      SuggestedRepayments = suggestedRepayments,
+      TotalExpenses = result.TotalExpenses,
     };
   }
 }
