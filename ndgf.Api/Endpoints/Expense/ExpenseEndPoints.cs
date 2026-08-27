@@ -3,6 +3,7 @@ using System.Security.Claims;
 using ndgf.Api.Dtos.Expense.Request;
 using ndgf.Api.Dtos.Expense.Response;
 using ndgf.Api.Mappers.Expense;
+using ndgf.Application.Commands.Expense;
 using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Queries.Expense;
 
@@ -102,6 +103,34 @@ public static class ExpenseEndPoints
     .Produces<GetGroupBalanceResponseDto>(StatusCodes.Status200OK)
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapDelete("/api/groups/{groupId}/expenses/{expenseId}", async (
+        Guid groupId,
+        Guid expenseId,
+        SoftDeleteExpenseHandler softDeleteExpenseHandler,
+        ClaimsPrincipal user) =>
+      {
+        var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = Guid.Parse(userIdClaim!);
+
+        var command = new SoftDeleteExpenseCommand(userId, groupId, expenseId);
+
+        var result = await softDeleteExpenseHandler.HandleAsync(command);
+
+        if (!result.IsSuccess)
+        {
+          return Results.BadRequest(result.ErrorMessage);
+        }
+        
+        return Results.Ok();
+      })
+      .RequireAuthorization()
+      .WithName("SoftDeleteExpense")
+      .WithSummary("Archiver une dépense")
+      .WithDescription("Permet à l'utilisateur de supprimer une dépense, elle restera archivée pour information")
+      .Produces(StatusCodes.Status400BadRequest)
+      .Produces(StatusCodes.Status401Unauthorized)
+      .Produces(StatusCodes.Status200OK);
     
     return app;
   }

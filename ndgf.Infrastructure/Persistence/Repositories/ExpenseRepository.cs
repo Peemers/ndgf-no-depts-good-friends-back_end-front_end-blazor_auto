@@ -41,4 +41,22 @@ public class ExpenseRepository(NdgfDbContext context) : IExpenseRepository
       .Where(e => e.GroupId == groupId)
       .ToListAsync();
   }
+
+  public async Task<IEnumerable<Expense>> GetAllActiveGroupExpensesAsync(Guid groupId)
+  {
+    return await context.Expenses
+      .Include(e => e.ExpenseParts)
+      .Where(e => e.GroupId == groupId && e.DeletedAt == null)
+      .ToListAsync();
+  }
+
+  public async Task<Expense?> GetExpenseByIdAsync(Guid expenseId)
+  {
+    return await context.Expenses.FindAsync(expenseId);
+  }
+
+  public async Task UpdateAsync(Expense expense)
+  {
+    await context.SaveChangesAsync();
+  }
 }

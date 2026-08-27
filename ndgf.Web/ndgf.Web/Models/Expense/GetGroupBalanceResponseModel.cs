@@ -5,4 +5,5 @@ public record GetGroupBalanceResponseModel
   public required List<UserBalanceResponseModel> Balances { get; init; }
   public required List<SuggestedRepaymentResponseModel> SuggestedRepayments { get; init; }
   public decimal TotalExpenses { get; init; }
+  public int ExpenseCount { get; init; }
 };

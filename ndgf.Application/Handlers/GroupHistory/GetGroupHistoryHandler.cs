@@ -36,7 +36,8 @@ public class GetGroupHistoryHandler(
           expense.Description,
           expense.CreatedAt,
           payer.Pseudo,
-          null));
+          null,
+          expense.DeletedAt));
       }
     }
 
@@ -53,7 +54,8 @@ public class GetGroupHistoryHandler(
           refund.Description,
           refund.CreatedAt,
           payer.Pseudo,
-          receiver.Pseudo));
+          receiver.Pseudo,
+          refund.DeletedAt));
       }
     }
     

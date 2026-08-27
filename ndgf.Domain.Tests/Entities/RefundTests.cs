@@ -101,4 +101,34 @@ public class RefundTests
     
     Assert.Throws<DomainException>(() => Refund.Create(payerId, receiverId, amount, description, groupId));
   }
+
+  [Fact]
+  public void SoftDelete_OnActiveRefund_ShouldSetDeleteAt()
+  {
+    var amount = 100m;
+    var payerId = Guid.NewGuid();
+    var receiverId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var description = "description";
+    
+    var refund = Refund.Create(payerId, receiverId, amount, description, groupId);
+    
+    refund.SoftDelete();
+    Assert.NotNull(refund.DeletedAt);
+  }
+  
+  [Fact]
+  public void SoftDelete_OnAlreadyDeleteRefund_ShouldThrowException()
+  {
+    var amount = 100m;
+    var payerId = Guid.NewGuid();
+    var receiverId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var description = "description";
+    
+    var refund = Refund.Create(payerId, receiverId, amount, description, groupId);
+    
+    refund.SoftDelete();
+    Assert.Throws<DomainException>(() => refund.SoftDelete());
+  }
 }

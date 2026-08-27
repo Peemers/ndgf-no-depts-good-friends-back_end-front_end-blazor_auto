@@ -5,6 +5,7 @@ public abstract class BaseEntity
   public Guid Id { get; protected set; } // protected pour autoriser les enfants à écrire dans ces champs. Pas oublier.
   public DateTime CreatedAt { get; protected set; }
   public DateTime? UpdatedAt { get; protected set; }
+  public DateTime? DeletedAt { get; protected set; }
 
   protected BaseEntity()
   {
@@ -20,5 +21,10 @@ public abstract class BaseEntity
   protected void MarkAsUpdated()
   {
     UpdatedAt = DateTime.UtcNow;
+  }
+  
+  protected void MarkAsDeleted()
+  {
+    DeletedAt = DateTime.UtcNow;
   }
 }

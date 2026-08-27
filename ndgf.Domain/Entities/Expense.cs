@@ -69,4 +69,13 @@ public sealed partial class Expense : BaseEntity
       part => part.UserId,
       part => Amount * part.Percentage / 100m);
   }
+
+  public void SoftDelete()
+  {
+    if (DeletedAt is not null)
+    {
+      throw new DomainException("Cette dépense est deja supprimée");
+    }
+    MarkAsDeleted();
+  }
 }
