@@ -20,7 +20,6 @@ public class GetGroupBalanceTests
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
-    var expenseId = Guid.NewGuid();
     var payerId = Guid.NewGuid();
     var amount = 250m;
     var description = "Test Expense";
@@ -59,6 +58,7 @@ public class GetGroupBalanceTests
     Assert.Equal(expectedUser.Pseudo, balanceResult.Pseudo);
     Assert.Equal(-250m, balanceResult.Balance);
     Assert.Equal(250m, result.Value.TotalExpenses);
+    Assert.Equal(1, result.Value.ExpenseCount);
   }
 
   [Fact]

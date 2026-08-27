@@ -22,6 +22,11 @@ public class SoftDeleteRefundHandler(
       return Result<bool>.Failure("Remboursement introuvable");
     }
     
+    if (refund.DeletedAt is not null)
+    {
+      return Result<bool>.Failure("Ce remboursement est déjà supprimé");
+    }
+    
     refund.SoftDelete();
     
     await refundRepository.UpdateAsync(refund);

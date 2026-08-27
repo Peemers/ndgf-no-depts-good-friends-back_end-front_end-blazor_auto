@@ -6,4 +6,6 @@ public record GetGroupBalanceResponseDto
   public required List<SuggestedRepaymentResponseDto> SuggestedRepayments { get; init; }
   
   public decimal TotalExpenses { get; init; }
+  
+  public int ExpenseCount { get; init; }
 };

@@ -91,8 +91,9 @@ public class GetGroupBalanceHandler(
       if (debtors[debtorIndex].Balance == 0) debtorIndex++;
       if (creditors[creditorIndex].Balance == 0) creditorIndex++;
     }
-    
-    var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses);
+
+    var expenseCount = expenses.Count();
+    var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses, expenseCount);
     
     return Result<GetGroupBalanceResult>.Success(result);
   }

@@ -23,4 +23,9 @@ public class ExpenseApiClient(HttpClient httpClient)
   {
     return await httpClient.GetAsync($"/api/groups/{groupId}/history?page={pageNumber}&pageSize={pageSize}&sortDescending={sortDescending}");
   }
+
+  public async Task<HttpResponseMessage> DeleteExpenseAsync(Guid groupId, Guid expenseId)
+  {
+    return await httpClient.DeleteAsync($"/api/groups/{groupId}/expenses/{expenseId}");
+  }
 }

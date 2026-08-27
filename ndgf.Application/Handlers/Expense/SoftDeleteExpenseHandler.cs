@@ -21,6 +21,11 @@ public class SoftDeleteExpenseHandler(
     {
       return Result<bool>.Failure("Dépense introuvable");
     }
+
+    if (expense.DeletedAt is not null)
+    {
+      return Result<bool>.Failure("Cette dépense est déjà supprimée");
+    }
     
     expense.SoftDelete();
     

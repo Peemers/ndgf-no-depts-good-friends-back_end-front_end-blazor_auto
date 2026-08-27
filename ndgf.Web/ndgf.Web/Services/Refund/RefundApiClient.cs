@@ -8,4 +8,9 @@ public class RefundApiClient(HttpClient httpClient)
   {
     return await httpClient.PostAsJsonAsync($"/api/groups/{groupId}/refunds", model);
   }
+
+  public async Task<HttpResponseMessage> DeleteRefundAsync(Guid groupId, Guid refundId)
+  {
+    return await httpClient.DeleteAsync($"/api/groups/{groupId}/refunds/{refundId}");
+  }
 }

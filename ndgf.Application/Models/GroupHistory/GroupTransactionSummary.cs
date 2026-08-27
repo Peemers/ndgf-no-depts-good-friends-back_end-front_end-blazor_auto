@@ -7,4 +7,5 @@ public record GroupTransactionSummary(
   string? Description,
   DateTime CreatedAt,
   string MainActorPseudo,
-  string? ReceiverPseudo);
+  string? ReceiverPseudo,
+  DateTime? DeletedAt);
