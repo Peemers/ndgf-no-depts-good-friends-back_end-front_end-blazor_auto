@@ -3,6 +3,7 @@ using System.Security.Claims;
 using ndgf.Api.Dtos.Refund.Request;
 using ndgf.Api.Dtos.Refund.Response;
 using ndgf.Api.Mappers.Refund;
+using ndgf.Application.Commands.Refund;
 using ndgf.Application.Handlers.Refund;
 
 namespace ndgf.Api.Endpoints.Refund;
@@ -40,6 +41,33 @@ public static class RefundEndPoints
     .Produces<CreateRefundResponseDto>(StatusCodes.Status201Created)
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapDelete ("/api/groups/{groupId}/refunds/{refundId}", async (
+      Guid groupId,
+      Guid refundId,
+      SoftDeleteRefundHandler softDeleteRefundHandler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+      
+      var command = new SoftDeleteRefundCommand(userId, groupId, refundId);
+      var result = await softDeleteRefundHandler.HandleAsync(command);
+      
+      if(!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+
+      return Results.Ok();
+    })
+    .RequireAuthorization()
+    .WithName("SoftDeleteRefund")
+    .WithSummary("Archiver un remboursement")
+    .WithDescription("Permet à l'utilisateur de supprimer un remboursement, elle restera archivée pour information")
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized)
+    .Produces(StatusCodes.Status200OK);
     
     return app;
   }

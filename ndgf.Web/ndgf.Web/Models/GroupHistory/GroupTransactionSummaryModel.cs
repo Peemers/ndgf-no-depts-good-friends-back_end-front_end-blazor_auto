@@ -9,4 +9,5 @@ public record GroupTransactionSummaryModel
   public DateTime CreatedAt { get; init; }
   public required string MainActorPseudo { get; init; }
   public string? ReceiverPseudo { get; init; }
+  public DateTime? DeletedAt { get; init; }
 }

@@ -4,7 +4,7 @@ namespace ndgf.Web.Models.Expense;
 
 public record CreateExpenseRequestModel
 {
-  [Range(0.01, 2500, ErrorMessage = "Le montant doit être compris entre 0.01 et 2500.")] 
+  [Range(0.01, 5000, ErrorMessage = "Le montant doit être compris entre 0.01 et 2500.")] 
   public decimal Amount { get; set; }
 
   [Required(ErrorMessage = "La déscription de la dépense est requise.")]

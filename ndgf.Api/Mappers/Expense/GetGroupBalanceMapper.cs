@@ -28,6 +28,7 @@ public static class GetGroupBalanceMapper
       Balances = balances,
       SuggestedRepayments = suggestedRepayments,
       TotalExpenses = result.TotalExpenses,
+      ExpenseCount =  result.ExpenseCount,
     };
   }
 }

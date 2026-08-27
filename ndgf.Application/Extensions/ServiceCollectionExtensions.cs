@@ -22,6 +22,8 @@ public static class ServiceCollectionExtensions
     services.AddScoped<GetGroupBalanceHandler>();
     services.AddScoped<CreateRefundHandler>();
     services.AddScoped<GetGroupHistoryHandler>();
+    services.AddScoped<SoftDeleteExpenseHandler>();
+    services.AddScoped<SoftDeleteRefundHandler>();
     return services;
   }
 }

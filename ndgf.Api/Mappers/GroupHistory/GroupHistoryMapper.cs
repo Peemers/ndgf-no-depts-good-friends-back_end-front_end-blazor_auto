@@ -17,6 +17,7 @@ public static class GroupHistoryMapper
       CreatedAt = t.CreatedAt,
       MainActorPseudo = t.MainActorPseudo,
       ReceiverPseudo = t.ReceiverPseudo,
+      DeletedAt =  t.DeletedAt,
     }).ToList();
 
     var pagedDto = new PagedResultDto<GroupTransactionSummaryDto>
