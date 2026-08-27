@@ -26,4 +26,14 @@ public class RefundRepository(NdgfDbContext context) : IRefundRepository
       .Where(r => r.GroupId == groupId && r.DeletedAt == null)
       .ToListAsync();
   }
+
+  public async Task<Refund?> GetRefundByIdAsync(Guid refundId)
+  {
+    return await context.Refunds.FindAsync(refundId);
+  }
+
+  public async Task UpdateAsync(Refund refund)
+  {
+    await context.SaveChangesAsync();
+  }
 }

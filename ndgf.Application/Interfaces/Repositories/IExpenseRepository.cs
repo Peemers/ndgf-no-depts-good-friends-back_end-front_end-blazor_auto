@@ -9,4 +9,6 @@ public interface IExpenseRepository
   Task<int> GetGroupExpensesCountAsync(Guid groupId);
   Task<IEnumerable<Expense>> GetAllGroupExpensesAsync(Guid groupId);
   Task<IEnumerable<Expense>> GetAllActiveGroupExpensesAsync(Guid groupId);
+  Task<Expense?> GetExpenseByIdAsync(Guid expenseId);
+  Task UpdateAsync(Expense expense);
 }
