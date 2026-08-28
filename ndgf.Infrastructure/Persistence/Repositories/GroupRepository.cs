@@ -17,4 +17,9 @@ public class GroupRepository(NdgfDbContext context) : IGroupRepository
   {
     return await context.Groups.FindAsync(groupId);
   }
+
+  public async Task UpdateAsync(Group group)
+  {
+    await context.SaveChangesAsync();
+  }
 }
