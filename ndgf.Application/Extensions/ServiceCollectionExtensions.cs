@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<SoftDeleteExpenseHandler>();
     services.AddScoped<SoftDeleteRefundHandler>();
     services.AddScoped<IBalanceCalculator, BalanceCalculator>();
+    services.AddScoped<ArchiveGroupHandler>();
     return services;
   }
 }

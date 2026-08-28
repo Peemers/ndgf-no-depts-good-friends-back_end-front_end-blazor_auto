@@ -2,7 +2,6 @@
 using ndgf.Application.Interfaces.Services;
 using ndgf.Application.Models.Expense;
 using ndgf.Application.Queries.Expense;
-using ndgf.Application.Services;
 using ndgf.Domain.Common;
 
 namespace ndgf.Application.Handlers.Expense;
