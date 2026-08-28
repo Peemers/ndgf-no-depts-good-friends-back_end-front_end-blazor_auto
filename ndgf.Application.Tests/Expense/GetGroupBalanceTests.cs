@@ -32,7 +32,7 @@ public class GetGroupBalanceTests
 
     var userBalance = new List<UserBalanceResult>
     {
-      new(userId, "toto", balance)
+      new(userId, "Toto", balance)
     };
 
     var expectedUser = Domain.Entities.User.Create("test@test.be", "Test1234=", "Toto", "Thierry", "Leman");
