@@ -1,6 +1,5 @@
 ﻿using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Expense;
-using ndgf.Application.Models.Group;
 using ndgf.Application.Queries.Expense;
 using ndgf.Domain.Common;
 
