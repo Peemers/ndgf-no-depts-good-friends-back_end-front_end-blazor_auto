@@ -23,4 +23,9 @@ public class GroupApiClient(HttpClient httpClient)
   {
     return await httpClient.GetAsync($"/api/groups/mine");
   }
+
+  public async Task<HttpResponseMessage> ArchiveGroupAsync(Guid groupId)
+  {
+    return await httpClient.PostAsync($"/api/groups/{groupId}/archive", null);
+  }
 }

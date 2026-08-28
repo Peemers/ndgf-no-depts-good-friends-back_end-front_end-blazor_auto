@@ -25,7 +25,7 @@ public class GetUserGroupsHandler(
         var groupMembers = await groupMemberRepository.GetMemberByGroupIdAsync(group.Id);
         var memberCount = groupMembers.Count();
 
-        groups.Add(new UserGroupSummaryResult(group.Id, group.Name, group.Description, memberCount));
+        groups.Add(new UserGroupSummaryResult(group.Id, group.Name, group.Description, memberCount, group.ArchivedAt));
       }
     }
 

@@ -14,7 +14,8 @@ public static class GetUserGroupsMapper
         Name = u.Name,
         Description = u.Description,
         Id = u.Id,
-        MemberCount = u.MemberCount
+        MemberCount = u.MemberCount,
+        ArchivedAt = u.ArchivedAt
       }).ToList()
     };
   }

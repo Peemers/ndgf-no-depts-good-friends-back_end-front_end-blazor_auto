@@ -120,6 +120,32 @@ public static class GroupEndpoints
     .Produces<GetUserGroupsResponseDto>(StatusCodes.Status200OK)
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized);
+    
+    app.MapPost("/api/groups/{groupId}/archive", async (
+      Guid groupId,
+      ArchiveGroupHandler handler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+      
+      var command = new ArchiveGroupCommand(userId, groupId);
+      var result = await handler.HandleAsync(command);
+
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+      
+      return Results.Ok();
+    })
+    .RequireAuthorization()
+    .WithName("ArchiveGroup")
+    .WithSummary("Archiver un groupe")
+    .WithDescription("Permet à l'utilisateur d'archiver un groupe si les balances de tout le monde est à 0 (groupe soldé)")
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized)
+    .Produces(StatusCodes.Status200OK);
 
     return app;
   }
