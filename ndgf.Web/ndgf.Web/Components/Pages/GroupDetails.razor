@@ -183,6 +183,12 @@
           }
 
           <div class="flex flex-col md:flex-row items-center bg-gray-200 p-2 mt-2 rounded-xl gap-2">
+
+            <button @onclick="RequestArchive"
+                    class="bg-linear-to-r text-center rounded-2xl  shadow-black shadow-sm from-red-200 to-red-400 text-black hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-500 active:to-red-600 px-4 py-2 text-xl">
+              🔒Archiver le groupe
+            </button>
+
             <NavLink href="/groups"
                      class="bg-linear-to-r text-center rounded-2xl  shadow-black shadow-sm from-amber-100 to-orange-300 text-black hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
               🔙 Retour aux groupes
@@ -208,7 +214,8 @@
             <div class="mt-6 p-3 divide-y divide-gray-400">
               @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
               {
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-4 @(transaction.DeletedAt is not null ? "opacity-40" : "")">
+                <div
+                  class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-4 @(transaction.DeletedAt is not null ? "opacity-40" : "")">
                   <div class="min-w-0">
                     @if (transaction.Transaction == TransactionTypeModel.Expense)
                     {
@@ -455,6 +462,29 @@
         <button @onclick="ConfirmDelete"
                 class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
           Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+@if (_showArchiveConfirmation)
+{
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-xl font-bold mb-4">Confirmer l'archivage</h2>
+      <p class="text-gray-600 mb-6">
+        Êtes-vous sûr de vouloir archiver ce groupe : 
+        @(_groupDetails?.Name) ?
+        Il restera visible sur la page "Groupe Archivé".
+      </p>
+      <div class="flex justify-end gap-3">
+        <button @onclick="CancelArchive"
+                class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">
+          Annuler
+        </button>
+        <button @onclick="ConfirmArchive"
+                class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+          Archiver
         </button>
       </div>
     </div>
@@ -756,6 +786,37 @@
     }
 
     CancelDelete();
+  }
+
+  private bool _showArchiveConfirmation;
+
+  private void RequestArchive()
+  {
+    _showArchiveConfirmation = true;
+  }
+
+  private void CancelArchive()
+  {
+    _showArchiveConfirmation = false;
+  }
+
+  private async Task ConfirmArchive()
+  {
+    var response = await GroupApiClient.ArchiveGroupAsync(GroupId);
+
+    if (response.IsSuccessStatusCode)
+    {
+      NavigationManager.NavigateTo("/groups");
+    }
+    else
+    {
+      _message = "Impossible d'archiver ce groupe";
+      StateHasChanged();
+      await Task.Delay(3000);
+      _message = null;
+    }
+
+    _showArchiveConfirmation = false;
   }
 
 }
