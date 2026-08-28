@@ -38,13 +38,17 @@
           </div>
         }
 
-        @foreach (var group in _userGroups.Groups)
+        @foreach (var group in _userGroups.Groups.OrderBy(g => g.ArchivedAt))
         {
           <div
-            class="flex flex-wrap hover:scale-[0.95] active:scale-[0.95] hover:shadow-amber-800 transition-all shadow-black shadow-2xl rounded-2xl bg-linear-to-tl to-[#B07D4C] w-full sm:w-110">
+            class="flex flex-wrap hover:scale-[0.95] active:scale-[0.95] hover:shadow-amber-800 transition-all shadow-black shadow-2xl rounded-2xl bg-linear-to-tl to-[#B07D4C] w-full sm:w-110 @(group.ArchivedAt is not null ? "opacity-40" : "")">
             <NavLink href="@($"/groups/{group.Id}")" class="p-4 w-full">
               <img src="images/ndgf-card.jpg" class="w-full h-auto rounded-lg" alt="">
               <h1 class="text-center tracking-tight text-3xl mt-2 underline">@group.Name</h1>
+              @if (group.ArchivedAt is not null)
+              {
+                <p class="text-center text-sm text-gray-800 font-semibold">🔒 Archivé</p>
+              }
               @if (group.Description is not null)
               {
                 <h2 class="text-center text-lg mt-2 text-gray-600">@group.Description</h2>
