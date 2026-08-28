@@ -1,5 +1,6 @@
 ﻿using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
+using ndgf.Application.Interfaces.Services;
 using ndgf.Application.Models.Expense;
 using ndgf.Application.Queries.Expense;
 using ndgf.Domain.Common;
@@ -13,17 +14,16 @@ public class GetGroupBalanceTests
   [Fact]
   public async Task HandleAsync_WithValidData_ShouldReturnSuccess()
   {
-    IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
-    IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
     var payerId = Guid.NewGuid();
     var amount = 250m;
     var description = "Test Expense";
-    var balance = 0;
+    var balance = -250m;
 
     var expendedPartInput = new List<ExpensePartInput>
     {
@@ -43,10 +43,9 @@ public class GetGroupBalanceTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember> { expectedGroupMember });
     expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
-    userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
-    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
+    balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
     var query = new GetGroupBalanceQuery(groupId, userId);
 
     var result = await handler.HandleAsync(query);
@@ -64,18 +63,17 @@ public class GetGroupBalanceTests
   [Fact]
   public async Task HandleAsync_WithUserNotInGroup_ShouldReturnFailure()
   {
-    IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
-    IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
-    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund>());
+    
 
-    var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
     var query = new GetGroupBalanceQuery(groupId, userId);
     var result = await handler.HandleAsync(query);
 
@@ -86,10 +84,9 @@ public class GetGroupBalanceTests
   [Fact]
   public async Task HandleAsync_WithRefund_ShouldAdjustBalance()
   {
-    IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
-    IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -101,19 +98,23 @@ public class GetGroupBalanceTests
     {
       new(userId, 100)
     };
-
+    
     var expectedUser = Domain.Entities.User.Create("test@test.be", "Test1234=", "Toto", "Thierry", "Leman");
     var expectedGroupMember = GroupMember.Create(userId, groupId);
     var expectedExpense = Domain.Entities.Expense.Create(payerId, expendedPartInput, amount, description, groupId);
-    var expectedRefund = Domain.Entities.Refund.Create(userId, payerId, 100m, "Remboursement partiel", groupId);
+    
+    var userBalance = new List<UserBalanceResult>
+    {
+      new(userId, expectedUser.Pseudo, -150m)
+    };
+    
+    balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember> { expectedGroupMember });
     expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
-    refundRepository.GetAllActiveGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund> { expectedRefund });
-    userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
 
-    var handler = new GetGroupBalanceHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
     var query = new GetGroupBalanceQuery(groupId, userId);
 
     var result = await handler.HandleAsync(query);

@@ -4,6 +4,8 @@ using ndgf.Application.Handlers.Group;
 using ndgf.Application.Handlers.GroupHistory;
 using ndgf.Application.Handlers.Refund;
 using ndgf.Application.Handlers.User;
+using ndgf.Application.Interfaces.Services;
+using ndgf.Application.Services;
 
 namespace ndgf.Application.Extensions;
 
@@ -24,6 +26,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<GetGroupHistoryHandler>();
     services.AddScoped<SoftDeleteExpenseHandler>();
     services.AddScoped<SoftDeleteRefundHandler>();
+    services.AddScoped<IBalanceCalculator, BalanceCalculator>();
     return services;
   }
 }
