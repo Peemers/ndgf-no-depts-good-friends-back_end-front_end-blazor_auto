@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ndgf.Api.Endpoints.Expense;
 using ndgf.Api.Endpoints.Group;
 using ndgf.Api.Endpoints.GroupHistory;
@@ -6,6 +7,7 @@ using ndgf.Api.Endpoints.User;
 using ndgf.Api.Extensions;
 using ndgf.Application.Extensions;
 using ndgf.Infrastructure.Extensions;
+using ndgf.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +42,12 @@ app.MapRefundEndPoints();
 app.MapExpenseEndPoints();
 app.MapGroupHistoryEndpoint();
 app.UseHttpsRedirection();
+
+using (var scope = app.Services.CreateScope())
+{
+  var dbContext = scope.ServiceProvider.GetRequiredService<NdgfDbContext>();
+  dbContext.Database.Migrate();
+}
 
 app.Run();
 
