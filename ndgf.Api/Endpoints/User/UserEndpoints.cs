@@ -3,6 +3,9 @@ using ndgf.Api.Dtos.User.Response;
 using ndgf.Api.Mappers;
 using ndgf.Api.Mappers.User;
 using ndgf.Application.Handlers.User;
+using ndgf.Application.Interfaces.Repositories;
+using ndgf.Application.Interfaces.Security;
+using ndgf.Domain.Entities;
 
 namespace ndgf.Api.Endpoints.User;
 
@@ -51,6 +54,49 @@ public static class UserEndpoints
       .WithDescription("Connexion de l'utilisateur avec email et mot de passe et protection jwt")
       .Produces<LoginUserResponseDto>(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status400BadRequest);
+    
+    app.MapPost("/api/users/refresh", async (
+        RefreshTokenRequestDto dto,
+        IRefreshTokenRepository refreshTokenRepository,
+        IUserRepository userRepository,
+        IJwtService jwtService) =>
+      {
+        var storedToken = await refreshTokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
+
+        if (storedToken is null || storedToken.RevokedAt is not null || storedToken.ExpiresAt < DateTime.UtcNow)
+        {
+          return Results.Unauthorized();
+        }
+
+        var user = await userRepository.GetUserByIdAsync(storedToken.UserId);
+        if (user is null)
+        {
+          return Results.Unauthorized();
+        }
+
+        var newAccessToken = jwtService.GenerateAccessToken(user);
+        var newRefreshTokenValue = jwtService.GenerateRefreshToken();
+
+        storedToken.Revoke();
+        await refreshTokenRepository.UpdateAsync(storedToken);
+
+        var newRefreshToken = RefreshToken.Create(newRefreshTokenValue, user.Id, DateTime.UtcNow.AddDays(14));
+        await refreshTokenRepository.AddAsync(newRefreshToken);
+
+        var response = new RefreshTokenResponseDto
+        {
+          AccessToken = newAccessToken,
+          RefreshToken = newRefreshTokenValue
+        };
+
+        return Results.Ok(response);
+      })
+      .AllowAnonymous()
+      .WithName("RefreshToken")
+      .WithSummary("Renouvelle un access token à partir d'un refresh token")
+      .WithDescription("Vérifie la validité du refresh token fourni, révoque l'ancien, génère et retourne une nouvelle paire de tokens")
+      .Produces<RefreshTokenResponseDto>(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status401Unauthorized);
 
 
     return app;
