@@ -3,7 +3,7 @@
 
 <AuthorizeView>
   <Authorized>
-    <div class="flex items-center gap-4">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base">
       <span>Bonjour, @context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</span>
       <button @onclick="HandleLogout" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
         Déconnexion
