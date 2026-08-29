@@ -28,4 +28,9 @@ public class GroupApiClient(HttpClient httpClient)
   {
     return await httpClient.PostAsync($"/api/groups/{groupId}/archive", null);
   }
+
+  public async Task<HttpResponseMessage> RemoveGroupMemberAsync(Guid groupId, Guid memberId)
+  {
+    return await httpClient.DeleteAsync($"/api/groups/{groupId}/members/{memberId}");
+  }
 }
