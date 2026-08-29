@@ -146,6 +146,32 @@ public static class GroupEndpoints
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status401Unauthorized)
     .Produces(StatusCodes.Status200OK);
+    
+    app.MapDelete("/api/groups/{groupId}/members/{memberId}", async (
+      Guid groupId,
+      Guid memberId,
+      RemoveGroupMemberHandler handler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var requestingUserId = Guid.Parse(userIdClaim!);
+      
+      var command = new RemoveGroupMemberCommand(requestingUserId, memberId, groupId);
+      var result = await handler.HandleAsync(command);
+
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+      return Results.Ok();
+    })
+    .RequireAuthorization()
+    .WithName("RemoveGroupMember")
+    .WithSummary("Retirer un membre du groupe")
+    .WithDescription("Permet à l'utilisateur de retirer un membre du groupe, non créateur du groupe et avec sa balance à 0")
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized)
+    .Produces(StatusCodes.Status200OK);
 
     return app;
   }

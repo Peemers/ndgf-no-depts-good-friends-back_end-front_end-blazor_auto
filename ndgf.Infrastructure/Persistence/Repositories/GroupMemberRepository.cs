@@ -30,4 +30,10 @@ public class GroupMemberRepository(NdgfDbContext context) : IGroupMemberReposito
     return await context.GroupMembers
       .Where(gm => gm.UserId == userId).ToListAsync();
   }
+
+  public async Task RemoveAsync(GroupMember groupMember)
+  {
+    context.GroupMembers.Remove(groupMember);
+    await context.SaveChangesAsync();
+  }
 }
