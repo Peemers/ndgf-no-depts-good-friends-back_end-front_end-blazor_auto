@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
 {
   public static IServiceCollection AddWebService(this IServiceCollection services, IConfiguration configuration)
   {
-    const string apiUri = "http://localhost:5217";
+    var apiUri = configuration["ApiUri"] ?? "http://localhost:5217";
 
     services.AddScoped<CustomAuthenticationStateProvider>();
     services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
@@ -61,7 +61,8 @@ public static class ServiceCollectionExtensions
 
     services.AddHttpClient("RawWebClient", client =>
     {
-      client.BaseAddress = new Uri("https://localhost:5087");
+      var webUri = configuration["WebUri"] ?? "https://localhost:5087";
+      client.BaseAddress = new Uri(webUri);
     });
 
     return services;
