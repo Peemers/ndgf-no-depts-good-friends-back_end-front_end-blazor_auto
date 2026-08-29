@@ -472,6 +472,10 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class="text-xl font-bold mb-4">Confirmer l'archivage</h2>
+      @if (_message is not null)
+      {
+        <p class="text-center text-2xl text-red-600 p-6">@_message</p>
+      }
       <p class="text-gray-600 mb-6">
         Êtes-vous sûr de vouloir archiver ce groupe : 
         @(_groupDetails?.Name) ?
