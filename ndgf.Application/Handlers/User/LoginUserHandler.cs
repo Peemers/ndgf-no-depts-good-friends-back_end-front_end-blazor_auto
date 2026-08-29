@@ -30,7 +30,7 @@ public class LoginUserHandler(
 
     string accessToken = jwtService.GenerateAccessToken(user);
     string refreshToken = jwtService.GenerateRefreshToken();
-    DateTime expiryDay = DateTime.UtcNow.AddDays(7);
+    DateTime expiryDay = DateTime.UtcNow.AddDays(14);
 
     RefreshToken refreshTokenEntity = RefreshToken.Create(refreshToken, user.Id, expiryDay);
 

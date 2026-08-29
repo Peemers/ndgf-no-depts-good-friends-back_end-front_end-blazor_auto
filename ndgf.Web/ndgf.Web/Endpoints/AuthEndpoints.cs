@@ -37,6 +37,27 @@ public static class AuthEndpoints
       await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
       return Results.Redirect("/login");
     });
+    
+    app.MapPost("/auth/refresh-cookie", async (
+        HttpContext httpContext,
+        RefreshCookieRequest request) =>
+      {
+        var identity = (ClaimsIdentity)httpContext.User.Identity!;
+
+        var oldAccessTokenClaim = identity.FindFirst("AccessToken");
+        var oldRefreshTokenClaim = identity.FindFirst("RefreshToken");
+
+        if (oldAccessTokenClaim is not null) identity.RemoveClaim(oldAccessTokenClaim);
+        if (oldRefreshTokenClaim is not null) identity.RemoveClaim(oldRefreshTokenClaim);
+
+        identity.AddClaim(new Claim("AccessToken", request.AccessToken));
+        identity.AddClaim(new Claim("RefreshToken", request.RefreshToken));
+
+        await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, httpContext.User);
+
+        return Results.Ok();
+      })
+      .RequireAuthorization();
 
     return app;
   }

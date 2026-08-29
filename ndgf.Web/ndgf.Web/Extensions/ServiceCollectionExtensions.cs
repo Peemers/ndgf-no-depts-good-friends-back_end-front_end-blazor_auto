@@ -53,6 +53,16 @@ public static class ServiceCollectionExtensions
         client.BaseAddress = new Uri(apiUri);
       })
       .AddHttpMessageHandler<AuthTokenHandler>();
+    
+    services.AddHttpClient("RawApiClient", client =>
+    {
+      client.BaseAddress = new Uri(apiUri);
+    });
+
+    services.AddHttpClient("RawWebClient", client =>
+    {
+      client.BaseAddress = new Uri("https://localhost:5087");
+    });
 
     return services;
   }
