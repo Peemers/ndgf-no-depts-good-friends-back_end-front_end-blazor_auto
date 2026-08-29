@@ -19,7 +19,7 @@ public class GetGroupBalanceHandler(
       return Result<GetGroupBalanceResult>.Failure("Vous devez être membre du groupe pour consulter toutes les dépenses.");
     }
     
-    var expenses = await expenseRepository.GetAllActiveGroupExpensesAsync(query.GroupId);
+    var expenses = (await expenseRepository.GetAllActiveGroupExpensesAsync(query.GroupId)).ToList();
     
     var userBalance = await balanceCalculator.CalculateBalanceAsync(query.GroupId);
     

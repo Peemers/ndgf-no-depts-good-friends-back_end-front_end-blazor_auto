@@ -26,13 +26,12 @@ public class GetGroupDetailsHandler(
 
     var groupMembers = await groupMemberRepository.GetMemberByGroupIdAsync(query.GroupId);
 
-
     var membersInfo = new List<GroupMemberInfoResult>();
 
     foreach (var groupMember in groupMembers)
     {
       var user = await userRepository.GetUserByIdAsync(groupMember.UserId);
-
+      
       if (user is not null)
       {
         membersInfo.Add(new GroupMemberInfoResult(user.Id, user.Pseudo, user.Email));

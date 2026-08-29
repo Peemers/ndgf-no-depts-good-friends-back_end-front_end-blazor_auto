@@ -8,4 +8,5 @@ public interface IGroupMemberRepository
   Task<bool> IsMemberAsync(Guid userId, Guid groupId);
   Task<IEnumerable<GroupMember>> GetMemberByGroupIdAsync(Guid groupId);
   Task<IEnumerable<GroupMember>> GetMembershipsByUserIdAsync(Guid userId);
+  Task RemoveAsync(GroupMember groupMember);
 }
