@@ -8,6 +8,7 @@ riderModule.iml
 .vs/
 *.user
 .DS_Store
+.env
 
 # Node.js / npm (Tailwind)
 node_modules/

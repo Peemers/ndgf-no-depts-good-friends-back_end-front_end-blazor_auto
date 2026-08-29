@@ -1,7 +1,52 @@
 ﻿services:
-  ndgf:
-    image: ndgf
-    build:
-      context: .
-      dockerfile: ndgf/Dockerfile
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' -No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ndgf-network
 
+  api:
+    image: ghcr.io/peemers/ndgf-api:latest
+    environment:
+      ConnectionStrings__DefaultConnection: ${CONNECTION_STRING}
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5217:8080"
+    networks:
+      - ndgf-network
+
+  web:
+    image: ghcr.io/peemers/ndgf-web:latest
+    depends_on:
+      - api
+    ports:
+      - "5087:8080"
+    networks:
+      - ndgf-network
+    environment:
+      ApiUri: http://api:8080
+      WebUri: http://localhost:8080
+
+volumes:
+  sqlserver-data:
+
+networks:
+  ndgf-network:
