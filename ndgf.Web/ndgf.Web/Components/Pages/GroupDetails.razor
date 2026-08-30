@@ -1,6 +1,5 @@
 ﻿@page "/groups/{groupId:guid}"
 @using Microsoft.AspNetCore.Authorization
-@using ndgf.Domain.Entities
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
 @using ndgf.Web.Models.GroupHistory
@@ -79,9 +78,9 @@
               class="w-10 h-10 md:w-25 md:h-25 shrink-0 rounded-full shadow-md bg-linear-to-t from-amber-700 to-amber-900 text-white flex items-center justify-center text-sm font-bold">
               @member.Pseudo[0]@member.Pseudo[1]@member.Pseudo[2]
             </div>
-            <div class="min-w-0">
-              <p class="font-bold text-lg md:text-2xl text-gray-800">@member.Pseudo</p>
-              <p class="text-lg text-gray-500">@member.Email</p>
+            <div class="min-w-0 flex-1">
+              <p class="font-bold text-lg md:text-2xl text-gray-800 truncate">@member.Pseudo</p>
+              <p class="text-lg text-gray-500 trunecate">@member.Email</p>
             </div>
             <button @onclick="() => RequestRemoveMember(member.UserId, member.Pseudo)"
                     class="text-gray-400 hover:bg-red-600 active:text-red-600 border rounded-full bg-red-400 text-white p-0.5">
@@ -101,7 +100,7 @@
           <p class="text-gray-500 text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
 
-        <div class="flex flex-col md:flex-row gap-6 mt-4">
+        <div class="flex flex-col md:flex-row gap-1.5 mt-4">
           <div class="w-full md:flex-1 bg-white/60 rounded-2xl p-4 border border-amber-200">
             <div class="flex items-center gap-2 mb-3">
               <span class="text-xl">💡</span>
@@ -174,38 +173,38 @@
         </div>
 
         <div
-          class="flex flex-col md:flex-row justify-between items-center mt-2 p-3 rounded-xl gap-2 w-full">
+          class="flex flex-col md:flex-row justify-between items-center p-3 rounded-xl gap-1 w-full">
           @if (_getGroupBalance is not null)
           {
             <div class="bg-white/70 rounded-xl p-3 shadow-sm flex flex-row items-center gap-2">
-              <p class="text-gray-700 text-xl">
+              <p class="text-gray-700 text-sm">
                 @_getGroupBalance?.ExpenseCount dépense(s) au total
               </p>
               <span class="text-gray-400">•</span>
-              <p class="text-gray-700 text-xl">pour une somme de <span
-                  class="text-orange-950 font-semibold">@_getGroupBalance?.TotalExpenses</span> € dépensée</p>
+              <p class="text-gray-700 text-sm text-end">pour une somme de <span
+                  class="text-orange-950 font-semibold">@_getGroupBalance?.TotalExpenses</span> €</p>
             </div>
           }
 
-          <div class="flex flex-col md:flex-row items-center bg-gray-200 p-2 mt-2 rounded-xl gap-2">
+          <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2">
 
             <button @onclick="RequestArchive"
-                    class="bg-linear-to-r text-center rounded-2xl  shadow-black shadow-sm from-red-200 to-red-400 text-black hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-500 active:to-red-600 px-4 py-2 text-xl">
+                    class="bg-linear-to-r text-center rounded-2xl  shadow-black shadow-sm from-red-200 to-red-400 text-black hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-500 active:to-red-600 px-4 py-2 text-xl w-full md:flex-1">
               🔒Archiver le groupe
             </button>
 
             <NavLink href="/groups"
-                     class="bg-linear-to-r text-center rounded-2xl  shadow-black shadow-sm from-amber-100 to-orange-300 text-black hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+                     class="bg-linear-to-r text-center content-center rounded-2xl  shadow-black shadow-sm from-amber-100 to-orange-300 text-black hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
               🔙 Retour aux groupes
             </NavLink>
 
             <button @onclick="OpenExpenseModal"
-                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
               ➕ Créer une nouvelle dépense
             </button>
 
             <button @onclick="OpenRefundModal"
-                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl">
+                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
               ➕ Créer un nouveau remboursement
             </button>
           </div>
@@ -216,7 +215,7 @@
         <div class="bg-gray-200 rounded-2xl">
           @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
           {
-            <div class="mt-6 p-3 divide-y divide-gray-400">
+            <div class="mt-1 p-3 divide-y divide-gray-400">
               @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
               {
                 <div
