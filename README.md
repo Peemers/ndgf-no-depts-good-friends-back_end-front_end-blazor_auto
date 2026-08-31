@@ -1,6 +1,6 @@
 # NDGF
 
-> **N**e **D**oit rien à **G**ère les **F**rais — application de gestion de dépenses partagées entre groupes d'utilisateurs (façon "Tricount").
+> NoDepthGoodFriends — application de gestion de dépenses partagées entre groupes d'utilisateurs (façon "Tricount").
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-512BD4?logo=blazor)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
