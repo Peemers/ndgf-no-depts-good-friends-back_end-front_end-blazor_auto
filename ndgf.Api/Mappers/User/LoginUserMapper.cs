@@ -18,6 +18,7 @@ public static class LoginUserMapper
     {
       Email = result.User.Email,
       Id = result.User.Id,
+      Pseudo =  result.User.Pseudo,
       AccessToken = result.AccessToken,
       RefreshToken = result.RefreshToken
     };

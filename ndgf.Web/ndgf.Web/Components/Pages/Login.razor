@@ -60,15 +60,17 @@
       </div>
     </EditForm>
   </div>
-  @if (_loginResponse is not null)
+  
+  @if (_authResponse is not null)
   {
-    // "Faux forms pour la connection et le probleme de header deja envoyé"
+    // "Faux forms caché pour la connection et le probleme de header deja envoyé"
     <form action="/auth/signin" method="post" id="signin-form">
       <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken"/>
-      <input type="hidden" name="userId" value="@_loginResponse.Id"/>
-      <input type="hidden" name="email" value="@_loginResponse.Email"/>
-      <input type="hidden" name="accessToken" value="@_loginResponse.AccessToken"/>
-      <input type="hidden" name="refreshToken" value="@_loginResponse.RefreshToken"/>
+      <input type="hidden" name="userId" value="@_authResponse.Id"/>
+      <input type="hidden" name="email" value="@_authResponse.Email"/>
+      <input type="hidden" name="pseudo" value="@_authResponse.Pseudo"/>
+      <input type="hidden" name="accessToken" value="@_authResponse.AccessToken"/>
+      <input type="hidden" name="refreshToken" value="@_authResponse.RefreshToken"/>
     </form>
 
     <script>
@@ -95,7 +97,7 @@
     Password = ""
   };
 
-  private LoginUserResponseModel? _loginResponse;
+  private AuthUserResponseModel? _authResponse;
 
   private async Task HandleValidSubmit()
   {
@@ -111,9 +113,9 @@
         return;
       }
 
-      _loginResponse = await response.Content.ReadFromJsonAsync<LoginUserResponseModel>();
+      _authResponse = await response.Content.ReadFromJsonAsync<AuthUserResponseModel>();
 
-      if (_loginResponse is null)
+      if (_authResponse is null)
       {
         _message = "Erreur lors de la connexion";
         return;

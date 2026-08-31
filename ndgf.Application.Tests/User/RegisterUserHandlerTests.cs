@@ -12,16 +12,21 @@ public class RegisterUserHandlerTests
   public async Task HandleAsync_WithNewEmail_ShouldReturnSuccessResult()
   {
     // Arrange
-    var userRepository = Substitute.For<IUserRepository>();
-    var passwordHasher = Substitute.For<IPasswordHasher>();
+    IUserRepository userRepository = Substitute.For<IUserRepository>();
+    IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
+    IJwtService jwtService = Substitute.For<IJwtService>();
+    IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
 
     var expectedUser = Domain.Entities.User.Create("test@test.be", "hashedPassword123", "Toto", "Dupont", "Jean");
 
     userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(false);
+    userRepository.PseudoAlreadyExistsAsync(Arg.Any<string>()).Returns(false);
     passwordHasher.HashPassword(Arg.Any<string>()).Returns("hashedPassword123");
     userRepository.AddAsync(Arg.Any<Domain.Entities.User>()).Returns(expectedUser);
+    jwtService.GenerateAccessToken(Arg.Any<Domain.Entities.User>()).Returns("test-access-token");
+    jwtService.GenerateRefreshToken().Returns("test-refresh-token");
 
-    var handler = new RegisterUserHandler(userRepository, passwordHasher);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
     var command = new RegisterUserCommand("test@test.be", "MonMotDePasse123", "Toto", "Jean", "Dupont");
 
     // Act
@@ -29,8 +34,11 @@ public class RegisterUserHandlerTests
 
     // Assert
     Assert.True(result.IsSuccess);
+    Assert.Equal("test@test.be", result.Value!.User.Email);
+    Assert.Equal("test-access-token", result.Value.AccessToken);
+    Assert.Equal("test-refresh-token", result.Value.RefreshToken);
     Assert.NotNull(result.Value);
-    Assert.Equal("test@test.be", result.Value.Email);
+    Assert.Equal("test@test.be", result.Value.User.Email);
   }
 
   [Fact]
@@ -38,12 +46,14 @@ public class RegisterUserHandlerTests
   {
     //Arrange
 
-    var userRepository = Substitute.For<IUserRepository>();
-    var passwordHasher = Substitute.For<IPasswordHasher>();
+    IUserRepository userRepository = Substitute.For<IUserRepository>();
+    IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
+    IJwtService jwtService = Substitute.For<IJwtService>();
+    IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
 
     userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(true);
 
-    var handler = new RegisterUserHandler(userRepository, passwordHasher);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
     var command = new RegisterUserCommand("test@test.be", "MonMotDePasse123", "Toto", "Jean", "Dupont");
     
     //Act
@@ -60,13 +70,15 @@ public class RegisterUserHandlerTests
   [Fact]
   public async Task HandleAsync_WithExistingPseudo_ShouldReturnFailureResult()
   {
-    var userRepository = Substitute.For<IUserRepository>();
-    var passwordHasher = Substitute.For<IPasswordHasher>();
+    IUserRepository userRepository = Substitute.For<IUserRepository>();
+    IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
+    IJwtService jwtService = Substitute.For<IJwtService>();
+    IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
     
     userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(false);
     userRepository.PseudoAlreadyExistsAsync(Arg.Any<string>()).Returns(true);
     
-    var handler = new RegisterUserHandler(userRepository, passwordHasher);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
     var command = new RegisterUserCommand("test@test.be", "Test1234=", "Toto", "Jean", "Dupont");
     
     var result = await handler.HandleAsync(command);

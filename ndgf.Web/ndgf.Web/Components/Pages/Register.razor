@@ -3,22 +3,23 @@
 @using ndgf.Web.Models.User
 @using ndgf.Web.Services.User
 @inject UserApiClient UserApiClient
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
 
 <div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]  items-center justify-center p-4 border-2">
   <div class="border rounded-2xl flex-row flex p-2 bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
-    
+
     <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl mr-2 hidden md:block">
-
-
-    @if (_message is not null)
-    {
-      <p class="mb-4">@_message</p>
-    }
-
+    
     <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-1">
       <DataAnnotationsValidator/>
       <h1 class="text-2xl font-bold mb-6 flex underline">Formulaire d'inscription</h1>
+      
+      @if (_message is not null)
+      {
+        <p class="mb-4">@_message</p>
+      }
 
       <div>
         <label class="text-xl">Email</label>
@@ -87,11 +88,34 @@
   </div>
 </div>
 
+@if (_authResponse is not null)
+{
+  <form action="/auth/signin" method="post" id="register-form">
+    <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken"/>
+    <input type="hidden" name="userId" value="@_authResponse.Id"/>
+    <input type="hidden" name="email" value="@_authResponse.Email"/>
+    <input type="hidden" name="pseudo" value="@_authResponse.Pseudo"/>
+    <input type="hidden" name="accessToken" value="@_authResponse.AccessToken"/>
+    <input type="hidden" name="refreshToken" value="@_authResponse.RefreshToken"/>
+  </form>
+
+  <script>
+    document.getElementById('register-form').submit();
+  </script>
+}
+
 
 @code {
 
   private string? _message;
   private bool _isSubmiting;
+  private string? _antiforgeryToken;
+
+  protected override void OnInitialized()
+  {
+    var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext!);
+    _antiforgeryToken = tokens.RequestToken;
+  }
 
   private RegisterUserModel _model = new()
   {
@@ -103,6 +127,8 @@
     LastName = ""
   };
 
+  private AuthUserResponseModel? _authResponse;
+
   private async Task HandleValidSubmit()
   {
     _isSubmiting = true;
@@ -110,9 +136,14 @@
     try
     {
       var response = await UserApiClient.RegisterAsync(_model);
-      _message = response.IsSuccessStatusCode
-        ? "Inscription réussie !"
-        : "Erreur lors de l'inscription";
+
+      if (!response.IsSuccessStatusCode)
+      {
+        _message = "Erreur lors de l'inscription";
+        return;
+      }
+
+      _authResponse = await response.Content.ReadFromJsonAsync<AuthUserResponseModel>();
     }
     finally
     {

@@ -3,58 +3,74 @@ using System.Net.Http.Headers;
 
 namespace ndgf.Web.Services.Auth;
 
-public class AuthTokenHandler(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory) : DelegatingHandler
+public class AuthTokenHandler(
+  IHttpContextAccessor httpContextAccessor,
+  IHttpClientFactory httpClientFactory,
+  TokenStore tokenStore) : DelegatingHandler
 {
   protected override async Task<HttpResponseMessage> SendAsync(
     HttpRequestMessage request,
     CancellationToken cancellationToken)
   {
-    var token = httpContextAccessor.HttpContext?.User.FindFirst("AccessToken")?.Value;
-
-    if (!string.IsNullOrWhiteSpace(token))
+    if (tokenStore.AccessToken is null)
     {
-      request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+      tokenStore.AccessToken = httpContextAccessor.HttpContext?.User.FindFirst("AccessToken")?.Value;
+      tokenStore.RefreshToken = httpContextAccessor.HttpContext?.User.FindFirst("RefreshToken")?.Value;
+    }
+
+    if (!string.IsNullOrWhiteSpace(tokenStore.AccessToken))
+    {
+      request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenStore.AccessToken);
     }
 
     var response = await base.SendAsync(request, cancellationToken);
 
     if (response.StatusCode == HttpStatusCode.Unauthorized)
     {
-      var refreshToken = httpContextAccessor.HttpContext?.User.FindFirst("RefreshToken")?.Value;
+      var attemptedAccessToken = tokenStore.AccessToken;
 
-      if (!string.IsNullOrWhiteSpace(refreshToken))
+      using (await tokenStore.LockAsync())
       {
-        var rawClient = httpClientFactory.CreateClient("RawApiClient");
-
-        var refreshResponse = await rawClient.PostAsJsonAsync(
-          "/api/users/refresh",
-          new { RefreshToken = refreshToken },
-          cancellationToken);
-
-        if (refreshResponse.IsSuccessStatusCode)
+        if (tokenStore.AccessToken == attemptedAccessToken && !string.IsNullOrWhiteSpace(tokenStore.RefreshToken))
         {
-          var result = await refreshResponse.Content.ReadFromJsonAsync<RefreshResult>(cancellationToken: cancellationToken);
+          var rawClient = httpClientFactory.CreateClient("RawApiClient");
 
-          if (result is not null)
+          var refreshResponse = await rawClient.PostAsJsonAsync(
+            "/api/users/refresh",
+            new { RefreshToken = tokenStore.RefreshToken },
+            cancellationToken);
+
+          if (refreshResponse.IsSuccessStatusCode)
           {
-            var cookieClient = httpClientFactory.CreateClient("RawWebClient");
+            var result = await refreshResponse.Content.ReadFromJsonAsync<RefreshResult>(cancellationToken: cancellationToken);
 
-            var cookieHeader = httpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
-            if (!string.IsNullOrEmpty(cookieHeader))
+            if (result is not null)
             {
-              cookieClient.DefaultRequestHeaders.Add("Cookie", cookieHeader);
+              tokenStore.AccessToken = result.AccessToken;
+              tokenStore.RefreshToken = result.RefreshToken;
+
+              var cookieClient = httpClientFactory.CreateClient("RawWebClient");
+
+              var cookieHeader = httpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
+              if (!string.IsNullOrEmpty(cookieHeader))
+              {
+                cookieClient.DefaultRequestHeaders.Add("Cookie", cookieHeader);
+              }
+
+              await cookieClient.PostAsJsonAsync("/auth/refresh-cookie", new
+              {
+                result.AccessToken,
+                result.RefreshToken
+              }, cancellationToken);
             }
-
-            await cookieClient.PostAsJsonAsync("/auth/refresh-cookie", new
-            {
-              result.AccessToken,
-              result.RefreshToken
-            }, cancellationToken);
-
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
-            response = await base.SendAsync(request, cancellationToken);
           }
         }
+      }
+
+      if (!string.IsNullOrWhiteSpace(tokenStore.AccessToken))
+      {
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenStore.AccessToken);
+        response = await base.SendAsync(request, cancellationToken);
       }
     }
 
