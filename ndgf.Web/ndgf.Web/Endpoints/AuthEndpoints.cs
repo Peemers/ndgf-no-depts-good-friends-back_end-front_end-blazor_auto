@@ -12,7 +12,8 @@ public static class AuthEndpoints
     app.MapPost("/auth/signin", async (
       HttpContext context, 
       [FromForm] string userId, 
-      [FromForm] string email, 
+      [FromForm] string email,
+      [FromForm] string pseudo,
       [FromForm] string accessToken, 
       [FromForm] string refreshToken) =>
     {
@@ -20,6 +21,7 @@ public static class AuthEndpoints
       {
         new(ClaimTypes.NameIdentifier, userId),
         new(ClaimTypes.Email, email),
+        new("Pseudo", pseudo),
         new("AccessToken", accessToken),
         new("RefreshToken", refreshToken)
       };
