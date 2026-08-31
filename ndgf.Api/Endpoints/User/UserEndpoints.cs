@@ -1,6 +1,5 @@
 ﻿using ndgf.Api.Dtos.User.Request;
 using ndgf.Api.Dtos.User.Response;
-using ndgf.Api.Mappers;
 using ndgf.Api.Mappers.User;
 using ndgf.Application.Handlers.User;
 using ndgf.Application.Interfaces.Repositories;
@@ -31,7 +30,7 @@ public static class UserEndpoints
       .WithName("RegisterUser")
       .WithSummary("Inscrit un nouvel utilisateur")
       .WithDescription("Crée un compte utilisateur avec email, mot de passe et informations personnelles")
-      .Produces<RegisterUserResponseDto>(StatusCodes.Status201Created)
+      .Produces<LoginUserResponseDto>(StatusCodes.Status201Created)
       .Produces(StatusCodes.Status400BadRequest);
 
     app.MapPost("/api/users/login", async (LoginUserRequestDto dto, LoginUserHandler handler) =>
