@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
 
     services.AddScoped<CustomAuthenticationStateProvider>();
     services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
+    services.AddScoped<TokenStore>();
 
     services.AddAuthentication(options =>
       {
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
     services.AddAuthorizationCore();
     services.AddHttpContextAccessor();
     services.AddScoped<AuthTokenHandler>();
+    
 
     services.AddHttpClient<UserApiClient>(client =>
       {
@@ -61,7 +63,7 @@ public static class ServiceCollectionExtensions
 
     services.AddHttpClient("RawWebClient", client =>
     {
-      var webUri = configuration["WebUri"] ?? "https://localhost:5087";
+      var webUri = configuration["WebUri"] ?? "http://localhost:5087";
       client.BaseAddress = new Uri(webUri);
     });
 
