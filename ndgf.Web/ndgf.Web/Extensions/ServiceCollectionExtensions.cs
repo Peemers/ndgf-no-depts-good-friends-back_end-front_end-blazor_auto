@@ -16,7 +16,6 @@ public static class ServiceCollectionExtensions
 
     services.AddScoped<CustomAuthenticationStateProvider>();
     services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
-    services.AddScoped<TokenStore>();
 
     services.AddAuthentication(options =>
       {
