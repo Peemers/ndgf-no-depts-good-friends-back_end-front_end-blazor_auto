@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @layout MainLayout
 
@@ -23,7 +22,7 @@
       <AuthorizeView>
         <Authorized>
           <NavLink href="/groups"
-                   class="text-center bg-amber-600 hover:bg-amber-700 active:scale-[0.95] transition-all text-white font-semibold rounded-lg h-14 px-8 text-base w-fit shadow-lg shadow-amber-600/20 inline-flex items-center justify-center">
+                   class="hover:scale-[0.98] active:scale-[0.98] transition-all text-center shadow-black shadow-sm bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg h-14 px-8 text-base w-fit shadow-lg shadow-amber-600/20 inline-flex items-center justify-center">
             Consultez vos groupes de dépense
           </NavLink>
         </Authorized>

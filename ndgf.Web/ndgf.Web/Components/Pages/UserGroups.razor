@@ -1,5 +1,4 @@
 ﻿@page "/groups"
-@using System.Security.Cryptography
 @using Microsoft.AspNetCore.Authorization
 @using ndgf.Web.Models.Group
 @using ndgf.Web.Services.Group
@@ -7,9 +6,11 @@
 @attribute [Authorize]
 
 <div class="min-h-screen flex flex-col bg-linear-to-bl from-[#F3EBD8] bg-[#F5F3EE]">
-  <h1 class="text-3xl underline p-2 text-center tracking-tight mt-4">Groupes dans lesquels vous êtes inscrit</h1>
+  <NavLink href="@($"/groups/create")"
+           class="text-center rounded-2xl hover:scale-[0.98] transition-all shadow-black shadow-lg/50 bg-amber-600 hover:bg-amber-700 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 mt-4 text-xl p-1 ml-6 mr-6">
+    Créer un nouveau groupe
+  </NavLink>
   <div class="justify-center flex flex-col md:flex-row">
-
     @if (_errorMessage is not null)
     {
       <p class="text-center text-2xl text-red-600 p-6">@_errorMessage</p>
@@ -21,48 +22,52 @@
     else
     {
       <div
-        class="flex flex-wrap bg-[#F5F3EE] gap-4 mt-8 mx-4 border-gray-600 rounded-2xl p-4 md:p-8 shadow-2xl">
-
+        class="flex flex-wrap flex-row bg-[#F5F3EE] gap-4 mt-5 mx-4 border-gray-600 rounded-2xl p-4 md:p-8 shadow-2xl">
         @if (_userGroups.Groups.Count == 0)
         {
           <div class="flex flex-col self-start">
             <div>
-              <img src="images/notfound.jpg" alt="" class="w-xl rounded-2xl opacity-70">
+              <img src="images/notfound.jpg" alt="" class="w-xl rounded-2xl opacity-50">
             </div>
             <div class="text-2xl text-center mt-5">
               <p class="text-gray-600">Pas de groupe à afficher</p>
-              <NavLink href="@($"/groups/create")" class="text-blue-700 hover:text-green-900 underline">Créez un groupe
+              <NavLink href="@($"/groups/create")"
+                       class="text-center hover:scale-[0.98] active:scale-[0.98] bg-amber-600 hover:bg-amber-700 transition-all text-white font-semibold rounded-lg h-12 mt-2  px-8 text-base w-fit inline-flex items-center justify-center shadow-lg active:shadow-amber-700 bg-linear-to-b hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 shadow-black">
+                Créez un groupe
                 de dépense
               </NavLink>
             </div>
           </div>
         }
-
-        @foreach (var group in _userGroups.Groups.OrderBy(g => g.ArchivedAt))
+        
+        @if (_userGroups is not null)
         {
-          <div
-            class="flex flex-wrap hover:scale-[0.95] active:scale-[0.95] hover:shadow-amber-800 transition-all shadow-black shadow-2xl rounded-2xl bg-linear-to-tl to-[#B07D4C] w-full sm:w-110 @(group.ArchivedAt is not null ? "opacity-40" : "")">
-            <NavLink href="@($"/groups/{group.Id}")" class="p-4 w-full">
-              <img src="images/ndgf-card.jpg" class="w-full h-auto rounded-lg" alt="">
-              <h1 class="text-center tracking-tight text-3xl mt-2 underline">@group.Name</h1>
-              @if (group.ArchivedAt is not null)
-              {
-                <p class="text-center text-sm text-gray-800 font-semibold">🔒 Archivé</p>
-              }
-              @if (group.Description is not null)
-              {
-                <h2 class="text-center text-lg mt-2 text-gray-600">@group.Description</h2>
-              }
+          @foreach (var group in _userGroups.Groups.OrderBy(g => g.ArchivedAt))
+          {
+            <div
+              class="flex flex-wrap hover:scale-[0.95] active:scale-[0.95] hover:shadow-amber-800 transition-all shadow-black shadow-2xl rounded-2xl bg-linear-to-tl to-[#B07D4C] w-full sm:w-110 @(group.ArchivedAt is not null ? "opacity-40" : "")">
+              <NavLink href="@($"/groups/{group.Id}")" class="p-4 w-full">
+                <img src="images/ndgf-card.jpg" class="w-full h-auto rounded-lg" alt="">
+                <h1 class="text-center tracking-tight text-3xl mt-2">@group.Name</h1>
+                @if (group.ArchivedAt is not null)
+                {
+                  <p class="text-center text-sm text-gray-800 font-semibold">🔒 Archivé</p>
+                }
+                @if (group.Description is not null)
+                {
+                  <h2 class="text-center text-lg mt-2 text-gray-600">@group.Description</h2>
+                }
 
-              <div class="flex justify-between mt-8">
-                <p class="text-gray-700">Cliquez pour afficher ce groupe</p>
-                <span class="inline-flex items-center gap-1 bg-white/80 rounded-full px-3 py-1 text-sm font-medium">
-                  👥 @group.MemberCount membre@(group.MemberCount > 1 ? "s" : "")
-                </span>
-              </div>
+                <div class="flex justify-between mt-8">
+                  <p class="text-gray-700">Cliquez pour afficher ce groupe</p>
+                  <span class="inline-flex items-center gap-1 bg-white/80 rounded-full px-3 py-1 text-sm font-medium">
+                    👥 @group.MemberCount membre@(group.MemberCount > 1 ? "s" : "")
+                  </span>
+                </div>
 
-            </NavLink>
-          </div>
+              </NavLink>
+            </div>
+          }
         }
       </div>
     }

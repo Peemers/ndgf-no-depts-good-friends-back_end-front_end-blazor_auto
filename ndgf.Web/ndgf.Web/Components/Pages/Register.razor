@@ -14,7 +14,7 @@
     
     <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-1">
       <DataAnnotationsValidator/>
-      <h1 class="text-2xl font-bold mb-6 flex underline">Formulaire d'inscription</h1>
+      <h1 class="text-2xl font-bold mb-4 justify-center flex">Formulaire d'inscription</h1>
       
       @if (_message is not null)
       {
@@ -26,12 +26,15 @@
         <InputText @bind-Value="_model.Email" class="border border-gray-400 rounded-xl p-2 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.Email"/>
       </div>
-
-      <div>
-        <label class="text-xl">Mot de passe</label>
-        <InputText type="password" @bind-Value="_model.Password"
-                   class="border border-gray-400 rounded-xl  p-2 w-full text-xl mt-1"/>
-        <ValidationMessage For="() => _model.Password"/>
+      
+      <label class="text-xl">Mot de passe</label>
+      <div class="relative">
+        <input type="@(_showPassword ? "text" : "password")" @bind="_model.Password" @bind:event="oninput"
+               class="border border-gray-400 rounded-xl p-2 pr-10 w-full text-xl mt-1"/>
+        <button type="button" @onclick="() => _showPassword = !_showPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-2xl hover:bg-gray-600 rounded-full items-center text-center justify-center">
+          👁️‍🗨️
+        </button>
       </div>
 
       <div>
@@ -60,7 +63,7 @@
       </div>
 
       <button type="submit" disabled="@_isSubmiting"
-              class=" bg-linear-to-l from-amber-700 to-orange-800 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-10 w-full">
+              class=" bg-linear-to-l from-amber-700 to-orange-800 shadow-black shadow-lg/40 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-5 w-full">
         @if (_isSubmiting)
         {
           <span>Inscription en cours ...</span>
@@ -70,18 +73,18 @@
           <span>S'inscrire</span>
         }
       </button>
-      <div class="flex justify-around p-6 text-2xl">
+      <div class="flex-1 justify-center text-center p-4 mt-5 text-xl md:text-2xl">
         Deja inscrit ?
         <NavLink href="/login" class="text-orange-600 hover:text-[#7B9668]">Connectez-vous</NavLink>
       </div>
 
       <div class="pt-1 mt-1">
-        <p class="text-xl text-gray-600 font-semibold mb-1 justify-center items-center flex">Avec No Debts, Good
+        <p class="text-xl text-gray-600 font-semibold mb-1 justify-center items-center text-center flex">Avec No Debts, Good
           Friends, vous pouvez :</p>
         <ul class="space-y-2 text-xl text-gray-700">
-          <li class="flex items-center justify-center gap-2">💰 Suivre vos dépenses partagées facilement</li>
-          <li class="flex items-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>
-          <li class="flex items-center gap-2 justify-center">💰 Gérer votre budget en toute simplicité</li>
+          <li class="flex items-center text-center gap-2 justify-center">💰 Suivre vos dépenses partagées facilement</li>
+          <li class="flex items-center text-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>
+          <li class="flex items-center text-center gap-2 justify-center">💰 Gérer votre budget en toute simplicité</li>
         </ul>
       </div>
     </EditForm>
@@ -110,6 +113,7 @@
   private string? _message;
   private bool _isSubmiting;
   private string? _antiforgeryToken;
+  private bool _showPassword;
 
   protected override void OnInitialized()
   {
