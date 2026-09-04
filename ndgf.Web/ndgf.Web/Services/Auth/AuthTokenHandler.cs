@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Http.Headers;
 
 namespace ndgf.Web.Services.Auth;
@@ -7,10 +8,8 @@ public class AuthTokenHandler(
     IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory) : DelegatingHandler
 {
-    private const string AccessTokenKey = "CurrentAccessToken";
-    private const string RefreshTokenKey = "CurrentRefreshToken";
-    private const string RefreshTaskKey = "CurrentRefreshTask";
-    private static readonly object LockObject = new();
+    private static readonly ConcurrentDictionary<string, RefreshResult> LatestTokens = new();
+    private static readonly ConcurrentDictionary<string, Task<RefreshResult?>> RefreshTasks = new();
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
@@ -22,7 +21,13 @@ public class AuthTokenHandler(
             return await base.SendAsync(request, cancellationToken);
         }
 
-        var accessToken = GetOrInitAccessToken(context);
+        var userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var cookieAccessToken = context.User.FindFirst("AccessToken")?.Value;
+        var cookieRefreshToken = context.User.FindFirst("RefreshToken")?.Value;
+
+        var accessToken = (userId is not null && LatestTokens.TryGetValue(userId, out var cached))
+            ? cached.AccessToken
+            : cookieAccessToken;
 
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
@@ -31,16 +36,23 @@ public class AuthTokenHandler(
 
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        if (response.StatusCode == HttpStatusCode.Unauthorized && userId is not null)
         {
-            var refreshSucceeded = await GetOrStartRefresh(context, cancellationToken);
+            var refreshTokenToUse = LatestTokens.TryGetValue(userId, out var latest)
+                ? latest.RefreshToken
+                : cookieRefreshToken;
 
-            if (refreshSucceeded)
+            if (!string.IsNullOrWhiteSpace(refreshTokenToUse))
             {
-                var newAccessToken = context.Items[AccessTokenKey] as string;
-                if (!string.IsNullOrWhiteSpace(newAccessToken))
+                var refreshTask = RefreshTasks.GetOrAdd(userId, _ => DoRefreshAsync(refreshTokenToUse, context, userId, cancellationToken));
+
+                var result = await refreshTask;
+
+                RefreshTasks.TryRemove(new KeyValuePair<string, Task<RefreshResult?>>(userId, refreshTask));
+
+                if (result is not null)
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newAccessToken);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
                     response = await base.SendAsync(request, cancellationToken);
                 }
             }
@@ -49,43 +61,8 @@ public class AuthTokenHandler(
         return response;
     }
 
-    private string? GetOrInitAccessToken(HttpContext context)
+    private async Task<RefreshResult?> DoRefreshAsync(string refreshToken, HttpContext context, string userId, CancellationToken cancellationToken)
     {
-        if (context.Items.TryGetValue(AccessTokenKey, out var stored) && stored is string token)
-        {
-            return token;
-        }
-
-        var claimToken = context.User.FindFirst("AccessToken")?.Value;
-        context.Items[AccessTokenKey] = claimToken;
-        context.Items[RefreshTokenKey] = context.User.FindFirst("RefreshToken")?.Value;
-        return claimToken;
-    }
-
-    private Task<bool> GetOrStartRefresh(HttpContext context, CancellationToken cancellationToken)
-    {
-        lock (LockObject)
-        {
-            if (context.Items[RefreshTaskKey] is Task<bool> existingTask && !existingTask.IsCompleted)
-            {
-                return existingTask;
-            }
-
-            var newTask = DoRefreshAsync(context, cancellationToken);
-            context.Items[RefreshTaskKey] = newTask;
-            return newTask;
-        }
-    }
-
-    private async Task<bool> DoRefreshAsync(HttpContext context, CancellationToken cancellationToken)
-    {
-        var refreshToken = context.Items[RefreshTokenKey] as string;
-
-        if (string.IsNullOrWhiteSpace(refreshToken))
-        {
-            return false;
-        }
-
         var rawClient = httpClientFactory.CreateClient("RawApiClient");
         var refreshResponse = await rawClient.PostAsJsonAsync(
             "/api/users/refresh",
@@ -94,17 +71,16 @@ public class AuthTokenHandler(
 
         if (!refreshResponse.IsSuccessStatusCode)
         {
-            return false;
+            return null;
         }
 
         var result = await refreshResponse.Content.ReadFromJsonAsync<RefreshResult>(cancellationToken: cancellationToken);
         if (result is null)
         {
-            return false;
+            return null;
         }
 
-        context.Items[AccessTokenKey] = result.AccessToken;
-        context.Items[RefreshTokenKey] = result.RefreshToken;
+        LatestTokens[userId] = result;
 
         var cookieClient = httpClientFactory.CreateClient("RawWebClient");
         var cookieHeader = context.Request.Headers.Cookie.ToString();
@@ -119,6 +95,6 @@ public class AuthTokenHandler(
             result.RefreshToken
         }, cancellationToken);
 
-        return true;
+        return result;
     }
 }
