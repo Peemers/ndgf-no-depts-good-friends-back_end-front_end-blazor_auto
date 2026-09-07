@@ -1,5 +1,6 @@
 ﻿@page "/groups/{groupId:guid}"
 @using Microsoft.AspNetCore.Authorization
+@using ndgf.Domain.Entities
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
 @using ndgf.Web.Models.GroupHistory
@@ -14,7 +15,11 @@
 
 @attribute [Authorize]
 
+
+
 <div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
+  <div
+    class="hidden from-[#8A6220] to-[#6E5219] from-[#98492C] to-[#7A3A23] from-[#46392F] to-[#352A23] from-[#6A4A70] to-[#553A5A] from-[#4A5C86] to-[#3A4A6E] from-[#6E6B2A] to-[#575420]"></div>
 
   @if (_errorMessage is not null)
   {
@@ -29,12 +34,12 @@
     <div class="w-full text-2xl bg-white/70 p-6 shadow-lg md:w-70 md:sticky md:top-0 md:h-screen md:overflow-y-auto">
 
       <div class="flex justify-between items-center mb-1">
-        <h2 class="text-xl font-semibold text-gray-800">Membres</h2>
-        <span class="text-lg text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">@_groupDetails.Members.Count()</span>
+        <h2 class="text-xl font-semibold text-[#1E1813]">Membres</h2>
+        <span class="text-lg text-[#356A6E] bg-gray-200 px-2 py-0.5 rounded-full">@_groupDetails.Members.Count()</span>
       </div>
 
       <button @onclick="ToggleAddMemberForm"
-              class="w-full mt-3 bg-linear-to-l rounded-xl shadow-black shadow-lg/50 border-black from-amber-700 to-orange-800 text-white px-4 py-2 hover:from-green-600 hover:to-[#7B9668] flex items-center justify-center gap-2">
+              class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all  w-full mt-3 rounded-xl shadow-black shadow-lg/50 px-4 py-2 flex items-center justify-center gap-2">
         <span>+</span> Ajouter un membre
       </button>
 
@@ -43,7 +48,7 @@
         <EditForm Model="_model" OnValidSubmit="HandleAddGroupMember"
                   class="p-3 mt-2 bg-amber-50 rounded-xl flex flex-col items-center">
           <DataAnnotationsValidator/>
-          <h3 class="mb-2 font-bold text-sm text-gray-700">Rechercher un membre à ajouter</h3>
+          <h3 class="mb-2 font-bold text-sm text-[#46392F] text-center">Rechercher un membre à ajouter</h3>
 
           <div class="w-full">
             <InputText @bind-Value="_model.SearchValue" class="border border-gray-400 rounded-xl p-3 mb-2 w-full"/>
@@ -51,14 +56,14 @@
           </div>
 
           <button type="submit" disabled="@_isSubmiting"
-                  class="bg-linear-to-l rounded-2xl border-b-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 w-full p-2 shadow-black shadow-lg">
+                  class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all rounded-2xl border-b-black text-white w-full p-2 shadow-black shadow-lg">
             @if (_isSubmiting)
             {
-              <span>Ajout en cours ...</span>
+              <span class="text-[#E8DECD]">Ajout en cours ...</span>
             }
             else
             {
-              <span>Ajouter membre</span>
+              <span class="text-[#E8DECD]">Ajouter membre</span>
             }
           </button>
         </EditForm>
@@ -71,11 +76,14 @@
 
       <div
         class="flex flex-row md:flex-col flex-wrap gap-0 md:gap-2 md:mt-6 border-t border-gray-400 pt-4 md:pt-4 items-center content-center justify-center md:items-start">
-        @foreach (var member in _groupDetails.Members)
+        @for (int i = 0; i < _groupDetails.Members.Count; i++)
         {
+          var member = _groupDetails.Members[i];
+          var colorClass = GetColorForUser(member.UserId);
+
           <div class="flex items-center justify-center gap-3 p-1 rounded-xl hover:bg-amber-50">
             <div
-              class="w-25 h-18 md:w-40 md:h-30 shrink-0 rounded-3xl shadow-lg/50 bg-linear-to-t from-amber-700 to-amber-900 text-white flex items-center justify-center text-lg font-bold shadow-black">
+              class="w-25 h-18 md:w-40 md:h-30 shrink-0 rounded-3xl shadow-lg/50 bg-linear-to-t @colorClass text-[#E8DECD] flex items-center justify-center text-lg font-bold shadow-black">
               @member.Pseudo
             </div>
             <button @onclick="() => RequestRemoveMember(member.UserId, member.Pseudo)"
@@ -87,20 +95,19 @@
       </div>
     </div>
 
-
     <div class="flex-1 p-3">
       <div class="bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6 min-h-screen max-w-screen">
-        <h1 class="text-4xl font-bold text-center md:text-left">@_groupDetails.Name</h1>
+        <h1 class="text-[#1E1813] text-4xl font-bold text-center md:text-left">@_groupDetails.Name</h1>
         @if (_groupDetails.Description is not null)
         {
-          <p class="text-gray-500 text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
+          <p class="text-[#46392F] text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
 
         <div class="flex flex-col md:flex-row gap-1.5 mt-4">
-          <div class="w-full md:flex-1 bg-white/60 rounded-2xl p-4 border border-amber-200">
+          <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-amber-200">
             <div class="flex items-center gap-2 mb-3">
               <span class="text-xl">💡</span>
-              <h3 class="text-lg font-semibold text-gray-800">Remboursements suggérés</h3>
+              <h3 class="text-lg font-semibold text-[#46392F]">Remboursements suggérés</h3>
             </div>
 
             @if (_getGroupBalance is not null && _getGroupBalance.SuggestedRepayments.Any())
@@ -108,12 +115,12 @@
               <div class="space-y-2">
                 @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
                 {
-                  <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                  <div class="flex items-center gap-3 p-3 rounded-xl bg-[#F6E9CC] border border-amber-200">
                     <div
-                      class="w-9 h-9 rounded-full bg-amber-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      class="w-9 h-9 rounded-full bg-linear-to-t @(GetColorForUser(repayment.PayerId)) text-white flex items-center justify-center text-xs font-bold shrink-0">
                       @repayment.PayerPseudo[0]@repayment.PayerPseudo[1]
                     </div>
-                    <p class="text-base leading-snug">
+                    <p class="text-base leading-snug text-[#6E5C4E]">
                       <span class="font-semibold">@repayment.PayerPseudo</span> doit
                       <span class="font-semibold text-amber-800">@repayment.Amount €</span>
                       à <span class="font-semibold">@repayment.ReceiverPseudo</span>
@@ -124,15 +131,15 @@
             }
             else
             {
-              <p class="text-gray-500 mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
+              <p class="text-[#6E5C4E] mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
             }
           </div>
 
 
-          <div class="w-full md:flex-1 bg-white/60 rounded-2xl p-4 border border-violet-200">
+          <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-violet-200">
             <div class="flex items-center gap-2 mb-3">
               <span class="text-xl">📊</span>
-              <h3 class="text-lg font-semibold text-gray-800">Soldes du groupe</h3>
+              <h3 class="text-[#46392F] text-lg font-semibold">Soldes du groupe</h3>
             </div>
 
             @if (_getGroupBalance is not null && _getGroupBalance.Balances.Any())
@@ -140,22 +147,22 @@
               <div class="space-y-2">
                 @foreach (var balance in _getGroupBalance.Balances)
                 {
-                  <div class="flex justify-between items-center p-3 rounded-xl bg-white border border-gray-200">
-                    <p class="font-semibold">@balance.Pseudo</p>
+                  <div class=" flex justify-between items-center p-3 rounded-xl bg-[#F6E9CC] border border-gray-200">
+                    <p class="text-[#6E5C4E] font-semibold">@balance.Pseudo</p>
 
                     @if (balance.Balance > 0)
                     {
                       <span
-                        class="text-sm font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-full">+@balance.Balance €</span>
+                        class="text-sm font-semibold text-[#3D5A45] bg-green-100 px-2 py-1 rounded-full">+@balance.Balance €</span>
                     }
                     else if (balance.Balance < 0)
                     {
                       <span
-                        class="text-sm font-semibold text-red-700 bg-red-100 px-2 py-1 rounded-full">@balance.Balance €</span>
+                        class="text-sm font-semibold text-[#6B3320] bg-[#E0A88C] px-2 py-1 rounded-full">@balance.Balance €</span>
                     }
                     else
                     {
-                      <span class="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">À jour</span>
+                      <span class="text-sm font-medium text-[#6E5C4E] bg-gray-100 px-2 py-1 rounded-full">À jour</span>
                     }
                   </div>
                 }
@@ -172,12 +179,13 @@
           class="flex flex-col md:flex-row justify-between items-center p-3 rounded-xl gap-1 w-full">
           @if (_getGroupBalance is not null)
           {
-            <div class="bg-white/70 rounded-xl p-3 shadow-sm flex flex-row items-center gap-2">
-              <p class="text-gray-700 text-sm">
+            <div class="bg-white/70 rounded-xl justify-between p-3 shadow-sm flex flex-row items-center gap-2">
+              <p class="text-[#2E2620] text-lg">
                 @_getGroupBalance?.ExpenseCount dépense(s) au total
               </p>
               <span class="text-gray-400">•</span>
-              <p class="text-gray-700 text-sm text-end">pour une somme de <span
+              <p class="text-[#2E2620] text-lg text-end">pour une somme de
+                <span
                   class="text-orange-950 font-semibold">@_getGroupBalance?.TotalExpenses</span> €</p>
             </div>
           }
@@ -185,23 +193,23 @@
           <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2">
 
             <button @onclick="RequestArchive"
-                    class="bg-linear-to-r text-center rounded-2xl hover:scale-[0.95] transition-all  shadow-black shadow-sm from-red-200 to-red-400 text-black hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-500 active:to-red-600 px-4 py-2 text-xl w-full md:flex-1">
-              🔒Archiver le groupe
+                    class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1">
+              Archiver le groupe
             </button>
 
             <NavLink href="/groups"
-                     class="bg-linear-to-r text-center content-center rounded-2xl hover:scale-[0.95] transition-all shadow-black shadow-sm from-amber-100 to-orange-300 text-black hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
-              🔙 Retour aux groupes
+                     class="hover:bg-[#93BABC] text-center content-center rounded-2xl hover:scale-[0.95] active:scale-97 transition-all shadow-black/10 shadow-sm text-[#46392F] px-4 py-2 text-xl w-full md:flex-1">
+               Retour aux groupes
             </NavLink>
 
             <button @onclick="OpenExpenseModal"
-                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm hover:scale-[0.95] from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
-              ➕ Créer une nouvelle dépense
+                    class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  rounded-2xl shadow-black/20 shadow-sm hover:scale-[0.95]  px-4 py-2 text-xl w-full md:flex-1">
+               Créer une nouvelle dépense
             </button>
 
             <button @onclick="OpenRefundModal"
-                    class="bg-linear-to-l rounded-2xl shadow-black shadow-sm hover:scale-[0.95] from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl w-full md:flex-1">
-              ➕ Créer un nouveau remboursement
+                    class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1">
+               Créer un nouveau remboursement
             </button>
           </div>
 
@@ -219,16 +227,18 @@
                   <div class="min-w-0">
                     @if (transaction.Transaction == TransactionTypeModel.Expense)
                     {
-                      <p class="text-xl font-semibold text-red-600 truncate">💸 @transaction.Description</p>
-                      <p class="text-lg text-gray-600">Payé par <span
+                      <p class="text-xl font-semibold text-[#A85434] truncate">💸 @transaction.Description</p>
+                      <p class="text-lg text-[#6B3320]">Payé par
+                        <span
                           class="font-semibold">@transaction.MainActorPseudo</span></p>
                     }
                     else
                     {
-                      <p class="text-xl font-semibold text-green-700 truncate">
+                      <p class="text-xl font-semibold text-[#3D5A45] truncate">
                         💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
-                      <p class="text-lg text-gray-600">Remboursé
-                        par <span class="font-semibold">@transaction.MainActorPseudo</span> vers <span
+                      <p class="text-lg text-[#6B3320]">Remboursé
+                        par <span class="font-semibold">@transaction.MainActorPseudo</span> vers
+                        <span
                           class="font-semibold">@transaction.ReceiverPseudo</span></p>
                     }
                   </div>
@@ -238,7 +248,7 @@
                       @if (transaction.DeletedAt is null)
                       {
                         <button @onclick="() => RequestDelete(transaction.Id, transaction.Transaction)"
-                                class="bg-red-300 p-0.5 hover:bg-red-600 rounded-2xl active:bg-red-500 mb-1">
+                                class="bg-[#C06B45] p-0.5 hover:bg-red-600 rounded-2xl active:bg-red-500 mb-1">
                           🗑️
                         </button>
                       }
@@ -273,12 +283,7 @@
             <div class="bg-white rounded-2xl p-6 max-w-md w-full">
               <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
                 <DataAnnotationsValidator/>
-                <div class="flex justify-end">
-                  <button type="button" @onclick="CloseExpenseModal"
-                          class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
-                  </button>
-                </div>
-                <h1 class="text-2xl font-bold mb-6 flex underline">Création d'une nouvelle dépense</h1>
+                <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'une nouvelle dépense</h1>
 
                 @if (_message is not null)
                 {
@@ -286,21 +291,21 @@
                 }
 
                 <div>
-                  <label class="text-xl">Montant dépensé</label>
+                  <label class="text-[#6B3320] text-xl">Montant dépensé</label>
                   <InputNumber @bind-Value="_createExpenseModel.Amount"
                                class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
                   <ValidationMessage For="() => _createExpenseModel.Amount"/>
                 </div>
 
                 <div>
-                  <label class="text-xl">Déscription de la dépense</label>
+                  <label class="text-[#6B3320] text-xl">Déscription de la dépense</label>
                   <InputText @bind-Value="_createExpenseModel.Description"
                              class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
                   <ValidationMessage For="() => _createExpenseModel.Description"/>
                 </div>
 
                 <div>
-                  <label class="text-xl">Qui a fait cette dépense ?</label>
+                  <label class="text-[#6B3320] text-xl">Qui a fait cette dépense ?</label>
                   <InputSelect @bind-Value="_createExpenseModel.UserId"
                                class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
                     <option value="">Choisir un membre du groupe</option>
@@ -312,12 +317,12 @@
                 </div>
 
 
-                <label class="text-xl">Qui participe à cette dépense ?</label>
+                <label class="text-[#6B3320] text-xl">Qui participe à cette dépense ?</label>
 
                 <div class="mt-3">
                   @foreach (var member in _groupDetails.Members)
                   {
-                    <div class="flex p-2 mb-1 w-fit items-center bg-[#B07D4C]/50 rounded-2xl">
+                    <div class="text-[#6B3320] flex p-2 mb-1 w-fit items-center bg-[#DDECEC] rounded-2xl">
                       <input class="ml-2 mr-2" type="checkbox"
                              checked="@_selectedUserIds.Contains(member.UserId)"
                              @onchange="() => ToggleParticipant(member.UserId)"/>
@@ -327,8 +332,8 @@
                 </div>
 
                 <div class="flex">
-                  <button type="submit" disabled="@_isSubmiting"
-                          class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
+                  <button type="button" @onclick="RequestCreateExpense" disabled="@_isSubmiting"
+                          class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all  mr-1 rounded-2xl px-4 py-2 text-xl mt-1 w-full">
                     @if (_isSubmiting)
                     {
                       <span>Création en cours ...</span>
@@ -339,7 +344,7 @@
                     }
                   </button>
                   <button type="button" @onclick="CloseExpenseModal"
-                          class="bg-linear-to-l rounded-2xl from-red-400 to-red-500 text-white hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 px-4 py-2 text-xl mt-4 w-full">
+                          class="bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 text-[#6B3320] rounded-2xl px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
@@ -353,12 +358,7 @@
             <div class="bg-white rounded-2xl p-6 max-w-md w-full">
               <EditForm Model="_createRefundModel" OnValidSubmit="HandleCreateRefund" class="space-y-4">
                 <DataAnnotationsValidator/>
-                <div class="flex justify-end">
-                  <button type="button" @onclick="CloseRefundModal"
-                          class="bg-gray-300 hover:bg-green-200 active:bg-green-300 flex text-xl underline"> fermer
-                  </button>
-                </div>
-                <h1 class="text-2xl font-bold mb-6 flex underline">Création d'un remboursement</h1>
+                <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'un remboursement</h1>
 
                 @if (_message is not null)
                 {
@@ -366,21 +366,21 @@
                 }
 
                 <div>
-                  <label class="text-xl">Montant remboursé</label>
+                  <label class="text-[#6B3320] text-xl">Montant remboursé</label>
                   <InputNumber @bind-Value="_createRefundModel.Amount"
                                class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
                   <ValidationMessage For="() => _createRefundModel.Amount"/>
                 </div>
 
                 <div>
-                  <label class="text-xl">Déscription du remboursement (optionnel)</label>
+                  <label class="text-[#6B3320] text-xl">Déscription du remboursement (optionnel)</label>
                   <InputText @bind-Value="_createRefundModel.Description"
                              class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
                   <ValidationMessage For="() => _createRefundModel.Description"/>
                 </div>
 
                 <div>
-                  <label class="text-xl">Qui rembourse cet argent ?</label>
+                  <label class="text-[#6B3320] text-xl">Qui rembourse cet argent ?</label>
                   <InputSelect @bind-Value="_createRefundModel.PayerId"
                                class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
                     <option value="">Choisir un membre du groupe</option>
@@ -392,7 +392,7 @@
                 </div>
 
                 <div>
-                  <label class="text-xl">Qui reçoit cet argent ?</label>
+                  <label class="text-[#6B3320] text-xl">Qui reçoit cet argent ?</label>
                   <InputSelect @bind-Value="_createRefundModel.ReceiverId"
                                class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
                     <option value="">Choisir un membre du groupe</option>
@@ -404,8 +404,8 @@
                 </div>
 
                 <div class="flex">
-                  <button type="submit" disabled="@_isSubmiting"
-                          class="mr-1 bg-linear-to-l rounded-2xl from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-1 w-full">
+                  <button type="button" @onclick="RequestCreateRefund" disabled="@_isSubmiting"
+                          class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all rounded-2xl mr-1 px-4 py-2 text-xl mt-1 w-full">
                     @if (_isSubmiting)
                     {
                       <span>Remboursement ...</span>
@@ -416,7 +416,7 @@
                     }
                   </button>
                   <button type="button" @onclick="CloseRefundModal"
-                          class="bg-linear-to-l rounded-2xl from-red-400 to-red-500 text-white hover:bg-linear-to-r hover:from-red-600 hover:to-red-700 active:from-red-600 active:to-red-700 px-4 py-2 text-xl mt-4 w-full">
+                          class="text-[#6B3320] bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 bg-linear-to-l rounded-2xl px-4 py-2 text-xl mt-4 w-full">
                     Annuler
                   </button>
                 </div>
@@ -430,14 +430,14 @@
         <div
           class="justify-between font-semibold text-xl items-center border bg-linear-to-tr from-white to-violet-200 border-gray-300 p-2 rounded-lg flex gap-2 mt-2">
           <button @onclick="PreviousPage"
-                  class="border border-gray-500 rounded-lg p-2 flex-1 bg-gray-300 bg-linear-to-l hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 text-center">
-            ◀️ page précédente
+                  class="text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] active:bg-[#CFC2AF] border border-[#46392F]/10 rounded-lg p-2 flex-1">
+            page précédente
           </button>
-          <p class="bg-gray-300 border border-gray-500 rounded-lg p-2 flex-1 text-center">Page
-            : @_getGroupHistory.TransactionSummary.PageNumber</p>
+          <p class="text-[#A79482] rounded-lg p-2 flex-1 text-center">PAGE
+            @_getGroupHistory.TransactionSummary.PageNumber</p>
           <button @onclick="NextPage"
-                  class="border border-gray-500 rounded-lg p-2 flex-1 bg-gray-300 bg-linear-to-br hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 text-center">
-            ▶️ page suivante
+                  class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:[#2F4436] rounded-lg p-2 flex-1 text-center">
+            page suivante -->
           </button>
         </div>
       }
@@ -447,24 +447,24 @@
 @if (_transactionToDeleteId is not null)
 {
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-      <h2 class="text-xl font-bold mb-4">Confirmer la suppression</h2>
+    <div class="bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class=" text-[#2E2620] text-xl font-bold mb-4">Confirmer la suppression</h2>
       @if (_message is not null)
       {
         <p class="text-center text-sm text-red-600 p-6">@_message</p>
       }
-      <p class="text-gray-600 mb-6">
+      <p class="text-[#6E5C4E] mb-6">
         Êtes-vous sûr de vouloir supprimer cette
         @(_transactionToDeleteType == TransactionTypeModel.Expense ? "dépense" : "remboursement") ?
         Elle restera visible dans l'historique mais ne comptera plus dans les calculs.
       </p>
       <div class="flex justify-end gap-3">
         <button @onclick="CancelDelete"
-                class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">
+                class=" text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] hover:scale-98 active:scale-98 transition-all px-4 py-2 rounded-xl ">
           Annuler
         </button>
         <button @onclick="ConfirmDelete"
-                class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+                class="text-[#E8DECD] bg-[#A85434] hover:bg-[#8A4529] active:bg-[#8A4529] hover:scale-98 active:scale-98 px-4 py-2 rounded-xl">
           Supprimer
         </button>
       </div>
@@ -474,24 +474,24 @@
 @if (_showArchiveConfirmation)
 {
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-      <h2 class="text-xl font-bold mb-4">Confirmer l'archivage</h2>
+    <div class="bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-[#2E2620] text-xl font-bold mb-4">Confirmer l'archivage</h2>
       @if (_message is not null)
       {
         <p class="text-center text-sm text-red-600 p-6">@_message</p>
       }
-      <p class="text-gray-600 mb-6">
-        Êtes-vous sûr de vouloir archiver ce groupe : 
-        @(_groupDetails?.Name) ?
+      <p class="text-[#6E5C4E] mb-6">
+        Êtes-vous sûr de vouloir archiver ce groupe :
+        <span class="font-bold">@(_groupDetails?.Name)</span> ?
         Il restera visible sur la page des groupes.
       </p>
       <div class="flex justify-end gap-3">
         <button @onclick="CancelArchive"
-                class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">
+                class="text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] active:bg-[#CFC2AF] hover:scale-98 active:scale-98 transition-all px-4 py-2 rounded-xl">
           Annuler
         </button>
         <button @onclick="ConfirmArchive"
-                class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+                class="text-[#F7F1E5] bg-[#A85434] hover:bg-[#8A4529] active:bg-[#8A4529] hover:scale-98 active:scale-98 transition-all  px-4 py-2 rounded-xl">
           Archiver
         </button>
       </div>
@@ -502,24 +502,100 @@
 @if (_memberToRemoveId is not null)
 {
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-      <h2 class="text-xl font-bold mb-4">Confirmer la suppression du membre</h2>
+    <div class="text-[#2E2620] bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-2xl font-bold mb-4">Confirmer la suppression du membre</h2>
       @if (_message is not null)
       {
         <p class="text-center text-sm text-red-600 p-6">@_message</p>
       }
-      <p class="text-gray-600 mb-6">
-        Êtes-vous sûr de vouloir supprimer l'utilisateur : 
+      <p class="text-[#6E5C4E] mb-6 text-lg">
+        Êtes-vous sûr de vouloir supprimer l'utilisateur :
         @_memberToRemovePseudo du groupe ?
       </p>
       <div class="flex justify-end gap-3">
         <button @onclick="CancelRemoveMember"
-                class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">
+                class="text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] active:bg-[#CFC2AF] hover:scale-98 active:scale-98 px-4 py-2 rounded-xl">
           Annuler
         </button>
         <button @onclick="ConfirmRemoveMember"
-                class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+                class="text-[#F7F1E5] bg-[#A85434] hover:bg-[#8A4529] active:bg-[#8A4529] hover:scale-98 active:scale-98 px-4 py-2 rounded-xl">
           Retirer du groupe
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (_confirmExpense)
+{
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-2xl text-center font-bold mb-6 text-[#2E2620]">Résumé de la dépense à ajouter</h2>
+      @if (_message is not null)
+      {
+        <p class="text-center rounded2--- text-sm text-red-600 p-6">@_message</p>
+      }
+      <p class="text-[#6E5C4E] mb-2">Montant : <span class="font-bold">@_createExpenseModel.Amount€</span></p>
+
+      <p class="text-[#6E5C4E] mb-2"> Déscription : <span class="font-bold">@_createExpenseModel.Description</span></p>
+
+      <p class="text-[#6E5C4E] mb-2">
+        Qui a dépensé ? <span
+          class="font-bold">@_groupDetails!.Members.FirstOrDefault(m => m.UserId == _createExpenseModel.UserId)?.Pseudo</span>
+      </p>
+
+      <p class="text-[#6E5C4E] mb-2">Qui participe ?</p>
+      @foreach (var part in _createExpenseModel.ExpenseParts)
+      {
+        var member = _groupDetails!.Members.FirstOrDefault(m => m.UserId == part.UserId);
+        <p class="mb-1"><span class="font-bold text-[#6E5C4E]">@member?.Pseudo</span> - @part.Percentage%</p>
+      }
+
+      <div class="flex justify-end gap-2">
+        <button @onclick="CancelCreateExpense"
+                class="text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] active:bg-[#CFC2AF] hover:scale-98 active:scale-98 px-4 py-2 rounded-xl">
+          Annuler
+        </button>
+        <button @onclick="ConfirmCreateExpense"
+                class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  px-4 py-2 rounded-xl">
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (_confirmRefund)
+{
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-[#2E2620] text-2xl text-center font-bold mb-6">Résumé de la dépense à ajouter</h2>
+      @if (_message is not null)
+      {
+        <p class="text-center rounded2--- text-lg text-red-600 p-6">@_message</p>
+      }
+      <p class="text-[#6E5C4E] mb-2">Montant : <span class="font-bold">@_createRefundModel.Amount€</span></p>
+
+      <p class="text-[#6E5C4E] mb-2"> Déscription : <span class="font-bold">@_createRefundModel.Description</span></p>
+
+      <p class="text-[#6E5C4E] mb-2">
+        Qui rembourse ? <span
+          class="font-bold">@_groupDetails!.Members.FirstOrDefault(m => m.UserId == _createRefundModel.PayerId)?.Pseudo</span>
+      </p>
+
+      <p class="text-[#6E5C4E] mb-2">
+        Qui reçois ce remboursement ? <span
+          class="font-bold">@_groupDetails!.Members.FirstOrDefault(m => m.UserId == _createRefundModel.ReceiverId)?.Pseudo</span>
+      </p>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button @onclick="CancelCreateRefund"
+                class="text-[#46392F] bg-[#E8DECD] hover:bg-[#CFC2AF] active:bg-[#CFC2AF] hover:scale-98 active:scale-98 px-4 py-2 rounded-xl">
+          Annuler
+        </button>
+        <button @onclick="ConfirmCreateRefund"
+                class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all px-4 py-2 rounded-xl">
+          Confirmer
         </button>
       </div>
     </div>
@@ -667,6 +743,8 @@
 
   private void CalculatePartPerUser()
   {
+    _createExpenseModel.ExpenseParts.Clear();
+
     var baseShare = 100 / _selectedUserIds.Count;
     var reminder = 100 % _selectedUserIds.Count;
 
@@ -825,6 +903,57 @@
     CancelDelete();
   }
 
+  private bool _confirmExpense;
+
+  private void RequestCreateExpense()
+  {
+    if (_selectedUserIds.Count == 0)
+    {
+      _message = "Veuillez selectionner au moins un participant à cette dépense";
+      return;
+    }
+
+    CalculatePartPerUser();
+    _confirmExpense = true;
+  }
+
+  private void CancelCreateExpense()
+  {
+    _confirmExpense = false;
+  }
+
+  private async Task ConfirmCreateExpense()
+  {
+    await HandleCreateExpense();
+
+    await Task.Delay(2000);
+    _message = null;
+
+    _confirmExpense = false;
+  }
+
+  private bool _confirmRefund;
+
+  private void RequestCreateRefund()
+  {
+    _confirmRefund = true;
+  }
+
+  private void CancelCreateRefund()
+  {
+    _confirmRefund = false;
+  }
+
+  private async Task ConfirmCreateRefund()
+  {
+    await HandleCreateRefund();
+    await Task.Delay(2000);
+    _message = null;
+
+    _confirmRefund = false;
+  }
+
+
   private bool _showArchiveConfirmation;
 
   private void RequestArchive()
@@ -895,6 +1024,22 @@
     }
 
     _memberToRemoveId = null;
+  }
+
+  private static readonly string[] Colors =
+  {
+    "from-[#8A6220] to-[#6E5219]",
+    "from-[#98492C] to-[#7A3A23]",
+    "from-[#46392F] to-[#352A23]",
+    "from-[#6A4A70] to-[#553A5A]",
+    "from-[#4A5C86] to-[#3A4A6E]",
+    "from-[#6E6B2A] to-[#575420]"
+  };
+
+  private static string GetColorForUser(Guid userId)
+  {
+    var index = Math.Abs(userId.GetHashCode()) % Colors.Length;
+    return Colors[index];
   }
 
 }

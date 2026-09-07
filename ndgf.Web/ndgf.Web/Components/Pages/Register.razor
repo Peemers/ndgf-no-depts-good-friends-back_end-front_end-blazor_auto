@@ -7,27 +7,27 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
 <div class="min-h-screen flex bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]  items-center justify-center p-4 border-2">
-  <div class="border rounded-2xl flex-row flex p-2 bg-linear-to-br from-white to-[#FDFBF5] shadow-2xl">
+  <div class="border rounded-2xl flex-row flex p-2 bg-[#F7F1E5] shadow-2xl">
 
     <img src="images/ngdf4.jpg" alt="image de personne en train de faire leurs comptes"
          class="border rounded-2xl mr-2 hidden md:block">
     
     <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-1">
       <DataAnnotationsValidator/>
-      <h1 class="text-2xl font-bold mb-4 justify-center flex">Formulaire d'inscription</h1>
+      <h1 class="text-2xl font-bold mb-4 justify-center flex  text-[#1E1813]">Formulaire d'inscription</h1>
       
       @if (_message is not null)
       {
-        <p class="mb-4">@_message</p>
+        <p class="text-[#A85434] mb-4">@_message</p>
       }
 
       <div>
-        <label class="text-xl">Email</label>
+        <label class="text-xl text-[#46392F]">Email</label>
         <InputText @bind-Value="_model.Email" class="border border-gray-400 rounded-xl p-2 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.Email"/>
       </div>
       
-      <label class="text-xl">Mot de passe</label>
+      <label class="text-xl text-[#46392F]">Mot de passe</label>
       <div class="relative">
         <input type="@(_showPassword ? "text" : "password")" @bind="_model.Password" @bind:event="oninput"
                class="border border-gray-400 rounded-xl p-2 pr-10 w-full text-xl mt-1"/>
@@ -38,32 +38,32 @@
       </div>
 
       <div>
-        <label class="text-xl">Confirmation mot de passe</label>
+        <label class="text-xl text-[#46392F]">Confirmation mot de passe</label>
         <InputText type="password" @bind-Value="_model.ConfirmPassword"
                    class="border border-gray-400 rounded-xl  p-2 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.ConfirmPassword"/>
       </div>
 
       <div>
-        <label class="text-xl">Pseudo</label>
+        <label class="text-xl text-[#46392F]">Pseudo</label>
         <InputText @bind-Value="_model.Pseudo" class="border p-2 w-full border-gray-400 rounded-xl  text-xl mt-1"/>
         <ValidationMessage For="() => _model.Pseudo"/>
       </div>
 
       <div>
-        <label class="text-xl">Prénom</label>
+        <label class="text-xl text-[#46392F]">Prénom</label>
         <InputText @bind-Value="_model.FirstName" class="border p-2 border-gray-400 rounded-xl  w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.FirstName"/>
       </div>
 
       <div>
-        <label class="text-xl">Nom de famille</label>
+        <label class="text-xl text-[#46392F]">Nom de famille</label>
         <InputText @bind-Value="_model.LastName" class="border p-2 border-gray-400 rounded-xl  w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.LastName"/>
       </div>
 
       <button type="submit" disabled="@_isSubmiting"
-              class=" bg-linear-to-l from-amber-700 to-orange-800 shadow-black shadow-lg/40 border-gray-500 rounded-xl  text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-2xl mt-5 w-full">
+              class=" bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all shadow-black shadow-lg/40 border-gray-500 rounded-xl text-white px-4 py-2 text-2xl mt-5 w-full">
         @if (_isSubmiting)
         {
           <span>Inscription en cours ...</span>
@@ -73,15 +73,15 @@
           <span>S'inscrire</span>
         }
       </button>
-      <div class="flex-1 justify-center text-center p-4 mt-5 text-xl md:text-2xl">
+      <div class="text-[#46392F] flex-1 justify-center text-center p-4 mt-3 text-xl md:text-2xl">
         Deja inscrit ?
-        <NavLink href="/login" class="text-orange-600 hover:text-[#7B9668]">Connectez-vous</NavLink>
+        <NavLink href="/login" class="text-[#C4953C] active:text-[#A87A2C] hover:underline">Connectez-vous</NavLink>
       </div>
 
       <div class="pt-1 mt-1">
-        <p class="text-xl text-gray-600 font-semibold mb-1 justify-center items-center text-center flex">Avec No Debts, Good
+        <p class="text-xl text-[#46392F] font-semibold mb-1 justify-center items-center text-center flex ">Avec No Debts, Good
           Friends, vous pouvez :</p>
-        <ul class="space-y-2 text-xl text-gray-700">
+        <ul class="space-y-2 text-xl text-[#6E5C4E]">
           <li class="flex items-center text-center gap-2 justify-center">💰 Suivre vos dépenses partagées facilement</li>
           <li class="flex items-center text-center gap-2 justify-center">💰 Savoir qui doit combien, en un coup d'œil</li>
           <li class="flex items-center text-center gap-2 justify-center">💰 Gérer votre budget en toute simplicité</li>

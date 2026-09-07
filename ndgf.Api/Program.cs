@@ -21,7 +21,6 @@ builder.Services.AddOpenApi(options =>
   options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 });
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

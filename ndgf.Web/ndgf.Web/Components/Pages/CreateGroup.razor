@@ -12,26 +12,26 @@
     
     <EditForm Model="_model" OnValidSubmit="HandleValidSubmit" class="space-y-4">
       <DataAnnotationsValidator/>
-      <h1 class="text-3xl font-bold mb-6 flex">Création d'un nouveau groupe</h1>
+      <h1 class="text-[#1E1813] text-3xl font-bold mb-6 flex">Création d'un nouveau groupe</h1>
       @if (_message is not null)
       {
         <p class="mb-4 text-lg text-red-600">@_message</p>
       }
       
       <div>
-        <label class="text-xl">Nom du groupe</label>
+        <label class="text-[#46392F] text-xl">Nom du groupe</label>
         <InputText @bind-Value="_model.Name" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.Name"/>
       </div>
       
       <div>
-        <label class="text-xl">Déscription</label>
+        <label class="text-[#46392F] text-xl">Déscription</label>
         <InputText @bind-Value="_model.Description" class="border border-gray-400 rounded-xl p-3 w-full text-xl mt-1"/>
         <ValidationMessage For="() => _model.Description"/>
       </div>
       
       <button type="submit" disabled="@_isSubmiting"
-              class="hover:scale-[0.98] active:scale-[0.98] transition-all bg-linear-to-l rounded-2xl shadow-black shadow-lg border-black from-amber-700 to-orange-800 text-white hover:bg-linear-to-r hover:from-green-600 hover:to-[#7B9668] active:from-green-400 active:to-green-600 px-4 py-2 text-xl mt-3 w-full">
+              class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all text-white rounded-2xl shadow-black shadow-lg border-black  px-4 py-2 text-xl mt-3 w-full">
         @if (_isSubmiting)
         {
           <span>Création en cours ...</span>
@@ -42,7 +42,7 @@
         }
       </button>
       <NavLink href="@($"/groups")"
-               class=" hover:scale-[0.98] active:scale-[0.98] transition-all bg-linear-to-l text-center justify-center shadow-lg shadow-black flex rounded-2xl border-black from-red-500 to-red-600 text-white hover:bg-linear-to-r hover:from-red-600 hover:to-red-800 active:from-red-400 active:to-red-600 px-4 py-2 text-xl">
+               class="bg-[#A85434]  hover:bg-[#8A4529] hover:scale-[0.98] active:scale-[0.98] transition-all text-center justify-center shadow-lg shadow-black flex rounded-2xl border-black  px-4 py-2 text-xl">
         Annuler
       </NavLink>
     </EditForm>
