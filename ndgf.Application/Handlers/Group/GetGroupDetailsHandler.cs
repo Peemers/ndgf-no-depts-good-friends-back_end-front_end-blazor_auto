@@ -38,7 +38,7 @@ public class GetGroupDetailsHandler(
       }
     }
 
-    var result = new GetGroupDetailsResult(group, membersInfo);
+    var result = new GetGroupDetailsResult(group, membersInfo, group.ArchivedAt);
 
     return Result<GetGroupDetailsResult>.Success(result);
   }

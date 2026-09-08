@@ -6,4 +6,5 @@ public record GroupDetailResponseModel
   public required string Name { get; init; }
   public string? Description { get; init; }
   public required List<GroupMemberModel> Members { get; init; }
+  public DateTime? ArchivedAt { get; init; }
 }

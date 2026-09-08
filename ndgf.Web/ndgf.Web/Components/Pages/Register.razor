@@ -143,7 +143,9 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Erreur lors de l'inscription";
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        _message = errorMessage;
+        StateHasChanged();
         return;
       }
 

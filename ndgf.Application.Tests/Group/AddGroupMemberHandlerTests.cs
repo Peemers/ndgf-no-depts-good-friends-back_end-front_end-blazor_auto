@@ -15,6 +15,7 @@ public class AddGroupMemberHandlerTests
 
     var userRepository = Substitute.For<IUserRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -22,6 +23,7 @@ public class AddGroupMemberHandlerTests
     var existingUser = Domain.Entities.User.Create("test@test.be", "passwordHash", "toto", "robert", "Berto");
     var expectedGroupMember = GroupMember.Create(existingUser.Id, groupId);
 
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
       .Returns(true, false);
 
@@ -29,7 +31,7 @@ public class AddGroupMemberHandlerTests
 
     groupMemberRepository.AddAsync(Arg.Any<GroupMember>()).Returns(expectedGroupMember);
 
-    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository);
+    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository, groupRepository);
     var command = new AddGroupMemberCommand(inviterId, groupId, "nouveau@test.be");
 
     // Act
@@ -49,14 +51,16 @@ public class AddGroupMemberHandlerTests
 
     var userRepository = Substitute.For<IUserRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
-
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(inviterId, groupId).Returns(true);
     userRepository.GetUserByEmailAsync(Arg.Any<string>()).Returns((Domain.Entities.User?)null);
 
-    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository);
+    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository, groupRepository);
     var command = new AddGroupMemberCommand(inviterId, groupId, "inconnu@test.be");
 
     // Act
@@ -73,13 +77,15 @@ public class AddGroupMemberHandlerTests
   {
     var userRepository = Substitute.For<IUserRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
 
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(inviterId, groupId).Returns(false);
 
-    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository);
+    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository, groupRepository);
     var command = new AddGroupMemberCommand(inviterId, groupId, "inconnu@test.be");
 
     var result = await handler.HandleAsync(command);
@@ -96,11 +102,13 @@ public class AddGroupMemberHandlerTests
   {
     var userRepository = Substitute.For<IUserRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
 
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
       .Returns(true, true);
 
@@ -108,7 +116,7 @@ public class AddGroupMemberHandlerTests
     userRepository.GetUserByEmailAsync(Arg.Any<string>()).Returns(existingUser);
 
 
-    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository);
+    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository, groupRepository);
     var command = new AddGroupMemberCommand(userId, groupId, "test@test.be");
 
     var result = await handler.HandleAsync(command);
@@ -116,5 +124,26 @@ public class AddGroupMemberHandlerTests
     Assert.False(result.IsSuccess);
     Assert.NotNull(result.ErrorMessage);
     await groupMemberRepository.DidNotReceive().AddAsync(Arg.Any<GroupMember>());
+  }
+
+  [Fact]
+  public async Task HandleAsync_WithGroupAlreadyArchived_ShouldReturnFailureResult()
+  {
+    var userRepository = Substitute.For<IUserRepository>();
+    var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    var inviterId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var userId = Guid.NewGuid();
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
+    
+    var handler = new AddGroupMemberHandler(userRepository, groupMemberRepository, groupRepository);
+    var command = new AddGroupMemberCommand(userId, groupId, "inconnu.test.be");
+    
+    var result = await handler.HandleAsync(command);
+    
+    Assert.False(result.IsSuccess);
+    Assert.NotNull(result.ErrorMessage);
   }
 }

@@ -18,6 +18,11 @@ public class GroupRepository(NdgfDbContext context) : IGroupRepository
     return await context.Groups.FindAsync(groupId);
   }
 
+  public async Task<bool> IsArchivedAsync(Guid groupId)
+  {
+    return await context.Groups.Where(g => g.Id == groupId && g.ArchivedAt != null).AnyAsync();
+  }
+
   public async Task UpdateAsync(Group group)
   {
     await context.SaveChangesAsync();
