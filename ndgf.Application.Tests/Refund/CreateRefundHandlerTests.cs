@@ -13,6 +13,7 @@ public class CreateRefundHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     
     var payerId = Guid.NewGuid();
     var receiverId = Guid.NewGuid();
@@ -24,13 +25,14 @@ public class CreateRefundHandlerTests
     var expectedPayer = Domain.Entities.User.Create("test@test.be", "Test1234!", "Toto", "Tony", "Montana");
     var expectedReceiver = Domain.Entities.User.Create("test2@test.be", "Test1234!", "Toto", "Tonio", "Montana");
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     userRepository.GetUserByIdAsync(payerId).Returns(expectedPayer);
     userRepository.GetUserByIdAsync(receiverId).Returns(expectedReceiver);
     var expectedRefund = Domain.Entities.Refund.Create(payerId, receiverId, amount, description, groupId);
     refundRepository.AddAsync(Arg.Any<Domain.Entities.Refund>()).Returns(expectedRefund);
     
-    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository);
+    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository, groupRepository);
     var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -53,6 +55,7 @@ public class CreateRefundHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     
     var requestingUserId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -61,9 +64,10 @@ public class CreateRefundHandlerTests
     var amount = 100m;
     var description = "test";
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
     
-    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository);
+    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository, groupRepository);
     var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -78,6 +82,7 @@ public class CreateRefundHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     
     var requestingUserId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -86,10 +91,11 @@ public class CreateRefundHandlerTests
     var amount = 100m;
     var description = "test";
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     userRepository.GetUserByIdAsync(payerId).Returns((Domain.Entities.User?)null);
     
-    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository);
+    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository, groupRepository);
     var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -104,6 +110,7 @@ public class CreateRefundHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     
     var requestingUserId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -114,11 +121,38 @@ public class CreateRefundHandlerTests
 
     var expectedPayer = Domain.Entities.User.Create("test@test.be", "Test1234!", "Toto", "Tony", "Montana");
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     userRepository.GetUserByIdAsync(payerId).Returns(expectedPayer);
     userRepository.GetUserByIdAsync(receiverId).Returns((Domain.Entities.User?)null);
     
-    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository);
+    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository, groupRepository);
+    var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
+    
+    var result = await handler.HandleAsync(command);
+    
+    Assert.False(result.IsSuccess);
+    Assert.NotNull(result.ErrorMessage);
+  }
+
+  [Fact]
+  public async Task HandleAsync_WithGroupAlreadyArchived_ShouldReturnFailureResult()
+  {
+    IUserRepository userRepository = Substitute.For<IUserRepository>();
+    IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    
+    var requestingUserId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var payerId = Guid.NewGuid();
+    var receiverId = Guid.NewGuid();
+    var amount = 100m;
+    var description = "test";
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
+    
+    var handler = new CreateRefundHandler(userRepository, groupMemberRepository, refundRepository, groupRepository);
     var command = new CreateRefundCommand(requestingUserId, payerId, receiverId, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);

@@ -9,6 +9,7 @@ riderModule.iml
 *.user
 .DS_Store
 .env
+CLAUDE.md
 
 # Node.js / npm (Tailwind)
 node_modules/

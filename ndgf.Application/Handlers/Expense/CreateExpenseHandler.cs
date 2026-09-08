@@ -8,10 +8,17 @@ namespace ndgf.Application.Handlers.Expense;
 public class CreateExpenseHandler(
   IUserRepository userRepository,
   IExpenseRepository expenseRepository,
-  IGroupMemberRepository groupMemberRepository)
+  IGroupMemberRepository groupMemberRepository,
+  IGroupRepository groupRepository)
 {
   public async Task<Result<CreateExpenseResult>> HandleAsync(CreateExpenseCommand command)
   {
+    bool isArchived = await groupRepository.IsArchivedAsync(command.GroupId);
+    if (isArchived)
+    {
+      return Result<CreateExpenseResult>.Failure("Ce groupe est archivé, impossible de le modifier à nouveau.");
+    }
+    
     bool isMember = await groupMemberRepository.IsMemberAsync(command.RequestingUserId, command.GroupId);
     if (!isMember)
     {

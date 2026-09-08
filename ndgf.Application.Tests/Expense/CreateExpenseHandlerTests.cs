@@ -14,6 +14,7 @@ public class CreateExpenseHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -28,13 +29,14 @@ public class CreateExpenseHandlerTests
 
     var expectedExpense = Domain.Entities.Expense.Create(payerId, expendedPartInput, amount, description, groupId);
     var expectedUser = Domain.Entities.User.Create("test@test.be", "Test1234!", "Toto", "Jack", "Leonardo");
-
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
       .Returns(true, true);
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
     expenseRepository.AddAsync(Arg.Any<Domain.Entities.Expense>()).Returns(expectedExpense);
 
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -58,6 +60,7 @@ public class CreateExpenseHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
 
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -65,6 +68,7 @@ public class CreateExpenseHandlerTests
     var amount = 250m;
     var description = "Test Expense";
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false, false);
     
     var expendedPartInput = new List<ExpensePartInput>
@@ -72,7 +76,7 @@ public class CreateExpenseHandlerTests
       new(payerId, 50)
     };
     
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -87,6 +91,7 @@ public class CreateExpenseHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -98,11 +103,43 @@ public class CreateExpenseHandlerTests
     {
       new(payerId, 50)
     };
-
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true, true);
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.User?)null);
     
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
+    var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
+    
+    var result = await handler.HandleAsync(command);
+    
+    Assert.False(result.IsSuccess);
+    Assert.NotNull(result.ErrorMessage);
+    await expenseRepository.DidNotReceive().AddAsync(Arg.Any<Domain.Entities.Expense>());
+  }
+  
+  [Fact]
+  public async Task HandleAsync_WithGroupArchived_ShouldReturnError()
+  {
+    IUserRepository userRepository = Substitute.For<IUserRepository>();
+    IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
+    IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    
+    var groupId = Guid.NewGuid();
+    var requestingUserId = Guid.NewGuid();
+    var payerId = Guid.NewGuid();
+    var amount = 250m;
+    var description = "Test Expense";
+    
+    var expendedPartInput = new List<ExpensePartInput>
+    {
+      new(payerId, 50)
+    };
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
+    
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);

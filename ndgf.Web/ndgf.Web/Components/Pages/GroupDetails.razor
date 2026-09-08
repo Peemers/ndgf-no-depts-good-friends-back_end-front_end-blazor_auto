@@ -20,12 +20,8 @@
 <div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
   <div
     class="hidden from-[#8A6220] to-[#6E5219] from-[#98492C] to-[#7A3A23] from-[#46392F] to-[#352A23] from-[#6A4A70] to-[#553A5A] from-[#4A5C86] to-[#3A4A6E] from-[#6E6B2A] to-[#575420]"></div>
-
-  @if (_errorMessage is not null)
-  {
-    <p class="text-center text-2xl text-red-600 p-6">@_errorMessage</p>
-  }
-  else if (_groupDetails is null)
+  
+  @if (_groupDetails is null)
   {
     <p class="text-center text-2xl p-6">Chargement en cours</p>
   }
@@ -39,7 +35,8 @@
       </div>
 
       <button @onclick="ToggleAddMemberForm"
-              class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all  w-full mt-3 rounded-xl shadow-black shadow-lg/50 px-4 py-2 flex items-center justify-center gap-2">
+              disabled="@(_groupDetails.ArchivedAt is not null)"
+              class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all  w-full mt-3 rounded-xl shadow-black shadow-lg/50 px-4 py-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
         <span>+</span> Ajouter un membre
       </button>
 
@@ -73,6 +70,10 @@
       {
         <p class="text-green-900 mt-4 text-sm">@_message</p>
       }
+      @if (_errorMessage is not null)
+      {
+        <p class="text-red-800 mt-4 text-sm">@_errorMessage</p>
+      }
 
       <div
         class="flex flex-row md:flex-col flex-wrap gap-0 md:gap-2 md:mt-6 border-t border-gray-400 pt-4 md:pt-4 items-center content-center justify-center md:items-start">
@@ -87,7 +88,8 @@
               @member.Pseudo
             </div>
             <button @onclick="() => RequestRemoveMember(member.UserId, member.Pseudo)"
-                    class="text-gray-400 hover:bg-red-600 active:text-red-600 border rounded-full bg-red-400 text-white p-0.5">
+                    disabled="@(_groupDetails.ArchivedAt is not null)"
+                    class="text-gray-400 hover:bg-red-600 active:text-red-600 border rounded-full bg-red-400 text-white p-0.5 disabled:opacity-0">
               ✕
             </button>
           </div>
@@ -132,6 +134,10 @@
             else
             {
               <p class="text-[#6E5C4E] mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
+              @if (_groupDetails.ArchivedAt is not null)
+              {
+                <h3 class="text-lg font-semibold text-[#8A4529]">Ce groupe a été archivé, impossible de modifier, lecture seule uniquement</h3>
+              }
             }
           </div>
 
@@ -193,7 +199,8 @@
           <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2">
 
             <button @onclick="RequestArchive"
-                    class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1">
+                    disabled="@(_groupDetails.ArchivedAt is not null)"
+                    class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
               Archiver le groupe
             </button>
 
@@ -203,12 +210,14 @@
             </NavLink>
 
             <button @onclick="OpenExpenseModal"
-                    class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  rounded-2xl shadow-black/20 shadow-sm hover:scale-[0.95]  px-4 py-2 text-xl w-full md:flex-1">
-               Créer une nouvelle dépense
+                    disabled="@(_groupDetails.ArchivedAt is not null)"
+                    class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  rounded-2xl shadow-black/20 shadow-sm hover:scale-[0.95]  px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              Créer une nouvelle dépense
             </button>
 
             <button @onclick="OpenRefundModal"
-                    class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1">
+                    disabled="@(_groupDetails.ArchivedAt is not null)"
+                    class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
                Créer un nouveau remboursement
             </button>
           </div>
@@ -287,7 +296,11 @@
 
                 @if (_message is not null)
                 {
-                  <p class="mb-4 text-xl text-green-500">@_message</p>
+                  <p class="mb-4 text-2xl text-green-800">@_message</p>
+                }
+                @if (_errorMessage is not null)
+                {
+                  <p class="mb-4 text-2xl text-red-800">@_errorMessage</p>
                 }
 
                 <div>
@@ -362,7 +375,11 @@
 
                 @if (_message is not null)
                 {
-                  <p class="mb-4 text-xl text-green-500">@_message</p>
+                  <p class="mb-4 text-xl text-green-800">@_message</p>
+                }
+                @if (_errorMessage is not null)
+                {
+                  <p class="mb-4 text-xl text-red-800">@_message</p>
                 }
 
                 <div>
@@ -449,9 +466,13 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class=" text-[#2E2620] text-xl font-bold mb-4">Confirmer la suppression</h2>
+      @if (_errorMessage is not null)
+      {
+        <p class="text-center text-sm text-red-800 p-6">@_errorMessage</p>
+      }
       @if (_message is not null)
       {
-        <p class="text-center text-sm text-red-600 p-6">@_message</p>
+        <p class="text-center text-sm text-green-800 p-6">@_message</p>
       }
       <p class="text-[#6E5C4E] mb-6">
         Êtes-vous sûr de vouloir supprimer cette
@@ -476,9 +497,13 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class="text-[#2E2620] text-xl font-bold mb-4">Confirmer l'archivage</h2>
+      @if (_errorMessage is not null)
+      {
+        <p class="text-center text-xl text-red-800 p-6">@_errorMessage</p>
+      }
       @if (_message is not null)
       {
-        <p class="text-center text-sm text-red-600 p-6">@_message</p>
+        <p class="text-center text-sm text-green-800 p-6">@_message</p>
       }
       <p class="text-[#6E5C4E] mb-6">
         Êtes-vous sûr de vouloir archiver ce groupe :
@@ -504,9 +529,13 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="text-[#2E2620] bg-[#F7F1E5] rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class="text-2xl font-bold mb-4">Confirmer la suppression du membre</h2>
+      @if (_errorMessage is not null)
+      {
+        <p class="text-center text-sm text-red-800 p-6">@_errorMessage</p>
+      }
       @if (_message is not null)
       {
-        <p class="text-center text-sm text-red-600 p-6">@_message</p>
+        <p class="text-center text-sm text-green-800 p-6">@_message</p>
       }
       <p class="text-[#6E5C4E] mb-6 text-lg">
         Êtes-vous sûr de vouloir supprimer l'utilisateur :
@@ -531,9 +560,13 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class="text-2xl text-center font-bold mb-6 text-[#2E2620]">Résumé de la dépense à ajouter</h2>
+      @if (_errorMessage is not null)
+      {
+        <p class="text-center rounded2--- text-sm text-red-800 p-6">@_errorMessage</p>
+      }
       @if (_message is not null)
       {
-        <p class="text-center rounded2--- text-sm text-red-600 p-6">@_message</p>
+        <p class="text-center rounded2--- text-sm text-green-800 p-6">@_message</p>
       }
       <p class="text-[#6E5C4E] mb-2">Montant : <span class="font-bold">@_createExpenseModel.Amount€</span></p>
 
@@ -570,9 +603,13 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
       <h2 class="text-[#2E2620] text-2xl text-center font-bold mb-6">Résumé de la dépense à ajouter</h2>
+      @if (_errorMessage is not null)
+      {
+        <p class="text-center rounded2--- text-lg text-red-800 p-6">@_errorMessage</p>
+      }
       @if (_message is not null)
       {
-        <p class="text-center rounded2--- text-lg text-red-600 p-6">@_message</p>
+        <p class="text-center rounded2--- text-lg text-green-800 p-6">@_message</p>
       }
       <p class="text-[#6E5C4E] mb-2">Montant : <span class="font-bold">@_createRefundModel.Amount€</span></p>
 
@@ -717,10 +754,11 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Membre inexistant";
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        _errorMessage = errorMessage;
         StateHasChanged();
         await Task.Delay(3000);
-        _message = null;
+        _errorMessage = null;
         return;
       }
 
@@ -763,7 +801,7 @@
     {
       if (_selectedUserIds.Count == 0)
       {
-        _message = "Veuillez selectionner au moins un participant";
+        _errorMessage = "Veuillez selectionner au moins un participant";
         return;
       }
 
@@ -773,7 +811,9 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Erreur lors de la création de la dépense";
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        _errorMessage = errorMessage;
+        StateHasChanged();
         return;
       }
 
@@ -806,7 +846,11 @@
 
       if (!response.IsSuccessStatusCode)
       {
-        _message = "Erreur lors de la création du remboursement";
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        _errorMessage = errorMessage;
+        StateHasChanged();
+        await Task.Delay(3000);
+        _errorMessage = null;
         return;
       }
 
@@ -905,11 +949,14 @@
 
   private bool _confirmExpense;
 
-  private void RequestCreateExpense()
+  private async Task RequestCreateExpense()
   {
     if (_selectedUserIds.Count == 0)
     {
-      _message = "Veuillez selectionner au moins un participant à cette dépense";
+      _errorMessage = "Veuillez selectionner au moins un participant à cette dépense";
+      StateHasChanged();
+      await Task.Delay(3000);
+      _errorMessage = null;
       return;
     }
 
@@ -976,10 +1023,11 @@
     }
     else
     {
-      _message = "Impossible d'archiver ce groupe car il n'est pas soldé";
+      var errorMessage = await response.Content.ReadAsStringAsync();
+      _errorMessage = errorMessage;
       StateHasChanged();
       await Task.Delay(3000);
-      _message = null;
+      _errorMessage = null;
     }
 
     _showArchiveConfirmation = false;
@@ -1017,10 +1065,10 @@
     else
     {
       var errorMessage = await response.Content.ReadAsStringAsync();
-      _message = errorMessage;
+      _errorMessage = errorMessage;
       StateHasChanged();
       await Task.Delay(3000);
-      _message = null;
+      _errorMessage = null;
     }
 
     _memberToRemoveId = null;
