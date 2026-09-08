@@ -12,6 +12,7 @@ public static class GetGroupDetailsMapper
       Name = result.Group.Name,
       Description = result.Group.Description,
       Id = result.Group.Id,
+      ArchivedAt = result.Group.ArchivedAt,
       Members = result.Members.Select(m => new GroupMemberInfoResultDto
       {
         UserId = m.UserId,

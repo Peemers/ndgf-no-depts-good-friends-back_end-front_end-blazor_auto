@@ -7,10 +7,17 @@ namespace ndgf.Application.Handlers.Group;
 
 public class AddGroupMemberHandler(
   IUserRepository userRepository,
-  IGroupMemberRepository groupMemberRepository)
+  IGroupMemberRepository groupMemberRepository,
+  IGroupRepository groupRepository)
 {
   public async Task<Result<GroupMember>> HandleAsync(AddGroupMemberCommand command)
   {
+    bool isArchived = await groupRepository.IsArchivedAsync(command.GroupId);
+    if (isArchived)
+    {
+      return Result<GroupMember>.Failure("Impossible d'ajouter un membre dans un groupe archivé.");
+    }
+    
     bool inviterIsMember = await groupMemberRepository.IsMemberAsync(command.UserId, command.GroupId);
     if (!inviterIsMember)
     {

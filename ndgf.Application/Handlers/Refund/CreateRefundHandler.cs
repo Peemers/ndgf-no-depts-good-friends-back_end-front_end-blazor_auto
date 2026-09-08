@@ -8,10 +8,17 @@ namespace ndgf.Application.Handlers.Refund;
 public class CreateRefundHandler(
   IUserRepository userRepository,
   IGroupMemberRepository groupMemberRepository,
-  IRefundRepository refundRepository)
+  IRefundRepository refundRepository,
+  IGroupRepository groupRepository)
 {
   public async Task<Result<CreateRefundResult>> HandleAsync(CreateRefundCommand command)
   {
+    bool isArchived = await groupRepository.IsArchivedAsync(command.GroupId);
+    if (isArchived)
+    {
+      return Result<CreateRefundResult>.Failure("Ce groupe est archivé, impossible de le modifier à nouveau.");
+    }
+    
     bool isMember = await groupMemberRepository.IsMemberAsync(command.RequestingUserId, command.GroupId);
     if (!isMember)
     {

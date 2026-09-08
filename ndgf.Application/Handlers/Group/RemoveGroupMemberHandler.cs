@@ -8,11 +8,18 @@ namespace ndgf.Application.Handlers.Group;
 
 public class RemoveGroupMemberHandler(
   IGroupMemberRepository groupMemberRepository,
-  IBalanceCalculator balanceCalculator
+  IBalanceCalculator balanceCalculator,
+  IGroupRepository groupRepository
   )
 {
   public async Task<Result<bool>> HandleAsync(RemoveGroupMemberCommand command)
   {
+    bool isArchived = await groupRepository.IsArchivedAsync(command.GroupId);
+    if (isArchived)
+    {
+      return Result<bool>.Failure("Ce groupe est archivé, impossible de le modifier à nouveau.");
+    }
+    
     bool requestingUserIsMember = await groupMemberRepository.IsMemberAsync(command.RequestingUserId, command.GroupId);
     if (!requestingUserIsMember)
     {
