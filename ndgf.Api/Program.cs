@@ -7,10 +7,14 @@ using ndgf.Api.Endpoints.User;
 using ndgf.Api.Extensions;
 using ndgf.Application.Extensions;
 using ndgf.Infrastructure.Extensions;
+using ndgf.Infrastructure.Logging;
 using ndgf.Infrastructure.Persistence;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddSerilogLogging();
 
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -33,6 +37,8 @@ if (app.Environment.IsDevelopment())
     option.Theme = ScalarTheme.Moon;
   });
 }
+
+app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapUserEndpoints();
@@ -44,8 +50,16 @@ app.UseHttpsRedirection();
 
 using (var scope = app.Services.CreateScope())
 {
-  var dbContext = scope.ServiceProvider.GetRequiredService<NdgfDbContext>();
-  dbContext.Database.Migrate();
+  try
+  {
+    var dbContext = scope.ServiceProvider.GetRequiredService<NdgfDbContext>();
+    dbContext.Database.Migrate();
+  }
+  catch (Exception ex)
+  {
+    Log.Fatal(ex, "Échec de la migration de la base de données au démarrage");
+    throw;
+  }
 }
 
 app.Run();
