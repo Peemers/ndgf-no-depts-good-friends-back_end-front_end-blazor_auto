@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Expense;
 using ndgf.Application.Queries.Expense;
 using ndgf.Domain.Common;
@@ -8,13 +9,16 @@ namespace ndgf.Application.Handlers.Expense;
 public class GetGroupExpenseHandler(
   IUserRepository userRepository,
   IGroupMemberRepository groupMemberRepository,
-  IExpenseRepository expenseRepository)
+  IExpenseRepository expenseRepository,
+  ILogger<GetGroupExpenseHandler> logger)
 {
   public async Task<Result<GetGroupExpensesResult>> HandleAsync(GetGroupExpenseQuery query)
   {
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
+      logger.LogInformation("Tentative de chargement des dépenses du groupe échouée : ({UserId}) ne fait pas partie du groupe : ({GroupId}) ", query.UserId,
+        query.GroupId);
       return Result<GetGroupExpensesResult>.Failure("Vous devez être membre du groupe pour en consulter les dépenses.");
     }
 
@@ -52,6 +56,8 @@ public class GetGroupExpenseHandler(
       totalPages);
 
     var result = new GetGroupExpensesResult(pagedResult);
+    
+    logger.LogInformation("Chargement des dépenses du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId , query.GroupId);
     
     return Result<GetGroupExpensesResult>.Success(result);
   }

@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.User;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.User;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Security;
 using ndgf.Application.Models.User;
@@ -11,13 +12,15 @@ public class LoginUserHandler(
   IUserRepository userRepository,
   IJwtService jwtService,
   IPasswordHasher passwordHasher,
-  IRefreshTokenRepository refreshTokenRepository)
+  IRefreshTokenRepository refreshTokenRepository,
+  ILogger<LoginUserHandler> logger)
 {
   public async Task<Result<LoginResult>> HandleAsync(LoginUserCommand command)
   {
     Domain.Entities.User? user = await userRepository.GetUserByEmailAsync(command.Email);
     if (user is null)
     {
+      logger.LogWarning("Tentative de connexion échouée : email inconnu ({Email})", command.Email);
       return Result<LoginResult>.Failure("Email ou mot de passe incorrect");
     }
 
@@ -25,6 +28,7 @@ public class LoginUserHandler(
 
     if (!verifyPass)
     {
+      logger.LogWarning("Tentative de connexion échouée : mot de passe incorrect pour ({UserId})", user.Id);
       return Result<LoginResult>.Failure("Email ou mot de passe incorrect");
     }
 
@@ -35,6 +39,8 @@ public class LoginUserHandler(
     RefreshToken refreshTokenEntity = RefreshToken.Create(refreshToken, user.Id, expiryDay);
 
     await refreshTokenRepository.AddAsync(refreshTokenEntity);
+
+    logger.LogInformation("Connexion réussie pour l'utilisateur ({UserId})", user.Id);
 
     LoginResult loginResult = new LoginResult(user, accessToken, refreshToken);
     return Result<LoginResult>.Success(loginResult);

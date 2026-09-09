@@ -12,6 +12,9 @@ public static class WebApplicationBuilderExtensions
     var seqServerUrl = builder.Configuration.GetValue<string>("Seq:ServerUrl");
 
     var loggerConfiguration = new LoggerConfiguration()
+      .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+      .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+      .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
       .Enrich.WithMachineName()
       .Enrich.WithEnvironmentName()
       .WriteTo.Seq(seqServerUrl!);

@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Group;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Group;
 using ndgf.Domain.Common;
@@ -8,7 +9,8 @@ namespace ndgf.Application.Handlers.Group;
 
 public class CreateGroupeHandler(
   IGroupRepository groupRepository,
-  IGroupMemberRepository groupMemberRepository)
+  IGroupMemberRepository groupMemberRepository,
+  ILogger<CreateGroupeHandler> logger)
 {
   public async Task<Result<CreateGroupResult>> HandleAsync(CreateGroupCommand command)
   {
@@ -21,6 +23,8 @@ public class CreateGroupeHandler(
     GroupMember savedGroupMember = await groupMemberRepository.AddAsync(groupMember);
     
     var result = new CreateGroupResult(savedGroup, savedGroupMember);
+    
+    logger.LogInformation("Tentative de création d'un nouveau groupe ({Name}) reussie par ({UserId}) ", command.Name, command.UserId);
     
     return Result<CreateGroupResult>.Success(result);
   }

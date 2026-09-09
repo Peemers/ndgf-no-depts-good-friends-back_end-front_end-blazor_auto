@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.GroupHistory;
 using ndgf.Application.Queries.GroupHistory;
 using ndgf.Domain.Common;
@@ -9,13 +10,15 @@ public class GetGroupHistoryHandler(
   IUserRepository userRepository,
   IGroupMemberRepository groupMemberRepository,
   IExpenseRepository expenseRepository,
-  IRefundRepository refundRepository)
+  IRefundRepository refundRepository,
+  ILogger<GetGroupHistoryHandler> logger)
 {
   public async Task<Result<GetGroupHistoryResult>> HandleAsync(GetGroupHistoryQuery query)
   {
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
+      logger.LogInformation("Tentative de récupération de l'historique complet du groupe ({GroupId}) échouée - ({UserId}) ne fait pas partie de ce groupe",  query.GroupId, query.UserId);
       return Result<GetGroupHistoryResult>.Failure("Vous devez etre membre du groupe pour consulter l'historique complet.");
     }
 
@@ -80,6 +83,8 @@ public class GetGroupHistoryHandler(
       totalPages);
 
     var result = new GetGroupHistoryResult(pagedResult);
+    
+    logger.LogInformation("Tentative de récupération de l'historique complet du groupe ({GroupId}) par ({UserId}) réussie", query.GroupId, query.UserId);
     
     return Result<GetGroupHistoryResult>.Success(result);
   }

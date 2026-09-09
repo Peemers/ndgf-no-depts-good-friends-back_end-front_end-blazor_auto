@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Expense;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Expense;
 using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Domain.Common;
@@ -15,6 +16,7 @@ public class CreateExpenseHandlerTests
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<CreateExpenseHandler> logger = Substitute.For<ILogger<CreateExpenseHandler>>();
 
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -36,7 +38,7 @@ public class CreateExpenseHandlerTests
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
     expenseRepository.AddAsync(Arg.Any<Domain.Entities.Expense>()).Returns(expectedExpense);
 
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository, logger);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -61,6 +63,9 @@ public class CreateExpenseHandlerTests
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<CreateExpenseHandler> logger = Substitute.For<ILogger<CreateExpenseHandler>>();
+
+    
 
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -76,7 +81,7 @@ public class CreateExpenseHandlerTests
       new(payerId, 50)
     };
     
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository, logger);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -92,6 +97,8 @@ public class CreateExpenseHandlerTests
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<CreateExpenseHandler> logger = Substitute.For<ILogger<CreateExpenseHandler>>();
+
     
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -108,7 +115,7 @@ public class CreateExpenseHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true, true);
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.User?)null);
     
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository, logger);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);
@@ -125,6 +132,8 @@ public class CreateExpenseHandlerTests
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<CreateExpenseHandler> logger = Substitute.For<ILogger<CreateExpenseHandler>>();
+
     
     var groupId = Guid.NewGuid();
     var requestingUserId = Guid.NewGuid();
@@ -139,7 +148,7 @@ public class CreateExpenseHandlerTests
     
     groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
     
-    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository);
+    var handler = new CreateExpenseHandler(userRepository, expenseRepository, groupMemberRepository, groupRepository, logger);
     var command = new CreateExpenseCommand(requestingUserId, payerId, expendedPartInput, amount, description, groupId);
     
     var result = await handler.HandleAsync(command);

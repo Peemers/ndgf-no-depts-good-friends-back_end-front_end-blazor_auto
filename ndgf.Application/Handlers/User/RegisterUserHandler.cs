@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.User;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.User;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Security;
 using ndgf.Application.Models.User;
@@ -11,19 +12,22 @@ public class RegisterUserHandler(
   IUserRepository userRepository, 
   IPasswordHasher passwordHasher,
   IJwtService jwtService,
-  IRefreshTokenRepository refreshTokenRepository)
+  IRefreshTokenRepository refreshTokenRepository,
+  ILogger<RegisterUserHandler> logger)
 {
   public async Task<Result<LoginResult>> HandleAsync(RegisterUserCommand command)
   {
     bool emailAlreadyExists = await userRepository.EmailAlreadyExistsAsync(command.Email);
     if (emailAlreadyExists)
     {
+      logger.LogWarning(" Tentative échouée Email ({Email}) existe déja", command.Email);
       return Result<LoginResult>.Failure("Cet email est déja utilisé.");
     }
     
     bool pseudoAlreadyExists = await userRepository.PseudoAlreadyExistsAsync(command.Pseudo);
     if (pseudoAlreadyExists)
     {
+      logger.LogWarning(" Tentative échouée Email ({Pseudo}) existe déja",  command.Pseudo);
       return Result<LoginResult>.Failure("Pseudo déjà utilisé");
     }
 
@@ -42,6 +46,8 @@ public class RegisterUserHandler(
     await refreshTokenRepository.AddAsync(refreshTokenEntity);
 
     LoginResult loginResult = new LoginResult(savedUser, accessToken, refreshToken);
+    
+    logger.LogInformation("Inscription réussie, utilisateur : ({pseudo}) - email : ({email}), id : ({id})", command.Pseudo, command.Email, user.Id);
     
     return Result<LoginResult>.Success(loginResult);
     

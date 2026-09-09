@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.User;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.User;
 using ndgf.Application.Handlers.User;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Security;
@@ -16,6 +17,7 @@ public class LoginUserHandlerTests
     IJwtService jwtService = Substitute.For<IJwtService>();
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<LoginUserHandler> logger = Substitute.For<ILogger<LoginUserHandler>>();
 
     var expectedUser = Domain.Entities.User.Create("test@test.be", "hashedPassword123", "toto", "Doe", "John");
     
@@ -25,7 +27,7 @@ public class LoginUserHandlerTests
     jwtService.GenerateAccessToken(Arg.Any<Domain.Entities.User>()).Returns("fakeAccessToken");
     jwtService.GenerateRefreshToken().Returns("fakeRefreshToken");
     
-    var handler = new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository);
+    var handler = new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository, logger);
     var command = new LoginUserCommand("test@test.be", "monMotDePasse123");
     
     var result = await handler.HandleAsync(command);
@@ -44,10 +46,11 @@ public class LoginUserHandlerTests
     IJwtService jwtService = Substitute.For<IJwtService>();
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<LoginUserHandler> logger = Substitute.For<ILogger<LoginUserHandler>>();
     
     userRepository.GetUserByEmailAsync(Arg.Any<string>()).Returns((Domain.Entities.User?)null);
     
-    var handler =  new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository);
+    var handler =  new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository, logger);
     var command = new LoginUserCommand("test@test.be", "monMotDePasse123");
     
     var result = await handler.HandleAsync(command);
@@ -67,13 +70,14 @@ public class LoginUserHandlerTests
     IJwtService jwtService = Substitute.For<IJwtService>();
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<LoginUserHandler> logger = Substitute.For<ILogger<LoginUserHandler>>();
     
     var expectedUser = Domain.Entities.User.Create("test@test.be", "hashedPassword123", "toto", "Doe", "John");
     
     userRepository.GetUserByEmailAsync(Arg.Any<string>()).Returns(expectedUser);
     passwordHasher.VerifyHashedPassword(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
     
-    var handler = new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository);
+    var handler = new LoginUserHandler(userRepository, jwtService, passwordHasher, refreshTokenRepository, logger);
     var command = new LoginUserCommand("test@test.be", "monMotDePasse123");
     
     var result = await handler.HandleAsync(command);
