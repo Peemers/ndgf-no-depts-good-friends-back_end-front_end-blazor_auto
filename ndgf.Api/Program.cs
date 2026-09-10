@@ -20,6 +20,7 @@ builder.AddSerilogLogging();
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddRateLimiterPolicies();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddOpenApi(options =>
 {
@@ -41,6 +42,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapUserEndpoints();
