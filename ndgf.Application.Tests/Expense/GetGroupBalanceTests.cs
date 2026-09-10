@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Handlers.Expense;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Services;
 using ndgf.Application.Models.Expense;
@@ -17,6 +18,7 @@ public class GetGroupBalanceTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<GetGroupBalanceHandler> logger = Substitute.For<ILogger<GetGroupBalanceHandler>>();
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -45,7 +47,7 @@ public class GetGroupBalanceTests
     expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator, logger);
     var query = new GetGroupBalanceQuery(groupId, userId);
 
     var result = await handler.HandleAsync(query);
@@ -66,6 +68,7 @@ public class GetGroupBalanceTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<GetGroupBalanceHandler> logger = Substitute.For<ILogger<GetGroupBalanceHandler>>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -73,7 +76,7 @@ public class GetGroupBalanceTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
     
 
-    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator, logger);
     var query = new GetGroupBalanceQuery(groupId, userId);
     var result = await handler.HandleAsync(query);
 
@@ -87,6 +90,7 @@ public class GetGroupBalanceTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<GetGroupBalanceHandler> logger = Substitute.For<ILogger<GetGroupBalanceHandler>>();
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -113,8 +117,9 @@ public class GetGroupBalanceTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember> { expectedGroupMember });
     expenseRepository.GetAllActiveGroupExpensesAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Expense> { expectedExpense });
+    
 
-    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator);
+    var handler = new GetGroupBalanceHandler(groupMemberRepository, expenseRepository, balanceCalculator, logger);
     var query = new GetGroupBalanceQuery(groupId, userId);
 
     var result = await handler.HandleAsync(query);

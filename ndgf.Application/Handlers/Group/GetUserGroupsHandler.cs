@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Group;
 using ndgf.Application.Queries.Group;
 using ndgf.Domain.Common;
@@ -7,7 +8,8 @@ namespace ndgf.Application.Handlers.Group;
 
 public class GetUserGroupsHandler(
   IGroupMemberRepository groupMemberRepository,
-  IGroupRepository groupRepository)
+  IGroupRepository groupRepository,
+  ILogger<GetUserGroupsHandler> logger)
 {
   public async Task<Result<GetUserGroupsResult>> HandleAsync(GetUserGroupsQuery query)
   {
@@ -30,6 +32,8 @@ public class GetUserGroupsHandler(
     }
 
     var result = new GetUserGroupsResult(groups);
+    
+    logger.LogInformation("[Succès] Tentative de récupération des groupes du membre ({UserId}) réussie", query.UserId);
 
     return Result<GetUserGroupsResult>.Success(result);
   }

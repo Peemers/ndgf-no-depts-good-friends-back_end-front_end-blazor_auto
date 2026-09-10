@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.User;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.User;
 using ndgf.Application.Handlers.User;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Security;
@@ -16,6 +17,7 @@ public class RegisterUserHandlerTests
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IJwtService jwtService = Substitute.For<IJwtService>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<RegisterUserHandler> logger = Substitute.For<ILogger<RegisterUserHandler>>();
 
     var expectedUser = Domain.Entities.User.Create("test@test.be", "hashedPassword123", "Toto", "Dupont", "Jean");
 
@@ -26,7 +28,7 @@ public class RegisterUserHandlerTests
     jwtService.GenerateAccessToken(Arg.Any<Domain.Entities.User>()).Returns("test-access-token");
     jwtService.GenerateRefreshToken().Returns("test-refresh-token");
 
-    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository, logger);
     var command = new RegisterUserCommand("test@test.be", "MonMotDePasse123", "Toto", "Jean", "Dupont");
 
     // Act
@@ -50,10 +52,12 @@ public class RegisterUserHandlerTests
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IJwtService jwtService = Substitute.For<IJwtService>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<RegisterUserHandler> logger = Substitute.For<ILogger<RegisterUserHandler>>();
+    
 
     userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(true);
 
-    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository, logger);
     var command = new RegisterUserCommand("test@test.be", "MonMotDePasse123", "Toto", "Jean", "Dupont");
     
     //Act
@@ -74,11 +78,13 @@ public class RegisterUserHandlerTests
     IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     IJwtService jwtService = Substitute.For<IJwtService>();
     IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
+    ILogger<RegisterUserHandler> logger = Substitute.For<ILogger<RegisterUserHandler>>();
+    
     
     userRepository.EmailAlreadyExistsAsync(Arg.Any<string>()).Returns(false);
     userRepository.PseudoAlreadyExistsAsync(Arg.Any<string>()).Returns(true);
     
-    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository);
+    var handler = new RegisterUserHandler(userRepository, passwordHasher, jwtService, refreshTokenRepository, logger);
     var command = new RegisterUserCommand("test@test.be", "Test1234=", "Toto", "Jean", "Dupont");
     
     var result = await handler.HandleAsync(command);

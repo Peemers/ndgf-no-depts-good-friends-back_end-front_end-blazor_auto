@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Services;
 using ndgf.Application.Models.Expense;
 using ndgf.Application.Queries.Expense;
@@ -9,22 +10,25 @@ namespace ndgf.Application.Handlers.Expense;
 public class GetGroupBalanceHandler(
   IGroupMemberRepository groupMemberRepository,
   IExpenseRepository expenseRepository,
-  IBalanceCalculator balanceCalculator)
+  IBalanceCalculator balanceCalculator,
+  ILogger<GetGroupBalanceHandler> logger)
 {
   public async Task<Result<GetGroupBalanceResult>> HandleAsync(GetGroupBalanceQuery query)
   {
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
+      logger.LogInformation("[Echec] Tentative de chargement de la balance du groupe ({GroupId}) échouée - ({UserId}) ne fait pas partie de ce groupe", query.GroupId,
+        query.UserId);
       return Result<GetGroupBalanceResult>.Failure("Vous devez être membre du groupe pour consulter toutes les dépenses.");
     }
-    
+
     var expenses = (await expenseRepository.GetAllActiveGroupExpensesAsync(query.GroupId)).ToList();
-    
+
     var userBalance = await balanceCalculator.CalculateBalanceAsync(query.GroupId);
-    
+
     var totalExpenses = expenses.Sum(expense => expense.Amount);
-    
+
     var suggestedRepayments = new List<SuggestedRepayment>();
 
     var creditors = userBalance.Where(ub => ub.Balance > 0).ToList();
@@ -54,7 +58,9 @@ public class GetGroupBalanceHandler(
 
     var expenseCount = expenses.Count();
     var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses, expenseCount);
-    
+
+    logger.LogInformation("[Succès] Chargement de la balance du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId, query.GroupId);
+
     return Result<GetGroupBalanceResult>.Success(result);
   }
 }

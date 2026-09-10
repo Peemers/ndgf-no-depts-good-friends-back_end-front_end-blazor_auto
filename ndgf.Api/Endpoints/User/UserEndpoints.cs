@@ -58,12 +58,26 @@ public static class UserEndpoints
         RefreshTokenRequestDto dto,
         IRefreshTokenRepository refreshTokenRepository,
         IUserRepository userRepository,
-        IJwtService jwtService) =>
+        IJwtService jwtService,
+        ILogger<Program> logger) =>
       {
         var storedToken = await refreshTokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
 
-        if (storedToken is null || storedToken.RevokedAt is not null || storedToken.ExpiresAt < DateTime.UtcNow)
+        if (storedToken is null)
         {
+          logger.LogWarning("Tentative de refresh avec un refresh-token inconnu.");
+          return Results.Unauthorized();
+        }
+
+        if (storedToken.RevokedAt is not null)
+        {
+          logger.LogWarning("Tentative de refresh avec un refresh-token révoqué !");
+          return Results.Unauthorized();
+        }
+
+        if (storedToken.ExpiresAt < DateTime.UtcNow)
+        {
+          logger.LogInformation("Tentative de refresh avec un refresh-token expiré.");
           return Results.Unauthorized();
         }
 

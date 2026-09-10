@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Handlers.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Handlers.Group;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Queries.Group;
 using ndgf.Domain.Entities;
@@ -13,6 +14,7 @@ public class GetUserGroupsHandlerTests
   {
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     var groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<GetUserGroupsHandler> logger = Substitute.For<ILogger<GetUserGroupsHandler>>();
     
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -26,7 +28,7 @@ public class GetUserGroupsHandlerTests
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>()).Returns(groupMembers);
     groupMemberRepository.GetMembershipsByUserIdAsync(Arg.Any<Guid>()).Returns(groupMembers);
     
-    var handler = new GetUserGroupsHandler(groupMemberRepository, groupRepository);
+    var handler = new GetUserGroupsHandler(groupMemberRepository, groupRepository, logger);
     var query = new GetUserGroupsQuery(userId);
     
     var result = await handler.HandleAsync(query);
@@ -46,12 +48,13 @@ public class GetUserGroupsHandlerTests
   {
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     var groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<GetUserGroupsHandler> logger = Substitute.For<ILogger<GetUserGroupsHandler>>();
     
     var userId = Guid.NewGuid();
     
     groupMemberRepository.GetMembershipsByUserIdAsync(Arg.Any<Guid>()).Returns(new List<GroupMember>());
     
-    var handler = new GetUserGroupsHandler(groupMemberRepository, groupRepository);
+    var handler = new GetUserGroupsHandler(groupMemberRepository, groupRepository, logger);
     var query = new GetUserGroupsQuery(userId);
     
     var result = await handler.HandleAsync(query);

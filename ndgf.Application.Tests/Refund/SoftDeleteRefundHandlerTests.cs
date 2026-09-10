@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Refund;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Refund;
 using ndgf.Application.Handlers.Refund;
 using ndgf.Application.Interfaces.Repositories;
 using NSubstitute;
@@ -11,6 +12,9 @@ public class SoftDeleteRefundHandlerTests
   {
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<SoftDeleteRefundHandler> logger = Substitute.For<ILogger<SoftDeleteRefundHandler>>();
+    
     
     var userId = Guid.NewGuid();
     var refundId = Guid.NewGuid();
@@ -22,10 +26,11 @@ public class SoftDeleteRefundHandlerTests
 
     var expectedRefund = Domain.Entities.Refund.Create(payerId, receiverId, amount, description, groupId);
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     refundRepository.GetRefundByIdAsync(Arg.Any<Guid>()).Returns(expectedRefund);
     
-    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository);
+    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository, groupRepository, logger);
     var command = new SoftDeleteRefundCommand(userId, groupId, refundId);
     var result = await handler.HandleAsync(command);
     
@@ -39,14 +44,17 @@ public class SoftDeleteRefundHandlerTests
   {
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<SoftDeleteRefundHandler> logger = Substitute.For<ILogger<SoftDeleteRefundHandler>>();
     
     var userId = Guid.NewGuid();
     var refundId = Guid.NewGuid();
     var groupId =  Guid.NewGuid();
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
     
-    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository);
+    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository, groupRepository, logger);
     var command = new SoftDeleteRefundCommand(userId, groupId, refundId);
     var result = await handler.HandleAsync(command);
     
@@ -60,16 +68,43 @@ public class SoftDeleteRefundHandlerTests
   {
     IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<SoftDeleteRefundHandler> logger = Substitute.For<ILogger<SoftDeleteRefundHandler>>();
     
     var userId = Guid.NewGuid();
     var refundId = Guid.NewGuid();
     var groupId =  Guid.NewGuid();
     
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     refundRepository.GetRefundByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.Refund?)null);
     
-    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository);
+    var handler = new SoftDeleteRefundHandler(refundRepository, groupMemberRepository, groupRepository, logger);
     var command = new SoftDeleteRefundCommand(userId, groupId, refundId);
+    var result = await handler.HandleAsync(command);
+    
+    Assert.False(result.IsSuccess);
+    Assert.NotNull(result.ErrorMessage);
+    await refundRepository.DidNotReceiveWithAnyArgs().UpdateAsync(Arg.Any<Domain.Entities.Refund>());
+  }
+
+  [Fact]
+  public async Task HandleAsync_WithGroupAlreadyArchived_ShouldReturnFailureResult()
+  {
+    IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+    IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<SoftDeleteRefundHandler> logger = Substitute.For<ILogger<SoftDeleteRefundHandler>>();
+    
+    var userId = Guid.NewGuid();
+    var refundId = Guid.NewGuid();
+    var groupId =  Guid.NewGuid();
+    
+    groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
+    
+    var handler =  new SoftDeleteRefundHandler(refundRepository, groupMemberRepository, groupRepository, logger);
+    var command = new SoftDeleteRefundCommand(userId, groupId, refundId);
+    
     var result = await handler.HandleAsync(command);
     
     Assert.False(result.IsSuccess);

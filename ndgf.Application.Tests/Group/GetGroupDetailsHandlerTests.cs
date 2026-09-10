@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Handlers.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Handlers.Group;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.Group;
 using ndgf.Application.Queries.Group;
@@ -15,6 +16,7 @@ public class GetGroupDetailsHandlerTests
     var groupRepository = Substitute.For<IGroupRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     var userRepository = Substitute.For<IUserRepository>();
+    ILogger<GetGroupDetailsHandler> logger = Substitute.For<ILogger<GetGroupDetailsHandler>>();
     
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -30,7 +32,7 @@ public class GetGroupDetailsHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(existingUser);
     
-    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository);
+    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository, logger);
     var query = new GetGroupDetailQuery(groupId, userId);
     
     var result = await handler.HandleAsync(query);
@@ -51,13 +53,14 @@ public class GetGroupDetailsHandlerTests
     var groupRepository = Substitute.For<IGroupRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     var userRepository = Substitute.For<IUserRepository>();
+    ILogger<GetGroupDetailsHandler> logger = Substitute.For<ILogger<GetGroupDetailsHandler>>();
     
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
     
     groupRepository.GetGroupByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.Group?)null);
     
-    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository);
+    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository, logger);
     var query = new GetGroupDetailQuery(groupId, userId);
     
     var result = await handler.HandleAsync(query);
@@ -74,6 +77,7 @@ public class GetGroupDetailsHandlerTests
     var groupRepository = Substitute.For<IGroupRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     var userRepository = Substitute.For<IUserRepository>();
+    ILogger<GetGroupDetailsHandler> logger = Substitute.For<ILogger<GetGroupDetailsHandler>>();
     
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -82,7 +86,7 @@ public class GetGroupDetailsHandlerTests
     groupRepository.GetGroupByIdAsync(Arg.Any<Guid>()).Returns(existingGroup);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false, false);
     
-    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository);
+    var handler = new GetGroupDetailsHandler(groupRepository, groupMemberRepository, userRepository, logger);
     var query = new GetGroupDetailQuery(groupId, userId);
     var result = await handler.HandleAsync(query);
     
