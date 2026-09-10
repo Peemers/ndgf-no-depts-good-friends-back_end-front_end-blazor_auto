@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
 using ndgf.Application.Interfaces.Repositories;
 using NSubstitute;
@@ -13,6 +14,7 @@ public class CreateGroupHandlerTests
     // Arrange
     var groupRepository = Substitute.For<IGroupRepository>();
     var groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    ILogger<CreateGroupeHandler> logger = Substitute.For<ILogger<CreateGroupeHandler>>();
 
     groupRepository.AddAsync(Arg.Any<Domain.Entities.Group>())!
       .Returns(callInfo => callInfo.Arg<Domain.Entities.Group>());
@@ -20,7 +22,7 @@ public class CreateGroupHandlerTests
     groupMemberRepository.AddAsync(Arg.Any<Domain.Entities.GroupMember>())!
       .Returns(callInfo => callInfo.Arg<Domain.Entities.GroupMember>());
 
-    var handler = new CreateGroupeHandler(groupRepository, groupMemberRepository);
+    var handler = new CreateGroupeHandler(groupRepository, groupMemberRepository, logger);
     var userId = Guid.NewGuid();
     var command = new CreateGroupCommand("Voyage à Tignes", "Dépenses partagées du ski-trip", userId);
 

@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Services;
@@ -16,6 +17,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
 
     var requestingUserId = Guid.NewGuid();
     var memberToRemoveId = Guid.NewGuid();
@@ -37,7 +39,7 @@ public class RemoveGroupMemberHandlerTests
       .Returns(new List<GroupMember> { expectedRequestingGroupMember, expectedGroupMemberToDelete });
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, memberToRemoveId, groupId);
 
 
@@ -53,6 +55,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
 
     var requestingUserId = Guid.NewGuid();
     var memberToRemoveId = Guid.NewGuid();
@@ -61,7 +64,7 @@ public class RemoveGroupMemberHandlerTests
     groupMemberRepository.IsMemberAsync(requestingUserId, groupId).Returns(false);
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, memberToRemoveId, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -76,6 +79,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
 
     var requestingUserId = Guid.NewGuid();
     var memberToRemoveId = Guid.NewGuid();
@@ -85,7 +89,7 @@ public class RemoveGroupMemberHandlerTests
     groupMemberRepository.IsMemberAsync(requestingUserId, Arg.Any<Guid>()).Returns(true);
     groupMemberRepository.IsMemberAsync(memberToRemoveId, Arg.Any<Guid>()).Returns(false);
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, memberToRemoveId, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -100,6 +104,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository  groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
     
     var requestingUserId = Guid.NewGuid();
     var creatorId = Guid.NewGuid();
@@ -117,7 +122,7 @@ public class RemoveGroupMemberHandlerTests
     groupMemberRepository.GetMemberByGroupIdAsync(Arg.Any<Guid>())
       .Returns(new List<GroupMember> { creatorMember, requestingMember });
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, creatorId, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -132,6 +137,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
 
     var requestingUserId = Guid.NewGuid();
     var memberToRemoveId = Guid.NewGuid();
@@ -152,7 +158,7 @@ public class RemoveGroupMemberHandlerTests
       .Returns(new List<GroupMember> { requestingMember, memberToRemove });
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, memberToRemoveId, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -167,6 +173,7 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
 
     var requestingUserId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -184,7 +191,7 @@ public class RemoveGroupMemberHandlerTests
       .Returns(new List<GroupMember> { onlyMember });
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, requestingUserId, groupId);
 
     var result = await handler.HandleAsync(command);
@@ -199,13 +206,14 @@ public class RemoveGroupMemberHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
+    ILogger<RemoveGroupMemberHandler> logger = Substitute.For<ILogger<RemoveGroupMemberHandler>>();
     
     var requestingUserId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
     
     groupRepository.IsArchivedAsync(Arg.Any<Guid>()).Returns(true);
     
-    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository);
+    var handler = new RemoveGroupMemberHandler(groupMemberRepository, balanceCalculator, groupRepository, logger);
     var command = new RemoveGroupMemberCommand(requestingUserId, requestingUserId, groupId);
     
     var result = await handler.HandleAsync(command);

@@ -199,7 +199,7 @@
           <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2">
 
             <button @onclick="RequestArchive"
-                    disabled="@(_groupDetails.ArchivedAt is not null)"
+                    disabled="@(_groupDetails.ArchivedAt is not null || (_getGroupBalance is not null && _getGroupBalance.Balances.Any(b => b.Balance != 0)))"
                     class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
               Archiver le groupe
             </button>
