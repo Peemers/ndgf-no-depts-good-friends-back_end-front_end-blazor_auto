@@ -143,6 +143,7 @@
 
       if (!response.IsSuccessStatusCode)
       {
+        var errorMessage = await response.Content.ReadAsStringAsync();
         if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
           _message = "Trop de tentatives, veuillez réessayer dans quelques instants.";
@@ -152,7 +153,7 @@
         }
         else
         {
-          _message = "Erreur lors de la connexion";
+          _message = errorMessage;
           StateHasChanged();
           await Task.Delay(3000);
           _message = null;
