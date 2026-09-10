@@ -5,6 +5,7 @@ using ndgf.Api.Endpoints.GroupHistory;
 using ndgf.Api.Endpoints.Refund;
 using ndgf.Api.Endpoints.User;
 using ndgf.Api.Extensions;
+using ndgf.Api.Middlewares;
 using ndgf.Application.Extensions;
 using ndgf.Infrastructure.Extensions;
 using ndgf.Infrastructure.Logging;
@@ -38,6 +39,7 @@ if (app.Environment.IsDevelopment())
   });
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
