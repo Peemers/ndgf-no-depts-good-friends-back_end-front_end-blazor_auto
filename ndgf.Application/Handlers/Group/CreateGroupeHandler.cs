@@ -17,15 +17,15 @@ public class CreateGroupeHandler(
     Domain.Entities.Group group = Domain.Entities.Group.Create(command.Name, command.Description);
 
     Domain.Entities.Group savedGroup = await groupRepository.AddAsync(group);
-    
+
     GroupMember groupMember = GroupMember.Create(command.UserId, savedGroup.Id);
 
     GroupMember savedGroupMember = await groupMemberRepository.AddAsync(groupMember);
-    
+
     var result = new CreateGroupResult(savedGroup, savedGroupMember);
-    
-    logger.LogInformation("Tentative de création d'un nouveau groupe ({Name}) reussie par ({UserId}) ", command.Name, command.UserId);
-    
+
+    logger.LogInformation("[Succès] Tentative de création d'un nouveau groupe ({Name}) reussie par ({UserId}) ", command.Name, command.UserId);
+
     return Result<CreateGroupResult>.Success(result);
   }
 }

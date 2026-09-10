@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Handlers.Expense;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Queries.Expense;
 using ndgf.Domain.Common;
@@ -15,6 +16,7 @@ public class GetGroupExpensesHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
+    ILogger<GetGroupExpenseHandler> logger = Substitute.For<ILogger<GetGroupExpenseHandler>>();
 
     var userId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
@@ -30,7 +32,7 @@ public class GetGroupExpensesHandlerTests
     expenseRepository.GetGroupExpensesCountAsync(Arg.Any<Guid>()).Returns(25);
     userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
 
-    var handler = new GetGroupExpenseHandler(userRepository, groupMemberRepository, expenseRepository);
+    var handler = new GetGroupExpenseHandler(userRepository, groupMemberRepository, expenseRepository, logger);
     var query = new GetGroupExpenseQuery(groupId, userId, 1, 10, true);
 
     var result = await handler.HandleAsync(query);
@@ -55,13 +57,14 @@ public class GetGroupExpensesHandlerTests
     IUserRepository userRepository = Substitute.For<IUserRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
+    ILogger<GetGroupExpenseHandler> logger = Substitute.For<ILogger<GetGroupExpenseHandler>>();
     
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
     
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
     
-    var handler = new GetGroupExpenseHandler(userRepository, groupMemberRepository, expenseRepository);
+    var handler = new GetGroupExpenseHandler(userRepository, groupMemberRepository, expenseRepository, logger);
     var query = new GetGroupExpenseQuery(groupId, userId, 1, 10, true);
     
     var result = await handler.HandleAsync(query);

@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Handlers.GroupHistory;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Handlers.GroupHistory;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Models.GroupHistory;
 using ndgf.Application.Queries.GroupHistory;
@@ -16,6 +17,7 @@ public class GetGroupHistoryHandlerTests
         IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
         IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
         IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+        ILogger<GetGroupHistoryHandler> logger = Substitute.For<ILogger<GetGroupHistoryHandler>>();
 
         var userId = Guid.NewGuid();
         var groupId = Guid.NewGuid();
@@ -32,7 +34,7 @@ public class GetGroupHistoryHandlerTests
         refundRepository.GetAllGroupRefundAsync(Arg.Any<Guid>()).Returns(new List<Domain.Entities.Refund> { refund });
         userRepository.GetUserByIdAsync(Arg.Any<Guid>()).Returns(expectedUser);
 
-        var handler = new GetGroupHistoryHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
+        var handler = new GetGroupHistoryHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository, logger);
         var query = new GetGroupHistoryQuery(groupId, userId, 1, 10, true);
 
         var result = await handler.HandleAsync(query);
@@ -52,13 +54,14 @@ public class GetGroupHistoryHandlerTests
         IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
         IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
         IRefundRepository refundRepository = Substitute.For<IRefundRepository>();
+        ILogger<GetGroupHistoryHandler> logger = Substitute.For<ILogger<GetGroupHistoryHandler>>();
 
         var groupId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
-        var handler = new GetGroupHistoryHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository);
+        var handler = new GetGroupHistoryHandler(userRepository, groupMemberRepository, expenseRepository, refundRepository, logger);
         var query = new GetGroupHistoryQuery(groupId, userId, 1, 10, true);
 
         var result = await handler.HandleAsync(query);

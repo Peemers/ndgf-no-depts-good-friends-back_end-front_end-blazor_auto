@@ -18,21 +18,24 @@ public class CreateExpenseHandler(
     bool isArchived = await groupRepository.IsArchivedAsync(command.GroupId);
     if (isArchived)
     {
-      logger.LogInformation("Tentative de création d'une dépense dans un groupe archivé par le user : ({RequestingUserId}) ", command.RequestingUserId);
+      logger.LogInformation("[Echec] Tentative de création d'une dépense dans le groupe ({GroupId}) par ({RequestingUserId}) - groupe archivé", command.GroupId,
+        command.RequestingUserId);
       return Result<CreateExpenseResult>.Failure("Ce groupe est archivé, impossible de le modifier à nouveau.");
     }
 
     bool isMember = await groupMemberRepository.IsMemberAsync(command.RequestingUserId, command.GroupId);
     if (!isMember)
     {
-      logger.LogInformation("Tentative de création d'une dépense échouée, ({RequestingUserId}) ne fait pas partie du groupe)", command.RequestingUserId);
+      logger.LogInformation("[Echec] Tentative de création d'une dépense dans le groupe ({GroupId}) par ({RequestingUserId}) car il ne fait pas partie du groupe)",
+        command.GroupId, command.RequestingUserId);
       return Result<CreateExpenseResult>.Failure("Vous devez être membre du groupe pour creer une dépense.");
     }
 
     Domain.Entities.User? payer = await userRepository.GetUserByIdAsync(command.PayerId);
     if (payer is null)
     {
-      logger.LogInformation("Tentative de création d'une dépense échouée, le membre payeur n'existe pas.");
+      logger.LogInformation("[Echec] Tentative de création d'une dépense dans le groupe ({GroupId}) par ({RequestingUserId}) échouée - le membre payeur n'existe pas.",
+        command.GroupId, command.RequestingUserId);
       return Result<CreateExpenseResult>.Failure("Membre introuvable");
     }
 
@@ -56,7 +59,8 @@ public class CreateExpenseHandler(
 
     var result = new CreateExpenseResult(savedExpense, userExpenseInfos, payer.Pseudo, payer.Email);
 
-    logger.LogInformation("Création d'un dépense réussie par : ({RequestingUserId})", command.RequestingUserId);
+    logger.LogInformation("[Succés] Création d'un dépense réussie dans le groupe ({GroupId}) par ({RequestingUserId}) réussie - payeur : ({PayerId})", command.GroupId,
+      command.RequestingUserId, command.PayerId);
 
     return Result<CreateExpenseResult>.Success(result);
   }

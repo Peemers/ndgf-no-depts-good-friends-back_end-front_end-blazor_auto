@@ -20,7 +20,7 @@ public class LoginUserHandler(
     Domain.Entities.User? user = await userRepository.GetUserByEmailAsync(command.Email);
     if (user is null)
     {
-      logger.LogWarning("Tentative de connexion échouée : email inconnu ({Email})", command.Email);
+      logger.LogWarning("[Echec] Tentative de connexion échouée : email inconnu ({Email})", command.Email);
       return Result<LoginResult>.Failure("Email ou mot de passe incorrect");
     }
 
@@ -28,7 +28,7 @@ public class LoginUserHandler(
 
     if (!verifyPass)
     {
-      logger.LogWarning("Tentative de connexion échouée : mot de passe incorrect pour ({UserId})", user.Id);
+      logger.LogWarning("[Echec] Tentative de connexion échouée : mot de passe incorrect pour ({UserId})", user.Id);
       return Result<LoginResult>.Failure("Email ou mot de passe incorrect");
     }
 
@@ -40,7 +40,7 @@ public class LoginUserHandler(
 
     await refreshTokenRepository.AddAsync(refreshTokenEntity);
 
-    logger.LogInformation("Connexion réussie pour l'utilisateur ({UserId})", user.Id);
+    logger.LogInformation("[Succès] Connexion réussie pour l'utilisateur ({UserId})", user.Id);
 
     LoginResult loginResult = new LoginResult(user, accessToken, refreshToken);
     return Result<LoginResult>.Success(loginResult);

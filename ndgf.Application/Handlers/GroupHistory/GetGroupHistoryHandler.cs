@@ -18,7 +18,7 @@ public class GetGroupHistoryHandler(
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
-      logger.LogInformation("Tentative de récupération de l'historique complet du groupe ({GroupId}) échouée - ({UserId}) ne fait pas partie de ce groupe",  query.GroupId, query.UserId);
+      logger.LogInformation("[Echec] Tentative de récupération de l'historique complet du groupe ({GroupId}) échouée - ({UserId}) ne fait pas partie de ce groupe",  query.GroupId, query.UserId);
       return Result<GetGroupHistoryResult>.Failure("Vous devez etre membre du groupe pour consulter l'historique complet.");
     }
 
@@ -84,7 +84,7 @@ public class GetGroupHistoryHandler(
 
     var result = new GetGroupHistoryResult(pagedResult);
     
-    logger.LogInformation("Tentative de récupération de l'historique complet du groupe ({GroupId}) par ({UserId}) réussie", query.GroupId, query.UserId);
+    logger.LogInformation("[Succès] Tentative de récupération de l'historique complet du groupe ({GroupId}) par ({UserId}) réussie", query.GroupId, query.UserId);
     
     return Result<GetGroupHistoryResult>.Success(result);
   }

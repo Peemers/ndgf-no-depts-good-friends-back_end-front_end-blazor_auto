@@ -18,8 +18,8 @@ public class GetGroupBalanceHandler(
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
-      logger.LogInformation("Tentative de chargement de la balance du groupe échouée - ({UserId}) ne fait pas partie du groupe : ({GroupId}) ", query.UserId,
-        query.GroupId);
+      logger.LogInformation("[Echec] Tentative de chargement de la balance du groupe ({GroupId}) échouée - ({UserId}) ne fait pas partie de ce groupe", query.GroupId,
+        query.UserId);
       return Result<GetGroupBalanceResult>.Failure("Vous devez être membre du groupe pour consulter toutes les dépenses.");
     }
 
@@ -58,8 +58,8 @@ public class GetGroupBalanceHandler(
 
     var expenseCount = expenses.Count();
     var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses, expenseCount);
-    
-    logger.LogInformation("Chargement de la balance du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId , query.GroupId);
+
+    logger.LogInformation("[Succès] Chargement de la balance du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId, query.GroupId);
 
     return Result<GetGroupBalanceResult>.Success(result);
   }

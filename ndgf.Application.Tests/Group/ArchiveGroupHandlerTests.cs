@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Group;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Group;
 using ndgf.Application.Handlers.Group;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Interfaces.Services;
@@ -15,6 +16,7 @@ public class ArchiveGroupHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<ArchiveGroupHandler> logger = Substitute.For<ILogger<ArchiveGroupHandler>>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -29,7 +31,7 @@ public class ArchiveGroupHandlerTests
     groupRepository.GetGroupByIdAsync(Arg.Any<Guid>()).Returns(expectedGroup);
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator);
+    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator, logger);
     var command = new ArchiveGroupCommand(userId, groupId);
     var result = await handler.HandleAsync(command);
 
@@ -43,13 +45,14 @@ public class ArchiveGroupHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<ArchiveGroupHandler> logger = Substitute.For<ILogger<ArchiveGroupHandler>>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
 
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
 
-    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator);
+    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator, logger);
     var command = new ArchiveGroupCommand(userId, groupId);
     var result = await handler.HandleAsync(command);
 
@@ -63,6 +66,7 @@ public class ArchiveGroupHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<ArchiveGroupHandler> logger = Substitute.For<ILogger<ArchiveGroupHandler>>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -70,7 +74,7 @@ public class ArchiveGroupHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     groupRepository.GetGroupByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.Group?)null);
 
-    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator);
+    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator, logger);
     var command = new ArchiveGroupCommand(userId, groupId);
     var result = await handler.HandleAsync(command);
 
@@ -84,6 +88,7 @@ public class ArchiveGroupHandlerTests
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     IBalanceCalculator balanceCalculator = Substitute.For<IBalanceCalculator>();
+    ILogger<ArchiveGroupHandler> logger = Substitute.For<ILogger<ArchiveGroupHandler>>();
 
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
@@ -97,7 +102,7 @@ public class ArchiveGroupHandlerTests
     groupRepository.GetGroupByIdAsync(Arg.Any<Guid>()).Returns(expectedGroup);
     balanceCalculator.CalculateBalanceAsync(Arg.Any<Guid>()).Returns(userBalance);
 
-    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator);
+    var handler = new ArchiveGroupHandler(groupMemberRepository, groupRepository, balanceCalculator, logger);
     var command = new ArchiveGroupCommand(userId, groupId);
     var result = await handler.HandleAsync(command);
 

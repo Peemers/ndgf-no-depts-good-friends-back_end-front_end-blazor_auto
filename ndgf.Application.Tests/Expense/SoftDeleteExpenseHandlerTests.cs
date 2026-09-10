@@ -1,4 +1,5 @@
-﻿using ndgf.Application.Commands.Expense;
+﻿using Microsoft.Extensions.Logging;
+using ndgf.Application.Commands.Expense;
 using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Domain.Common;
@@ -12,6 +13,7 @@ public class SoftDeleteExpenseHandlerTests
   {
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    ILogger<SoftDeleteExpenseHandler> logger = Substitute.For<ILogger<SoftDeleteExpenseHandler>>();
 
     var userId = Guid.NewGuid();
     var payerId = Guid.NewGuid();
@@ -29,7 +31,7 @@ public class SoftDeleteExpenseHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     expenseRepository.GetExpenseByIdAsync(Arg.Any<Guid>()).Returns(expectedExpense);
     
-    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository);
+    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository, logger);
     var command = new SoftDeleteExpenseCommand(userId, groupId, expenseId);
     
     var result = await handler.HandleAsync(command);
@@ -44,6 +46,7 @@ public class SoftDeleteExpenseHandlerTests
   {
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    ILogger<SoftDeleteExpenseHandler> logger = Substitute.For<ILogger<SoftDeleteExpenseHandler>>();
     
     var userId = Guid.NewGuid();
     var expenseId = Guid.NewGuid();
@@ -51,7 +54,7 @@ public class SoftDeleteExpenseHandlerTests
     
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(false);
     
-    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository);
+    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository, logger);
     var command = new SoftDeleteExpenseCommand(userId, groupId, expenseId);
     
     var result = await handler.HandleAsync(command);
@@ -66,6 +69,7 @@ public class SoftDeleteExpenseHandlerTests
   {
     IExpenseRepository expenseRepository = Substitute.For<IExpenseRepository>();
     IGroupMemberRepository groupMemberRepository = Substitute.For<IGroupMemberRepository>();
+    ILogger<SoftDeleteExpenseHandler> logger = Substitute.For<ILogger<SoftDeleteExpenseHandler>>();
     
     var userId = Guid.NewGuid();
     var expenseId = Guid.NewGuid();
@@ -74,7 +78,7 @@ public class SoftDeleteExpenseHandlerTests
     groupMemberRepository.IsMemberAsync(Arg.Any<Guid>(), Arg.Any<Guid>()).Returns(true);
     expenseRepository.GetExpenseByIdAsync(Arg.Any<Guid>()).Returns((Domain.Entities.Expense?)null);
     
-    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository);
+    var handler = new SoftDeleteExpenseHandler(expenseRepository, groupMemberRepository, logger);
     var command = new SoftDeleteExpenseCommand(userId, groupId, expenseId);
     var result = await handler.HandleAsync(command);
     

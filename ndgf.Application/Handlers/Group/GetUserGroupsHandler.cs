@@ -33,7 +33,7 @@ public class GetUserGroupsHandler(
 
     var result = new GetUserGroupsResult(groups);
     
-    logger.LogInformation("Tentative de récupération des groupes du membre ({UserId}) réussie", query.UserId);
+    logger.LogInformation("[Succès] Tentative de récupération des groupes du membre ({UserId}) réussie", query.UserId);
 
     return Result<GetUserGroupsResult>.Success(result);
   }

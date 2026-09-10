@@ -17,14 +17,14 @@ public class GetGroupDetailsHandler(
     var group = await groupRepository.GetGroupByIdAsync(query.GroupId);
     if (group == null)
     {
-      logger.LogInformation("Tentative de récupération des détails du groupe échouée par ({UserId}) - groupe inéxistant", query.UserId);
+      logger.LogInformation("[Echec] Tentative de récupération des détails du groupe échouée par ({UserId}) - groupe inéxistant", query.UserId);
       return Result<GetGroupDetailsResult>.Failure("Ce groupe n'existe pas");
     }
 
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
-      logger.LogInformation("Tentative de récupération des détails du groupe ({GroupId}) - ({UserId}) ne fait pas partie du groupe", query.GroupId, query.UserId);
+      logger.LogInformation("[Echec] Tentative de récupération des détails du groupe ({GroupId}) - ({UserId}) ne fait pas partie du groupe", query.GroupId, query.UserId);
       return Result<GetGroupDetailsResult>.Failure("Vous devez etre membre du groupe pour en consulter les détails");
     }
 
@@ -35,7 +35,7 @@ public class GetGroupDetailsHandler(
     foreach (var groupMember in groupMembers)
     {
       var user = await userRepository.GetUserByIdAsync(groupMember.UserId);
-      
+
       if (user is not null)
       {
         membersInfo.Add(new GroupMemberInfoResult(user.Id, user.Pseudo, user.Email));
@@ -43,8 +43,8 @@ public class GetGroupDetailsHandler(
     }
 
     var result = new GetGroupDetailsResult(group, membersInfo, group.ArchivedAt);
-    
-    logger.LogInformation("Tentative de récupération des détails du groupe ({GroupId}) par ({UserId}) réussie", query.GroupId, query.UserId);
+
+    logger.LogInformation("[Succès] Tentative de récupération des détails du groupe ({GroupId}) par ({UserId}) réussie", query.GroupId, query.UserId);
 
     return Result<GetGroupDetailsResult>.Success(result);
   }

@@ -17,8 +17,8 @@ public class GetGroupExpenseHandler(
     bool isMember = await groupMemberRepository.IsMemberAsync(query.UserId, query.GroupId);
     if (!isMember)
     {
-      logger.LogInformation("Tentative de chargement des dépenses du groupe échouée : ({UserId}) ne fait pas partie du groupe : ({GroupId}) ", query.UserId,
-        query.GroupId);
+      logger.LogInformation("[Echec] Tentative de chargement des dépenses du groupe ({GroupId}) échouée : ({UserId}) ne fait pas partie de ce groupe", query.GroupId,
+        query.UserId);
       return Result<GetGroupExpensesResult>.Failure("Vous devez être membre du groupe pour en consulter les dépenses.");
     }
 
@@ -35,7 +35,7 @@ public class GetGroupExpenseHandler(
       if (user is not null)
       {
         var participantCount = groupExpense.ExpenseParts.Count;
-        
+
         expenseSummary.Add(new ExpenseSummary(
           groupExpense.Id,
           groupExpense.Amount,
@@ -56,9 +56,9 @@ public class GetGroupExpenseHandler(
       totalPages);
 
     var result = new GetGroupExpensesResult(pagedResult);
-    
-    logger.LogInformation("Chargement des dépenses du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId , query.GroupId);
-    
+
+    logger.LogInformation("[Succès] Chargement des dépenses du groupe ({GroupId}) par ({UserId}) reussie", query.GroupId, query.UserId);
+
     return Result<GetGroupExpensesResult>.Success(result);
   }
 }
