@@ -27,6 +27,7 @@ public static class UserEndpoints
 
         return Results.Created($"/api/users/{response.Id}", response);
       })
+      .RequireRateLimiting("auth")
       .WithName("RegisterUser")
       .WithSummary("Inscrit un nouvel utilisateur")
       .WithDescription("Crée un compte utilisateur avec email, mot de passe et informations personnelles")
@@ -48,6 +49,7 @@ public static class UserEndpoints
 
         return Results.Ok(response);
       })
+      .RequireRateLimiting("auth")
       .WithName("LoginUser")
       .WithSummary("Connexion utilisateur")
       .WithDescription("Connexion de l'utilisateur avec email et mot de passe et protection jwt")
@@ -104,6 +106,7 @@ public static class UserEndpoints
 
         return Results.Ok(response);
       })
+      .RequireRateLimiting("auth")
       .AllowAnonymous()
       .WithName("RefreshToken")
       .WithSummary("Renouvelle un access token à partir d'un refresh token")
