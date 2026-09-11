@@ -28,4 +28,9 @@ public class ExpenseApiClient(HttpClient httpClient)
   {
     return await httpClient.DeleteAsync($"/api/groups/{groupId}/expenses/{expenseId}");
   }
+
+  public async Task<HttpResponseMessage> GetGroupExpensesByMonthAsync(Guid groupId)
+  {
+    return await httpClient.GetAsync($"/api/groups/{groupId}/monthly");
+  }
 }

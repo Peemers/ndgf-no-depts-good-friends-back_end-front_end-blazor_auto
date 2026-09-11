@@ -12,6 +12,7 @@
 @inject ExpenseApiClient ExpenseApiClient
 @inject RefundApiClient RefundApiClient
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 @attribute [Authorize]
 
@@ -20,7 +21,7 @@
 <div class="min-h-screen flex flex-col md:flex-row bg-linear-to-bl from-[#F3EBD8] to-[#B07D4C]">
   <div
     class="hidden from-[#8A6220] to-[#6E5219] from-[#98492C] to-[#7A3A23] from-[#46392F] to-[#352A23] from-[#6A4A70] to-[#553A5A] from-[#4A5C86] to-[#3A4A6E] from-[#6E6B2A] to-[#575420]"></div>
-  
+
   @if (_groupDetails is null)
   {
     <p class="text-center text-2xl p-6">Chargement en cours</p>
@@ -105,6 +106,17 @@
           <p class="text-[#46392F] text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
         }
 
+        <div class="w-full mt-2 justify-end flex flex-col">
+          <button @onclick="ToggleMonthlyStats"
+                  class="justify-end bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all p-2 rounded-2xl">
+            @(_showMonthlyStats ? "Cacher les statistiques" : "Afficher les statistiques")
+          </button>
+          @if (_showMonthlyStats)
+          {
+            <canvas id="monthlyExpensesChart"></canvas>
+          }
+        </div>
+
         <div class="flex flex-col md:flex-row gap-1.5 mt-4">
           <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-amber-200">
             <div class="flex items-center gap-2 mb-3">
@@ -136,11 +148,11 @@
               <p class="text-[#6E5C4E] mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
               @if (_groupDetails.ArchivedAt is not null)
               {
-                <h3 class="text-lg font-semibold text-[#8A4529]">Ce groupe a été archivé, impossible de modifier, lecture seule uniquement</h3>
+                <h3 class="text-lg font-semibold text-[#8A4529]">Ce groupe a été archivé, impossible de modifier,
+                  lecture seule uniquement</h3>
               }
             }
           </div>
-
 
           <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-violet-200">
             <div class="flex items-center gap-2 mb-3">
@@ -206,7 +218,7 @@
 
             <NavLink href="/groups"
                      class="hover:bg-[#93BABC] text-center content-center rounded-2xl hover:scale-[0.95] active:scale-97 transition-all shadow-black/10 shadow-sm text-[#46392F] px-4 py-2 text-xl w-full md:flex-1">
-               Retour aux groupes
+              Retour aux groupes
             </NavLink>
 
             <button @onclick="OpenExpenseModal"
@@ -218,7 +230,7 @@
             <button @onclick="OpenRefundModal"
                     disabled="@(_groupDetails.ArchivedAt is not null)"
                     class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
-               Créer un nouveau remboursement
+              Créer un nouveau remboursement
             </button>
           </div>
 
@@ -823,7 +835,7 @@
 
       StateHasChanged();
 
-      await Task.Delay(3000);
+      await Task.Delay(1000);
       _message = null;
 
       CloseExpenseModal();
@@ -973,7 +985,7 @@
   {
     await HandleCreateExpense();
 
-    await Task.Delay(2000);
+    await Task.Delay(1000);
     _message = null;
 
     _confirmExpense = false;
@@ -1000,6 +1012,43 @@
     _confirmRefund = false;
   }
 
+  private bool _showMonthlyStats;
+  private GetGroupExpensesByMonthResponseModel? _monthlyExpenses;
+
+  private async Task LoadMonthlyExpenses()
+  {
+    var response = await ExpenseApiClient.GetGroupExpensesByMonthAsync(GroupId);
+    if (response.IsSuccessStatusCode)
+    {
+      _monthlyExpenses = await response.Content.ReadFromJsonAsync<GetGroupExpensesByMonthResponseModel>();
+    }
+  }
+
+  private async Task ToggleMonthlyStats()
+  {
+    _showMonthlyStats = !_showMonthlyStats;
+
+    if (_showMonthlyStats)
+    {
+      await LoadMonthlyExpenses();
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (_showMonthlyStats && _monthlyExpenses is not null)
+    {
+      var labels = _monthlyExpenses.MonthlyExpenses
+        .Select(m => $"{m.Month}/{m.Year}")
+        .ToArray();
+
+      var data = _monthlyExpenses.MonthlyExpenses
+        .Select(m => m.Total)
+        .ToArray();
+
+      await JSRuntime.InvokeVoidAsync("renderMonthlyExpensesChart", "monthlyExpensesChart", labels, data);
+    }
+  }
 
   private bool _showArchiveConfirmation;
 

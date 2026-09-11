@@ -106,7 +106,7 @@ public static class UserEndpoints
 
         return Results.Ok(response);
       })
-      .RequireRateLimiting("auth")
+      .RequireRateLimiting("refresh")
       .AllowAnonymous()
       .WithName("RefreshToken")
       .WithSummary("Renouvelle un access token à partir d'un refresh token")
