@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using ndgf.Application.Commands.Refund;
-using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Handlers.Refund;
 using ndgf.Application.Interfaces.Repositories;
 using NSubstitute;

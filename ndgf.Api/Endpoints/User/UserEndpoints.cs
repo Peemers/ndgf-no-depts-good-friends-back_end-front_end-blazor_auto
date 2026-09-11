@@ -67,19 +67,19 @@ public static class UserEndpoints
 
         if (storedToken is null)
         {
-          logger.LogWarning("Tentative de refresh avec un refresh-token inconnu.");
+          logger.LogWarning("[WARNING] Tentative de refresh avec un refresh-token inconnu.");
           return Results.Unauthorized();
         }
 
         if (storedToken.RevokedAt is not null)
         {
-          logger.LogWarning("Tentative de refresh avec un refresh-token révoqué !");
+          logger.LogWarning("[WARNING] Tentative de refresh avec un refresh-token révoqué !");
           return Results.Unauthorized();
         }
 
         if (storedToken.ExpiresAt < DateTime.UtcNow)
         {
-          logger.LogInformation("Tentative de refresh avec un refresh-token expiré.");
+          logger.LogInformation("[Echec] Tentative de refresh avec un refresh-token expiré.");
           return Results.Unauthorized();
         }
 

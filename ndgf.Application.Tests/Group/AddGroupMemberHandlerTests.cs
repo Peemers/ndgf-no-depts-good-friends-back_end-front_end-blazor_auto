@@ -109,7 +109,6 @@ public class AddGroupMemberHandlerTests
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     ILogger<AddGroupMemberHandler> logger = Substitute.For<ILogger<AddGroupMemberHandler>>();
 
-    var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
 
@@ -139,7 +138,6 @@ public class AddGroupMemberHandlerTests
     IGroupRepository groupRepository = Substitute.For<IGroupRepository>();
     ILogger<AddGroupMemberHandler> logger = Substitute.For<ILogger<AddGroupMemberHandler>>();
     
-    var inviterId = Guid.NewGuid();
     var groupId = Guid.NewGuid();
     var userId = Guid.NewGuid();
     

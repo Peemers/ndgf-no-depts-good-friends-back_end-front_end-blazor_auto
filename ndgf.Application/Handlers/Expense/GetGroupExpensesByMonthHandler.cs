@@ -22,7 +22,7 @@ public class GetGroupExpensesByMonthHandler(
     }
 
     var expenses = await expenseRepository.GetAllActiveGroupExpensesAsync(query.GroupId);
-    
+
     var expensesByMonth = expenses
       .Where(e => e.CreatedAt >= DateTime.UtcNow.AddMonths(-12))
       .GroupBy(e => new { e.CreatedAt.Year, e.CreatedAt.Month })
@@ -34,15 +34,15 @@ public class GetGroupExpensesByMonthHandler(
       })
       .OrderBy(g => g.Year)
       .ThenBy(g => g.Month);
-    
+
     var monthlyResults = expensesByMonth
       .Select(m => new MonthlyExpensesResult(m.Year, m.Month, m.Total))
       .ToList();
 
     var result = new GetGroupExpensesByMonthResult(monthlyResults);
-    
+
     logger.LogInformation("[Succès] Chargement des dépenses mensuelles de ({GroupId}) par : ({UserId}) reussie", query.GroupId, query.UserId);
-    
+
     return Result<GetGroupExpensesByMonthResult>.Success(result);
   }
 }
