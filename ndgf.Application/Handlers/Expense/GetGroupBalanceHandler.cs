@@ -59,7 +59,7 @@ public class GetGroupBalanceHandler(
     var expenseCount = expenses.Count();
     var result = new GetGroupBalanceResult(userBalance, suggestedRepayments, totalExpenses, expenseCount);
 
-    logger.LogInformation("[Succès] Chargement de la balance du groupe ({GroupId}) par : ({UserId}) reussie", query.UserId, query.GroupId);
+    logger.LogInformation("[Succès] Chargement de la balance du groupe ({GroupId}) par : ({UserId}) reussie", query.GroupId, query.UserId);
 
     return Result<GetGroupBalanceResult>.Success(result);
   }

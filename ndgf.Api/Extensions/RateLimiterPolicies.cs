@@ -14,6 +14,13 @@ public static class RateLimiterPolicies
         authOptions.TokensPerPeriod = 3;
         authOptions.ReplenishmentPeriod = TimeSpan.FromSeconds(20);
       });
+      
+      options.AddTokenBucketLimiter("refresh", refreshOptions =>
+      {
+        refreshOptions.TokenLimit = 60;
+        refreshOptions.TokensPerPeriod = 15;
+        refreshOptions.ReplenishmentPeriod = TimeSpan.FromSeconds(20);
+      });
 
       options.RejectionStatusCode = 429;
 

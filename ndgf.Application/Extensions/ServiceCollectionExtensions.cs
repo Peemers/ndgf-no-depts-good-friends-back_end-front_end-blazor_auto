@@ -29,6 +29,8 @@ public static class ServiceCollectionExtensions
     services.AddScoped<IBalanceCalculator, BalanceCalculator>();
     services.AddScoped<ArchiveGroupHandler>();
     services.AddScoped<RemoveGroupMemberHandler>();
+    services.AddScoped<GetGroupExpensesByMonthHandler>();
+    services.AddScoped<GetGroupExpensesByMemberHandler>();
     return services;
   }
 }
