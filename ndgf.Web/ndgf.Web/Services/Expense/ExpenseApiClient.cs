@@ -33,4 +33,9 @@ public class ExpenseApiClient(HttpClient httpClient)
   {
     return await httpClient.GetAsync($"/api/groups/{groupId}/monthly");
   }
+
+  public async Task<HttpResponseMessage> GetGroupExpensesByMemberAsync(Guid groupId)
+  {
+    return await httpClient.GetAsync($"/api/groups/{groupId}/expenses-by-member");
+  }
 }

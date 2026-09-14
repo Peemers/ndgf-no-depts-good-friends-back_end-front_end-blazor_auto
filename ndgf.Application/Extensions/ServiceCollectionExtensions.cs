@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
     services.AddScoped<ArchiveGroupHandler>();
     services.AddScoped<RemoveGroupMemberHandler>();
     services.AddScoped<GetGroupExpensesByMonthHandler>();
+    services.AddScoped<GetGroupExpensesByMemberHandler>();
     return services;
   }
 }

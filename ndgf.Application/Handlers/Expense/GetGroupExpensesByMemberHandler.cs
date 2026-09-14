@@ -6,11 +6,11 @@ using ndgf.Domain.Common;
 
 namespace ndgf.Application.Handlers.Expense;
 
-public class GetExpensesByMemberHandler(
+public class GetGroupExpensesByMemberHandler(
   IGroupMemberRepository groupMemberRepository,
   IExpenseRepository expenseRepository,
   IUserRepository userRepository,
-  ILogger<GetExpensesByMemberHandler> logger)
+  ILogger<GetGroupExpensesByMemberHandler> logger)
 {
   public async Task<Result<GetGroupExpensesByMemberResult>> HandleAsync(GetGroupExpensesByMemberQuery query)
   {

@@ -18,5 +18,3 @@ public static class GetGroupExpensesByMemberMapper
     };
   }
 }
-
-//todo je viens de finir le mapper et les dto, endpoint et web la prochaine session.
