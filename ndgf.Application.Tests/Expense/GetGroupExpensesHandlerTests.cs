@@ -3,7 +3,6 @@ using ndgf.Application.Handlers.Expense;
 using ndgf.Application.Interfaces.Repositories;
 using ndgf.Application.Queries.Expense;
 using ndgf.Domain.Common;
-using ndgf.Domain.Entities;
 using NSubstitute;
 
 namespace ndgf.Application.Tests.Expense;

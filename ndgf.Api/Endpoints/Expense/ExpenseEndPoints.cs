@@ -131,6 +131,62 @@ public static class ExpenseEndPoints
       .Produces(StatusCodes.Status400BadRequest)
       .Produces(StatusCodes.Status401Unauthorized)
       .Produces(StatusCodes.Status200OK);
+
+    app.MapGet("/api/groups/{groupId}/monthly", async (
+        Guid groupId,
+        GetGroupExpensesByMonthHandler expensesByMonthHandler,
+        ClaimsPrincipal user) =>
+      {
+        var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = Guid.Parse(userIdClaim!);
+
+        var query = new GetGroupExpensesByMonthQuery(groupId, userId);
+        var result = await expensesByMonthHandler.HandleAsync(query);
+
+        if (!result.IsSuccess)
+        {
+          return Results.BadRequest(result.ErrorMessage);
+        }
+
+        var response = result.Value!.ToResponseDto();
+
+        return Results.Ok(response);
+      })
+      .RequireAuthorization()
+      .WithName("GetGroupExpensesByMonth")
+      .WithSummary("Charger les dépenses mensuelles")
+      .WithDescription("Permet à l'utilisateur de charger les dépenses faites sur un mois, fourni aussi les données aux graph")
+      .Produces<GetGroupExpensesByMonthResponseDto>(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status400BadRequest)
+      .Produces(StatusCodes.Status401Unauthorized);
+
+    app.MapGet("/api/groups/{groupId}/expenses-by-member", async (
+      Guid groupId,
+      GetGroupExpensesByMemberHandler expensesByMemberHandler,
+      ClaimsPrincipal user) =>
+    {
+      var userIdClaim = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      var userId = Guid.Parse(userIdClaim!);
+
+      var query = new GetGroupExpensesByMemberQuery(groupId, userId);
+      var result = await expensesByMemberHandler.HandleAsync(query);
+
+      if (!result.IsSuccess)
+      {
+        return Results.BadRequest(result.ErrorMessage);
+      }
+
+      var response = result.Value!.ToResponseDto();
+
+      return Results.Ok(response);
+    })
+    .RequireAuthorization()
+    .WithName("GetGroupExpensesByUser")
+    .WithSummary("Charger le total des dépenses individuelles par user")
+    .WithDescription("Permet à l'utilisateur de charger les dépenses total des utilisateurs d'un groupe, fourni aussi les données aux graph")
+    .Produces<GetGroupExpensesByMemberResponseDto>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status401Unauthorized);
     
     return app;
   }
