@@ -34,5 +34,9 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
       .WithMany()
       .HasForeignKey(e => e.GroupId)
       .OnDelete(DeleteBehavior.Restrict);
+    
+    builder.Property(e => e.Latitude).HasPrecision(9, 6);
+    
+    builder.Property(e => e.Longitude).HasPrecision(9, 6);
   }
 }

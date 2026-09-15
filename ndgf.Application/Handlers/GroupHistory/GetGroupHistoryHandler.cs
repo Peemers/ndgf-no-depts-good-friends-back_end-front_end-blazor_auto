@@ -40,7 +40,8 @@ public class GetGroupHistoryHandler(
           expense.CreatedAt,
           payer.Pseudo,
           null,
-          expense.DeletedAt));
+          expense.DeletedAt,
+          expense.Location));
       }
     }
 

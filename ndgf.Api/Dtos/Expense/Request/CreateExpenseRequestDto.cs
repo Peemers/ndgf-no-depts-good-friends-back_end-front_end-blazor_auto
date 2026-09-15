@@ -13,4 +13,8 @@ public record CreateExpenseRequestDto
   public required Guid UserId { get; init; } //incohérence nommage -> payerId en fait.
   
   public required List<ExpensePartInputDto> ExpenseParts { get; init; }
+  
+  public decimal? Latitude { get; init; }
+  
+  public decimal? Longitude { get; init; }
 }

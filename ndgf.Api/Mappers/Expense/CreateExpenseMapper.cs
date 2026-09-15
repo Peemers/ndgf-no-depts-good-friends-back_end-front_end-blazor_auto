@@ -14,7 +14,7 @@ public static class CreateExpenseMapper
       .Select(ep => new ExpensePartInput(ep.UserId, ep.Percentage))
       .ToList();
 
-    return new CreateExpenseCommand(requestingUserId, dto.UserId, expensePartInputs, dto.Amount, dto.Description, groupId);
+    return new CreateExpenseCommand(requestingUserId, dto.UserId, expensePartInputs, dto.Amount, dto.Description, groupId, dto.Latitude, dto.Longitude);
   }
 
   public static CreateExpenseResponseDto ToResponseDto(this CreateExpenseResult result)
@@ -26,6 +26,7 @@ public static class CreateExpenseMapper
       Description = result.Expense.Description,
       PayerPseudo = result.PayerPseudo,
       PayerEmail = result.PayerEmail,
+      Location = result.Expense.Location,
       UserExpenseInfos = result.UserExpenseInfoResults.Select(info => new UserExpenseInfoResponseDto
       {
         UserId = info.UserId,
