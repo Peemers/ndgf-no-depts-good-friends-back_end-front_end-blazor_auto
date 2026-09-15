@@ -8,4 +8,5 @@ public record CreateExpenseResponseModel
   public required string PayerPseudo { get; init; }
   public required string PayerEmail { get; init; }
   public required List<UserExpenseInfoResponseModel> UserExpenseInfos { get; init; }
+  public string? Location { get; init; }
 };
