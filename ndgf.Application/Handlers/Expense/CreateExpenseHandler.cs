@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ndgf.Application.Commands.Expense;
 using ndgf.Application.Interfaces.Repositories;
+using ndgf.Application.Interfaces.Services;
 using ndgf.Application.Models.Expense;
 using ndgf.Domain.Common;
 
@@ -11,6 +12,7 @@ public class CreateExpenseHandler(
   IExpenseRepository expenseRepository,
   IGroupMemberRepository groupMemberRepository,
   IGroupRepository groupRepository,
+  IGeoCodingService geoCodingService,
   ILogger<CreateExpenseHandler> logger)
 {
   public async Task<Result<CreateExpenseResult>> HandleAsync(CreateExpenseCommand command)
@@ -39,8 +41,14 @@ public class CreateExpenseHandler(
       return Result<CreateExpenseResult>.Failure("Membre introuvable");
     }
 
+    string? location = command.Location;
+    if (command.Latitude.HasValue && command.Longitude.HasValue)
+    {
+      location = await geoCodingService.GetGeoLocationAsync(command.Latitude.Value, command.Longitude.Value);
+    }
+
     Domain.Entities.Expense newExpense =
-      Domain.Entities.Expense.Create(command.PayerId, command.ExpensePartInputs, command.Amount, command.Description, command.GroupId);
+      Domain.Entities.Expense.Create(command.PayerId, command.ExpensePartInputs, command.Amount, command.Description, command.GroupId, command.Latitude, command.Longitude, location);
 
     Domain.Entities.Expense savedExpense = await expenseRepository.AddAsync(newExpense);
 
