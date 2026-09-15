@@ -2,4 +2,4 @@
 
 namespace ndgf.Application.Commands.Expense;
 
-public record CreateExpenseCommand(Guid RequestingUserId, Guid PayerId, List<ExpensePartInput> ExpensePartInputs, decimal Amount, string Description, Guid GroupId);
+public record CreateExpenseCommand(Guid RequestingUserId, Guid PayerId, List<ExpensePartInput> ExpensePartInputs, decimal Amount, string Description, Guid GroupId, decimal? Latitude = null, decimal? Longitude = null, string? Location = null);

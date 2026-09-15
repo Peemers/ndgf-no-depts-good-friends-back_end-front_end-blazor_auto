@@ -9,6 +9,9 @@ public sealed partial class Expense : BaseEntity
   public string Description { get; private set; } = null!;
   public Guid UserId { get; private set; }
   public Guid GroupId { get; private set; }
+  public Decimal? Latitude {get; private set;}
+  public decimal? Longitude {get; private set;}
+  public string? Location {get; private set;}
 
   private readonly List<ExpensePart> _expenseParts = [];
 
@@ -16,7 +19,7 @@ public sealed partial class Expense : BaseEntity
   
   private Expense(){}
 
-  private Expense(Guid id, DateTime createdAt, decimal amount, string description, Guid userId, Guid groupId, List<ExpensePart> expenseParts)
+  private Expense(Guid id, DateTime createdAt, decimal amount, string description, Guid userId, Guid groupId, List<ExpensePart> expenseParts, decimal? latitude,  decimal? longitude, string? location)
     : base(id, createdAt)
   {
     Amount = amount;
@@ -24,9 +27,12 @@ public sealed partial class Expense : BaseEntity
     UserId = userId;
     GroupId = groupId;
     _expenseParts = expenseParts;
+    Latitude = latitude;
+    Longitude = longitude;
+    Location = location;
   }
 
-  public static Expense Create(Guid userId, List<ExpensePartInput> expensesPartsInput, decimal amount, string description, Guid groupId)
+  public static Expense Create(Guid userId, List<ExpensePartInput> expensesPartsInput, decimal amount, string description, Guid groupId, decimal? latitude = null, decimal? longitude = null, string? location = null)
   {
     if (userId == Guid.Empty)
     {
@@ -54,13 +60,23 @@ public sealed partial class Expense : BaseEntity
     {
       throw new DomainException("La somme des pourcentages doit être égale à 100");
     }
+
+    if (latitude.HasValue && (latitude < -90 || latitude > 90))
+    {
+      throw new DomainException("La latitude doit etre comprise entre -90 et 90 degrés");
+    }
+
+    if (longitude.HasValue && (longitude < -180 || longitude > 180))
+    {
+      throw new DomainException("La longitude doit etre comprise entre -180 et 180 degrés");
+    }
     
     var expenseId = Guid.NewGuid();
 
     var expenseParts = expensesPartsInput
       .Select(input => ExpensePart.Create(input.UserId, expenseId, input.Percentage)).ToList();
     
-    return new Expense(expenseId, DateTime.UtcNow, amount, description, userId, groupId, expenseParts);
+    return new Expense(expenseId, DateTime.UtcNow, amount, description, userId, groupId, expenseParts, latitude, longitude, location);
   }
 
   public Dictionary<Guid, decimal> CalculateAmountsByUser()

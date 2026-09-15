@@ -10,4 +10,5 @@ public record GroupTransactionSummaryModel
   public required string MainActorPseudo { get; init; }
   public string? ReceiverPseudo { get; init; }
   public DateTime? DeletedAt { get; init; }
+  public string? Location { get; init; }
 }

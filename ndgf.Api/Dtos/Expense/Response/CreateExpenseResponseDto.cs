@@ -8,4 +8,5 @@ public record CreateExpenseResponseDto
   public required string PayerPseudo { get; init; }
   public required string PayerEmail { get; init; }
   public required List<UserExpenseInfoResponseDto> UserExpenseInfos { get; init; }
+  public string? Location  { get; init; }
 }

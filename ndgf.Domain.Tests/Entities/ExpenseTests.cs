@@ -13,6 +13,9 @@ public class ExpenseTests
     var groupId = Guid.NewGuid();
     var amount = 100m;
     var description = "description";
+    var latitude = 90m;
+    var longitude = 180m;
+    var location = "location test";
 
     var user1Id = Guid.NewGuid();
     var user2Id = Guid.NewGuid();
@@ -23,7 +26,7 @@ public class ExpenseTests
       new(user2Id, 40)
     };
 
-    var expense = Expense.Create(userId, expensePartInput, amount, description, groupId);
+    var expense = Expense.Create(userId, expensePartInput, amount, description, groupId, latitude, longitude, location);
 
     Assert.Equal(userId, expense.UserId);
     Assert.Equal(amount, expense.Amount);
@@ -34,6 +37,10 @@ public class ExpenseTests
     Assert.Equal(60, expense.ExpenseParts[0].Percentage);
     Assert.Equal(user2Id, expense.ExpenseParts[1].UserId);
     Assert.Equal(40, expense.ExpenseParts[1].Percentage);
+    Assert.Equal(latitude, expense.Latitude);
+    Assert.Equal(longitude, expense.Longitude);
+    Assert.Equal(location, expense.Location);
+      
   }
 
   [Fact]
@@ -112,6 +119,38 @@ public class ExpenseTests
     };
 
     Assert.Throws<DomainException>(() => Expense.Create(userId, expensePartInput, 100m, "description", groupId));
+  }
+
+  [Fact]
+  public void Create_WithLatitudeOverlap_ShouldThrowException()
+  {
+    var userId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var invalidLatitude = 91m;
+    var longitude = 180m;
+    var expensePartInput = new List<ExpensePartInput>
+    {
+      new(Guid.NewGuid(), 60),
+      new(Guid.NewGuid(), 40)
+    };
+    
+    Assert.Throws<DomainException>(() => Expense.Create(userId, expensePartInput, 100m, "description", groupId, invalidLatitude, longitude));
+  }
+  
+  [Fact]
+  public void Create_WithLongitudeOverlap_ShouldThrowException()
+  {
+    var userId = Guid.NewGuid();
+    var groupId = Guid.NewGuid();
+    var latitude = 90m;
+    var invalidLongitude = 181m;
+    var expensePartInput = new List<ExpensePartInput>
+    {
+      new(Guid.NewGuid(), 60),
+      new(Guid.NewGuid(), 40)
+    };
+    
+    Assert.Throws<DomainException>(() => Expense.Create(userId, expensePartInput, 100m, "description", groupId, latitude, invalidLongitude));
   }
   
   [Fact]

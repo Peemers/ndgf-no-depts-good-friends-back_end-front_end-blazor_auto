@@ -256,6 +256,10 @@
                       <p class="text-lg text-[#6B3320]">Payé par
                         <span
                           class="font-semibold">@transaction.MainActorPseudo</span></p>
+                      @if (transaction.Location is not null)
+                      {
+                        <p class="text-sm text-[#6B3320]/70 truncate">📍 @transaction.Location</p>
+                      }
                     }
                     else
                     {
@@ -667,7 +671,13 @@
   private string? _message;
   private bool _isSubmiting;
   private bool _showExpenseModal;
-  private void OpenExpenseModal() => _showExpenseModal = true;
+
+  private async Task OpenExpenseModal()
+  {
+    _showExpenseModal = true;
+    await GetLocationAsync();
+  }
+
   private void CloseExpenseModal() => _showExpenseModal = false;
   private bool _showRefundModal;
   private void OpenRefundModal() => _showRefundModal = true;
@@ -1150,6 +1160,23 @@
     }
 
     _memberToRemoveId = null;
+  }
+
+  private async Task GetLocationAsync()
+  {
+    try
+    {
+      var position = await JSRuntime.InvokeAsync<GeolocationResult>("getCurrentPosition");
+      _createExpenseModel.Latitude = position.Latitude;
+      _createExpenseModel.Longitude = position.Longitude;
+    }
+    catch (Exception)
+    {
+      _message = "Impossible de récupérer votre position. Si vous voulez que votre dépense soit localisée, vérifiez que vous avez autorisé la géolocalisation.";
+      StateHasChanged();
+      await Task.Delay(5000);
+      _message = null;
+    }
   }
 
   private static readonly string[] Colors =
