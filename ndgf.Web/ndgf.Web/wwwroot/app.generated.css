@@ -15,7 +15,6 @@
     --color-orange-950: oklch(26.6% 0.079 36.259);
     --color-amber-50: oklch(98.7% 0.022 95.277);
     --color-amber-200: oklch(92.4% 0.12 95.746);
-    --color-amber-300: oklch(87.9% 0.169 91.605);
     --color-amber-800: oklch(47.3% 0.137 46.201);
     --color-green-100: oklch(96.2% 0.044 156.743);
     --color-green-500: oklch(72.3% 0.219 149.579);
@@ -392,9 +391,6 @@
   }
   .max-w-md {
     max-width: var(--container-md);
-  }
-  .max-w-screen {
-    max-width: 100vw;
   }
   .max-w-sm {
     max-width: var(--container-sm);
@@ -823,10 +819,6 @@
   .text-3xl {
     font-size: var(--text-3xl);
     line-height: var(--tw-leading, var(--text-3xl--line-height));
-  }
-  .text-4xl {
-    font-size: var(--text-4xl);
-    line-height: var(--tw-leading, var(--text-4xl--line-height));
   }
   .text-base {
     font-size: var(--text-base);
@@ -1259,9 +1251,6 @@
     }
     .md\:pt-4 {
       padding-top: calc(var(--spacing) * 4);
-    }
-    .md\:text-left {
-      text-align: left;
     }
     .md\:text-2xl {
       font-size: var(--text-2xl);
