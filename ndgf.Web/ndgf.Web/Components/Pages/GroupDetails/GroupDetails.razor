@@ -1,7 +1,5 @@
 ﻿@page "/groups/{groupId:guid}"
-@using System.Runtime.CompilerServices
 @using Microsoft.AspNetCore.Authorization
-@using ndgf.Domain.Entities
 @using ndgf.Web.Models.Expense
 @using ndgf.Web.Models.Group
 @using ndgf.Web.Models.GroupHistory
@@ -9,6 +7,7 @@
 @using ndgf.Web.Services.Expense
 @using ndgf.Web.Services.Group
 @using ndgf.Web.Services.Refund
+@using ndgf.Web.Helpers
 @inject GroupApiClient GroupApiClient
 @inject ExpenseApiClient ExpenseApiClient
 @inject RefundApiClient RefundApiClient
@@ -82,7 +81,7 @@
         @for (int i = 0; i < _groupDetails.Members.Count; i++)
         {
           var member = _groupDetails.Members[i];
-          var colorClass = GetColorForUser(member.UserId);
+          var colorClass = UserColorHelper.GetColorForUser(member.UserId);
 
           <div class="flex items-center justify-center gap-3 p-1 rounded-xl hover:bg-amber-50">
             <div
@@ -100,368 +99,274 @@
     </div>
 
     <div class="flex-1 p-3">
-      <div class="bg-linear-to-br from-white to-violet-200 shadow-2xl rounded-2xl p-6 min-h-screen max-w-screen">
-        <h1 class="text-[#1E1813] text-4xl font-bold text-center md:text-left">@_groupDetails.Name</h1>
-        @if (_groupDetails.Description is not null)
+
+      <GroupStatsSection GroupId="@GroupId"/>
+
+      <GroupBalanceSection Balance="@_getGroupBalance" IsArchived="@(_groupDetails.ArchivedAt is not null)"/>
+
+      <div
+        class="flex flex-col md:flex-row justify-between items-center rounded-xl mt-2 gap-2 w-full">
+        @if (_getGroupBalance is not null)
         {
-          <p class="text-[#46392F] text-xl mt-2 text-center md:text-left">@_groupDetails.Description</p>
+          <div class="bg-white/70 rounded-xl justify-between p-3 shadow-sm flex flex-row items-center gap-2 w-full">
+            <p class="text-[#2E2620] text-lg">
+              @_getGroupBalance?.ExpenseCount dépense(s) au total
+            </p>
+            <span class="text-gray-400">•</span>
+            <p class="text-[#2E2620] text-lg text-end">pour une somme de
+              <span
+                class="text-orange-950 font-semibold">@_getGroupBalance?.TotalExpenses</span> €</p>
+          </div>
         }
 
-        <div class="w-full mt-2 justify-end flex flex-col">
-          <button @onclick="ToggleMonthlyStats"
-                  class="justify-end bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all p-2 rounded-2xl">
-            @(_showMonthlyStats ? "Cacher les statistiques" : "Afficher les statistiques")
+        <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2 w-full">
+
+          <button @onclick="RequestArchive"
+                  disabled="@(_groupDetails.ArchivedAt is not null || (_getGroupBalance is not null && _getGroupBalance.Balances.Any(b => b.Balance != 0)))"
+                  class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
+            Archiver le groupe
           </button>
-          @if (_showMonthlyStats)
-          {
-            <canvas id="monthlyExpensesChart"></canvas>
-            <div class="max-w-xl mx-auto md:w-2xl mt-1">
-              <canvas id="expensesByMemberChart"></canvas>
-            </div>
-          }
+
+          <NavLink href="/groups"
+                   class="hover:bg-[#93BABC] text-center content-center rounded-2xl hover:scale-[0.95] active:scale-97 transition-all shadow-black/10 shadow-sm text-[#46392F] px-4 py-2 text-xl w-full md:flex-1">
+            Retour aux groupes
+          </NavLink>
+
+          <button @onclick="OpenExpenseModal"
+                  disabled="@(_groupDetails.ArchivedAt is not null)"
+                  class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  rounded-2xl shadow-black/20 shadow-sm hover:scale-[0.95]  px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
+            Créer une nouvelle dépense
+          </button>
+
+          <button @onclick="OpenRefundModal"
+                  disabled="@(_groupDetails.ArchivedAt is not null)"
+                  class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
+            Créer un nouveau remboursement
+          </button>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-1.5 mt-4">
-          <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-amber-200">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-xl">💡</span>
-              <h3 class="text-lg font-semibold text-[#46392F]">Remboursements suggérés</h3>
-            </div>
-
-            @if (_getGroupBalance is not null && _getGroupBalance.SuggestedRepayments.Any())
-            {
-              <div class="space-y-2">
-                @foreach (var repayment in _getGroupBalance.SuggestedRepayments)
-                {
-                  <div class="flex items-center gap-3 p-3 rounded-xl bg-[#F6E9CC] border border-amber-200">
-                    <div
-                      class="w-9 h-9 rounded-full bg-linear-to-t @(GetColorForUser(repayment.PayerId)) text-white flex items-center justify-center text-xs font-bold shrink-0">
-                      @repayment.PayerPseudo[0]@repayment.PayerPseudo[1]
-                    </div>
-                    <p class="text-base leading-snug text-[#6E5C4E]">
-                      <span class="font-semibold">@repayment.PayerPseudo</span> doit
-                      <span class="font-semibold text-amber-800">@repayment.Amount €</span>
-                      à <span class="font-semibold">@repayment.ReceiverPseudo</span>
-                    </p>
-                  </div>
-                }
-              </div>
-            }
-            else
-            {
-              <p class="text-[#6E5C4E] mb-4 text-lg italic">Tout le monde est à jour, rien à régler.</p>
-              @if (_groupDetails.ArchivedAt is not null)
-              {
-                <h3 class="text-lg font-semibold text-[#8A4529]">Ce groupe a été archivé, impossible de modifier,
-                  lecture seule uniquement</h3>
-              }
-            }
-          </div>
-
-          <div class="w-full md:flex-1 bg-[#93BABC] rounded-2xl p-4 border border-violet-200">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-xl">📊</span>
-              <h3 class="text-[#46392F] text-lg font-semibold">Soldes du groupe</h3>
-            </div>
-
-            @if (_getGroupBalance is not null && _getGroupBalance.Balances.Any())
-            {
-              <div class="space-y-2">
-                @foreach (var balance in _getGroupBalance.Balances)
-                {
-                  <div class=" flex justify-between items-center p-3 rounded-xl bg-[#F6E9CC] border border-gray-200">
-                    <p class="text-[#6E5C4E] font-semibold">@balance.Pseudo</p>
-
-                    @if (balance.Balance > 0)
-                    {
-                      <span
-                        class="text-sm font-semibold text-[#3D5A45] bg-green-100 px-2 py-1 rounded-full">+@balance.Balance €</span>
-                    }
-                    else if (balance.Balance < 0)
-                    {
-                      <span
-                        class="text-sm font-semibold text-[#6B3320] bg-[#E0A88C] px-2 py-1 rounded-full">@balance.Balance €</span>
-                    }
-                    else
-                    {
-                      <span class="text-sm font-medium text-[#6E5C4E] bg-gray-100 px-2 py-1 rounded-full">À jour</span>
-                    }
-                  </div>
-                }
-              </div>
-            }
-            else
-            {
-              <p class="text-gray-500 text-sm italic">Aucun solde à afficher.</p>
-            }
-          </div>
-        </div>
-
-        <div
-          class="flex flex-col md:flex-row justify-between items-center p-3 rounded-xl gap-1 w-full">
-          @if (_getGroupBalance is not null)
-          {
-            <div class="bg-white/70 rounded-xl justify-between p-3 shadow-sm flex flex-row items-center gap-2">
-              <p class="text-[#2E2620] text-lg">
-                @_getGroupBalance?.ExpenseCount dépense(s) au total
-              </p>
-              <span class="text-gray-400">•</span>
-              <p class="text-[#2E2620] text-lg text-end">pour une somme de
-                <span
-                  class="text-orange-950 font-semibold">@_getGroupBalance?.TotalExpenses</span> €</p>
-            </div>
-          }
-
-          <div class="flex flex-col md:flex-row items-stretch bg-gray-200 p-1 rounded-xl gap-2">
-
-            <button @onclick="RequestArchive"
-                    disabled="@(_groupDetails.ArchivedAt is not null || (_getGroupBalance is not null && _getGroupBalance.Balances.Any(b => b.Balance != 0)))"
-                    class="bg-[#C06B45] hover:bg-[#A85434] text-[#F7F1E5] text-center rounded-2xl hover:scale-[0.95] transition-all shadow-black/20 shadow-sm px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
-              Archiver le groupe
-            </button>
-
-            <NavLink href="/groups"
-                     class="hover:bg-[#93BABC] text-center content-center rounded-2xl hover:scale-[0.95] active:scale-97 transition-all shadow-black/10 shadow-sm text-[#46392F] px-4 py-2 text-xl w-full md:flex-1">
-              Retour aux groupes
-            </NavLink>
-
-            <button @onclick="OpenExpenseModal"
-                    disabled="@(_groupDetails.ArchivedAt is not null)"
-                    class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#E8DECD] hover:scale-97 active:scale-97 transition-all  rounded-2xl shadow-black/20 shadow-sm hover:scale-[0.95]  px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
-              Créer une nouvelle dépense
-            </button>
-
-            <button @onclick="OpenRefundModal"
-                    disabled="@(_groupDetails.ArchivedAt is not null)"
-                    class="rounded-2xl shadow-black/10 shadow-sm hover:scale-[0.95] bg-[#F6E9CC] hover:bg-[#E2C182] text-[#46392F] transition-all px-4 py-2 text-xl w-full md:flex-1 disabled:opacity-50 disabled:cursor-not-allowed">
-              Créer un nouveau remboursement
-            </button>
-          </div>
-
-        </div>
+      </div>
 
 
-        <div class="bg-gray-200 rounded-2xl">
-          @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
-          {
-            <div class="mt-1 p-3 divide-y divide-gray-400">
-              @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
-              {
-                <div
-                  class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-4 @(transaction.DeletedAt is not null ? "opacity-40" : "")">
-                  <div class="min-w-0">
-                    @if (transaction.Transaction == TransactionTypeModel.Expense)
-                    {
-                      <p class="text-xl font-semibold text-[#A85434] truncate">💸 @transaction.Description</p>
-                      <p class="text-lg text-[#6B3320]">Payé par
-                        <span
-                          class="font-semibold">@transaction.MainActorPseudo</span></p>
-                      @if (transaction.Location is not null)
-                      {
-                        <p class="text-sm text-[#6B3320]/70 truncate">📍 @transaction.Location</p>
-                      }
-                    }
-                    else
-                    {
-                      <p class="text-xl font-semibold text-[#3D5A45] truncate">
-                        💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
-                      <p class="text-lg text-[#6B3320]">Remboursé
-                        par <span class="font-semibold">@transaction.MainActorPseudo</span> vers
-                        <span
-                          class="font-semibold">@transaction.ReceiverPseudo</span></p>
-                    }
-                  </div>
-                  <div
-                    class="flex flex-row sm:flex-col justify-between sm:justify-center sm:items-end sm:divide-y sm:divide-amber-800 sm:mr-2 shrink-0">
-                    <div>
-                      @if (transaction.DeletedAt is null)
-                      {
-                        <button @onclick="() => RequestDelete(transaction.Id, transaction.Transaction)"
-                                class="bg-[#C06B45] p-0.5 hover:bg-red-600 rounded-2xl active:bg-red-500 mb-1">
-                          🗑️
-                        </button>
-                      }
-                    </div>
-                    @if (transaction.Transaction == TransactionTypeModel.Expense)
-                    {
-                      <p class="font-bold text-red-500">@transaction.Amount€</p>
-                    }
-                    else
-                    {
-                      <p class="font-bold text-green-500">@transaction.Amount€</p>
-                    }
-                    <p
-                      class="text-sm font-semibold text-gray-800">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-          else
-          {
-            <p class="mt-4 text-center text-2xl pt-6">Pas d'historique à afficher dans ce groupe</p>
-            <div class="flex justify-center p-3 h-fit">
-              <img src="images/notfound.jpg" alt="NotFoundImage" class="w-lg p-3 opacity-40">
-            </div>
-          }
-        </div>
-
-        @if (_showExpenseModal)
+      <div class="bg-gray-200 rounded-2xl">
+        @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
         {
-          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-              <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
-                <DataAnnotationsValidator/>
-                <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'une nouvelle dépense</h1>
-
-                @if (_message is not null)
-                {
-                  <p class="mb-4 text-2xl text-green-800">@_message</p>
-                }
-                @if (_errorMessage is not null)
-                {
-                  <p class="mb-4 text-2xl text-red-800">@_errorMessage</p>
-                }
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Montant dépensé</label>
-                  <InputNumber @bind-Value="_createExpenseModel.Amount"
-                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
-                  <ValidationMessage For="() => _createExpenseModel.Amount"/>
-                </div>
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Déscription de la dépense</label>
-                  <InputText @bind-Value="_createExpenseModel.Description"
-                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
-                  <ValidationMessage For="() => _createExpenseModel.Description"/>
-                </div>
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Qui a fait cette dépense ?</label>
-                  <InputSelect @bind-Value="_createExpenseModel.UserId"
-                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
-                    <option value="">Choisir un membre du groupe</option>
-                    @foreach (var member in _groupDetails.Members)
-                    {
-                      <option value="@member.UserId">@member.Pseudo</option>
-                    }
-                  </InputSelect>
-                </div>
-
-
-                <label class="text-[#6B3320] text-xl">Qui participe à cette dépense ?</label>
-
-                <div class="mt-3">
-                  @foreach (var member in _groupDetails.Members)
+          <div class="mt-1 p-3 divide-y divide-gray-400">
+            @foreach (var transaction in _getGroupHistory.TransactionSummary.Items)
+            {
+              <div
+                class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-4 @(transaction.DeletedAt is not null ? "opacity-40" : "")">
+                <div class="min-w-0">
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
                   {
-                    <div class="text-[#6B3320] flex p-2 mb-1 w-fit items-center bg-[#DDECEC] rounded-2xl">
-                      <input class="ml-2 mr-2" type="checkbox"
-                             checked="@_selectedUserIds.Contains(member.UserId)"
-                             @onchange="() => ToggleParticipant(member.UserId)"/>
-                      <label class="text-xl">@member.Pseudo - @member.Email</label>
-                    </div>
+                    <p class="text-xl font-semibold text-[#A85434] truncate">💸 @transaction.Description</p>
+                    <p class="text-lg text-[#6B3320]">Payé par
+                      <span
+                        class="font-semibold">@transaction.MainActorPseudo</span></p>
+                    @if (transaction.Location is not null)
+                    {
+                      <p class="text-sm text-[#6B3320]/70 truncate">@transaction.Location</p>
+                    }
+                  }
+                  else
+                  {
+                    <p class="text-xl font-semibold text-[#3D5A45] truncate">
+                      💰 @(string.IsNullOrWhiteSpace(transaction.Description) ? "Remboursement" : transaction.Description)</p>
+                    <p class="text-lg text-[#6B3320]">Remboursé
+                      par <span class="font-semibold">@transaction.MainActorPseudo</span> vers
+                      <span
+                        class="font-semibold">@transaction.ReceiverPseudo</span></p>
                   }
                 </div>
-
-                <div class="flex">
-                  <button type="button" @onclick="RequestCreateExpense" disabled="@_isSubmiting"
-                          class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all  mr-1 rounded-2xl px-4 py-2 text-xl mt-1 w-full">
-                    @if (_isSubmiting)
+                <div
+                  class="flex flex-row sm:flex-col justify-between sm:justify-center sm:items-end sm:divide-y sm:divide-amber-800 sm:mr-2 shrink-0">
+                  <div>
+                    @if (transaction.DeletedAt is null)
                     {
-                      <span>Création en cours ...</span>
+                      <button @onclick="() => RequestDelete(transaction.Id, transaction.Transaction)"
+                              class="bg-[#C06B45] p-0.5 hover:bg-red-600 rounded-2xl active:bg-red-500 mb-1">
+                        🗑️
+                      </button>
                     }
-                    else
-                    {
-                      <span>Créer la dépense</span>
-                    }
-                  </button>
-                  <button type="button" @onclick="CloseExpenseModal"
-                          class="bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 text-[#6B3320] rounded-2xl px-4 py-2 text-xl mt-4 w-full">
-                    Annuler
-                  </button>
+                  </div>
+                  @if (transaction.Transaction == TransactionTypeModel.Expense)
+                  {
+                    <p class="font-bold text-red-500">@transaction.Amount€</p>
+                  }
+                  else
+                  {
+                    <p class="font-bold text-green-500">@transaction.Amount€</p>
+                  }
+                  <time datetime="@transaction.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")" class="local-time text-sm font-semibold text-gray-800"></time>
                 </div>
-              </EditForm>
-            </div>
+              </div>
+            }
           </div>
         }
-        @if (_showRefundModal)
+        else
         {
-          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-              <EditForm Model="_createRefundModel" OnValidSubmit="HandleCreateRefund" class="space-y-4">
-                <DataAnnotationsValidator/>
-                <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'un remboursement</h1>
-
-                @if (_message is not null)
-                {
-                  <p class="mb-4 text-xl text-green-800">@_message</p>
-                }
-                @if (_errorMessage is not null)
-                {
-                  <p class="mb-4 text-xl text-red-800">@_message</p>
-                }
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Montant remboursé</label>
-                  <InputNumber @bind-Value="_createRefundModel.Amount"
-                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
-                  <ValidationMessage For="() => _createRefundModel.Amount"/>
-                </div>
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Déscription du remboursement (optionnel)</label>
-                  <InputText @bind-Value="_createRefundModel.Description"
-                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
-                  <ValidationMessage For="() => _createRefundModel.Description"/>
-                </div>
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Qui rembourse cet argent ?</label>
-                  <InputSelect @bind-Value="_createRefundModel.PayerId"
-                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
-                    <option value="">Choisir un membre du groupe</option>
-                    @foreach (var member in _groupDetails.Members)
-                    {
-                      <option value="@member.UserId">@member.Pseudo</option>
-                    }
-                  </InputSelect>
-                </div>
-
-                <div>
-                  <label class="text-[#6B3320] text-xl">Qui reçoit cet argent ?</label>
-                  <InputSelect @bind-Value="_createRefundModel.ReceiverId"
-                               class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
-                    <option value="">Choisir un membre du groupe</option>
-                    @foreach (var member in _groupDetails.Members)
-                    {
-                      <option value="@member.UserId">@member.Pseudo</option>
-                    }
-                  </InputSelect>
-                </div>
-
-                <div class="flex">
-                  <button type="button" @onclick="RequestCreateRefund" disabled="@_isSubmiting"
-                          class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all rounded-2xl mr-1 px-4 py-2 text-xl mt-1 w-full">
-                    @if (_isSubmiting)
-                    {
-                      <span>Remboursement ...</span>
-                    }
-                    else
-                    {
-                      <span>Valider Remboursement</span>
-                    }
-                  </button>
-                  <button type="button" @onclick="CloseRefundModal"
-                          class="text-[#6B3320] bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 bg-linear-to-l rounded-2xl px-4 py-2 text-xl mt-4 w-full">
-                    Annuler
-                  </button>
-                </div>
-              </EditForm>
-            </div>
+          <p class="mt-4 text-center text-2xl pt-6">Pas d'historique à afficher dans ce groupe</p>
+          <div class="flex justify-center p-3 h-fit">
+            <img src="images/notfound.jpg" alt="NotFoundImage" class="w-lg p-3 opacity-40">
           </div>
         }
       </div>
+
+      @if (_showExpenseModal)
+      {
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <EditForm Model="_createExpenseModel" OnValidSubmit="HandleCreateExpense" class="space-y-4">
+              <DataAnnotationsValidator/>
+              <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'une nouvelle dépense</h1>
+
+              @if (_message is not null)
+              {
+                <p class="mb-4 text-2xl text-green-800">@_message</p>
+              }
+              @if (_errorMessage is not null)
+              {
+                <p class="mb-4 text-2xl text-red-800">@_errorMessage</p>
+              }
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Montant dépensé</label>
+                <InputNumber @bind-Value="_createExpenseModel.Amount"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                <ValidationMessage For="() => _createExpenseModel.Amount"/>
+              </div>
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Déscription de la dépense</label>
+                <InputText @bind-Value="_createExpenseModel.Description"
+                           class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                <ValidationMessage For="() => _createExpenseModel.Description"/>
+              </div>
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Qui a fait cette dépense ?</label>
+                <InputSelect @bind-Value="_createExpenseModel.UserId"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                  <option value="">Choisir un membre du groupe</option>
+                  @foreach (var member in _groupDetails.Members)
+                  {
+                    <option value="@member.UserId">@member.Pseudo</option>
+                  }
+                </InputSelect>
+              </div>
+
+
+              <label class="text-[#6B3320] text-xl">Qui participe à cette dépense ?</label>
+
+              <div class="mt-3">
+                @foreach (var member in _groupDetails.Members)
+                {
+                  <div class="text-[#6B3320] flex p-2 mb-1 w-fit items-center bg-[#DDECEC] rounded-2xl">
+                    <input class="ml-2 mr-2" type="checkbox"
+                           checked="@_selectedUserIds.Contains(member.UserId)"
+                           @onchange="() => ToggleParticipant(member.UserId)"/>
+                    <label class="text-xl">@member.Pseudo - @member.Email</label>
+                  </div>
+                }
+              </div>
+
+              <div class="flex">
+                <button type="button" @onclick="RequestCreateExpense" disabled="@_isSubmiting"
+                        class="bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all  mr-1 rounded-2xl px-4 py-2 text-xl mt-1 w-full">
+                  @if (_isSubmiting)
+                  {
+                    <span>Création en cours ...</span>
+                  }
+                  else
+                  {
+                    <span>Créer la dépense</span>
+                  }
+                </button>
+                <button type="button" @onclick="CloseExpenseModal"
+                        class="bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 text-[#6B3320] rounded-2xl px-4 py-2 text-xl mt-4 w-full">
+                  Annuler
+                </button>
+              </div>
+            </EditForm>
+          </div>
+        </div>
+      }
+      @if (_showRefundModal)
+      {
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <EditForm Model="_createRefundModel" OnValidSubmit="HandleCreateRefund" class="space-y-4">
+              <DataAnnotationsValidator/>
+              <h1 class="text-[#1E1813] text-2xl font-bold mb-6 flex">Création d'un remboursement</h1>
+
+              @if (_message is not null)
+              {
+                <p class="mb-4 text-xl text-green-800">@_message</p>
+              }
+              @if (_errorMessage is not null)
+              {
+                <p class="mb-4 text-xl text-red-800">@_message</p>
+              }
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Montant remboursé</label>
+                <InputNumber @bind-Value="_createRefundModel.Amount"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                <ValidationMessage For="() => _createRefundModel.Amount"/>
+              </div>
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Déscription du remboursement (optionnel)</label>
+                <InputText @bind-Value="_createRefundModel.Description"
+                           class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1"/>
+                <ValidationMessage For="() => _createRefundModel.Description"/>
+              </div>
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Qui rembourse cet argent ?</label>
+                <InputSelect @bind-Value="_createRefundModel.PayerId"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                  <option value="">Choisir un membre du groupe</option>
+                  @foreach (var member in _groupDetails.Members)
+                  {
+                    <option value="@member.UserId">@member.Pseudo</option>
+                  }
+                </InputSelect>
+              </div>
+
+              <div>
+                <label class="text-[#6B3320] text-xl">Qui reçoit cet argent ?</label>
+                <InputSelect @bind-Value="_createRefundModel.ReceiverId"
+                             class="border border-gray-300 rounded-xl p-3 w-full text-xl mt-1">
+                  <option value="">Choisir un membre du groupe</option>
+                  @foreach (var member in _groupDetails.Members)
+                  {
+                    <option value="@member.UserId">@member.Pseudo</option>
+                  }
+                </InputSelect>
+              </div>
+
+              <div class="flex">
+                <button type="button" @onclick="RequestCreateRefund" disabled="@_isSubmiting"
+                        class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] hover:scale-97 active:scale-97 transition-all rounded-2xl mr-1 px-4 py-2 text-xl mt-1 w-full">
+                  @if (_isSubmiting)
+                  {
+                    <span>Remboursement ...</span>
+                  }
+                  else
+                  {
+                    <span>Valider Remboursement</span>
+                  }
+                </button>
+                <button type="button" @onclick="CloseRefundModal"
+                        class="text-[#6B3320] bg-[#F6E9CC] hover:bg-[#E2C182] active:bg-[#E2C182] hover:scale-97 active:scale-97 bg-linear-to-l rounded-2xl px-4 py-2 text-xl mt-4 w-full">
+                  Annuler
+                </button>
+              </div>
+            </EditForm>
+          </div>
+        </div>
+      }
       @if (_getGroupHistory is not null && _getGroupHistory.TransactionSummary.Items.Any())
       {
         <div
@@ -474,7 +379,7 @@
             @_getGroupHistory.TransactionSummary.PageNumber</p>
           <button @onclick="NextPage"
                   class="text-[#E8DECD] bg-[#3D5A45] hover:bg-[#2F4436] active:[#2F4436] rounded-lg p-2 flex-1 text-center">
-            page suivante -->
+            page suivante
           </button>
         </div>
       }
@@ -711,6 +616,11 @@
   private void ToggleAddMemberForm()
   {
     _showAddMemberForm = !_showAddMemberForm;
+  }
+  
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await JSRuntime.InvokeVoidAsync("formatAllLocalTimes");
   }
 
   protected override async Task OnInitializedAsync()
@@ -1026,69 +936,6 @@
     _confirmRefund = false;
   }
 
-  private bool _showMonthlyStats;
-  private GetGroupExpensesByMonthResponseModel? _monthlyExpenses;
-
-  private async Task LoadMonthlyExpenses()
-  {
-    var response = await ExpenseApiClient.GetGroupExpensesByMonthAsync(GroupId);
-    if (response.IsSuccessStatusCode)
-    {
-      _monthlyExpenses = await response.Content.ReadFromJsonAsync<GetGroupExpensesByMonthResponseModel>();
-    }
-  }
-
-  private async Task ToggleMonthlyStats()
-  {
-    _showMonthlyStats = !_showMonthlyStats;
-
-    if (_showMonthlyStats)
-    {
-      await LoadMonthlyExpenses();
-      await LoadExpensesByMember();
-    }
-  }
-
-  private GetGroupExpensesByMemberResponseModel? _expensesByMember;
-
-  private async Task LoadExpensesByMember()
-  {
-    var response = await ExpenseApiClient.GetGroupExpensesByMemberAsync(GroupId);
-    if (response.IsSuccessStatusCode)
-    {
-      _expensesByMember = await response.Content.ReadFromJsonAsync<GetGroupExpensesByMemberResponseModel>();
-    }
-  }
-
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (_showMonthlyStats && _monthlyExpenses is not null)
-    {
-      var labels = _monthlyExpenses.MonthlyExpenses
-        .Select(m => $"{m.Month}/{m.Year}")
-        .ToArray();
-
-      var data = _monthlyExpenses.MonthlyExpenses
-        .Select(m => m.Total)
-        .ToArray();
-
-      await JSRuntime.InvokeVoidAsync("renderMonthlyExpensesChart", "monthlyExpensesChart", labels, data);
-    }
-
-    if (_showMonthlyStats && _expensesByMember is not null)
-    {
-      var labels = _expensesByMember.Expenses
-        .Select(m => m.Pseudo)
-        .ToArray();
-
-      var data = _expensesByMember.Expenses
-        .Select(m => m.Total)
-        .ToArray();
-
-      await JSRuntime.InvokeVoidAsync("renderExpensesByMemberChart", "expensesByMemberChart", labels, data);
-    }
-  }
-
   private bool _showArchiveConfirmation;
 
   private void RequestArchive()
@@ -1177,22 +1024,6 @@
       await Task.Delay(5000);
       _message = null;
     }
-  }
-
-  private static readonly string[] Colors =
-  {
-    "from-[#8A6220] to-[#6E5219]",
-    "from-[#98492C] to-[#7A3A23]",
-    "from-[#46392F] to-[#352A23]",
-    "from-[#6A4A70] to-[#553A5A]",
-    "from-[#4A5C86] to-[#3A4A6E]",
-    "from-[#6E6B2A] to-[#575420]"
-  };
-
-  private static string GetColorForUser(Guid userId)
-  {
-    var index = Math.Abs(userId.GetHashCode()) % Colors.Length;
-    return Colors[index];
   }
 
 }
