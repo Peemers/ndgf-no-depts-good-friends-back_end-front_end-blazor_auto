@@ -1,0 +1,86 @@
+﻿@using ndgf.Web.Models.Expense
+@using ndgf.Web.Services.Expense
+@inject ExpenseApiClient ExpenseApiClient
+@inject IJSRuntime JSRuntime
+
+<div class="w-full mt-2 justify-end flex flex-col">
+  <button @onclick="ToggleMonthlyStats"
+          class="justify-end bg-[#3D5A45] hover:bg-[#2F4436] active:bg-[#2F4436] text-[#F7F1E5] hover:scale-97 active:scale-97 transition-all p-2 rounded-2xl">
+    @(_showMonthlyStats ? "Cacher les statistiques" : "Afficher les statistiques")
+  </button>
+  @if (_showMonthlyStats)
+  {
+    <canvas id="monthlyExpensesChart"></canvas>
+    <div class="max-w-xl mx-auto md:w-2xl mt-1">
+      <canvas id="expensesByMemberChart"></canvas>
+    </div>
+  }
+</div>
+
+@code {
+  
+  [Parameter] public Guid GroupId { get; set; }
+  
+  private bool _showMonthlyStats;
+  private GetGroupExpensesByMonthResponseModel? _monthlyExpenses;
+
+  private async Task LoadMonthlyExpenses()
+  {
+    var response = await ExpenseApiClient.GetGroupExpensesByMonthAsync(GroupId);
+    if (response.IsSuccessStatusCode)
+    {
+      _monthlyExpenses = await response.Content.ReadFromJsonAsync<GetGroupExpensesByMonthResponseModel>();
+    }
+  }
+  
+  private GetGroupExpensesByMemberResponseModel? _expensesByMember;
+
+  private async Task LoadExpensesByMember()
+  {
+    var response = await ExpenseApiClient.GetGroupExpensesByMemberAsync(GroupId);
+    if (response.IsSuccessStatusCode)
+    {
+      _expensesByMember = await response.Content.ReadFromJsonAsync<GetGroupExpensesByMemberResponseModel>();
+    }
+  }
+  
+  private async Task ToggleMonthlyStats()
+  {
+    _showMonthlyStats = !_showMonthlyStats;
+
+    if (_showMonthlyStats)
+    {
+      await LoadMonthlyExpenses();
+      await LoadExpensesByMember();
+    }
+  }
+  
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (_showMonthlyStats && _monthlyExpenses is not null)
+    {
+      var labels = _monthlyExpenses.MonthlyExpenses
+        .Select(m => $"{m.Month}/{m.Year}")
+        .ToArray();
+
+      var data = _monthlyExpenses.MonthlyExpenses
+        .Select(m => m.Total)
+        .ToArray();
+
+      await JSRuntime.InvokeVoidAsync("renderMonthlyExpensesChart", "monthlyExpensesChart", labels, data);
+    }
+
+    if (_showMonthlyStats && _expensesByMember is not null)
+    {
+      var labels = _expensesByMember.Expenses
+        .Select(m => m.Pseudo)
+        .ToArray();
+
+      var data = _expensesByMember.Expenses
+        .Select(m => m.Total)
+        .ToArray();
+
+      await JSRuntime.InvokeVoidAsync("renderExpensesByMemberChart", "expensesByMemberChart", labels, data);
+    }
+  }
+}
